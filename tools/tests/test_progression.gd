@@ -74,7 +74,7 @@ func _test_first_completion() -> void:
 	_check(_player.motor.get_max_air_jumps() == 2, "two air jumps now")
 	_check(_manager.is_in_hub(), "party is back in the hub")
 	_check(_hud.stars_label.text == "1", "hub HUD shows the total stars (%s)" % _hud.stars_label.text)
-	_check(_hud.notice_label.text.contains("jump"), "HUD announces the new ability (%s)" % _hud.notice_label.text)
+	_check(_hud.notice_label.text.contains(tr(&"ABILITY_ENHANCED_JUMP")), "HUD announces the new ability (%s)" % _hud.notice_label.text)
 	_check(FileAccess.file_exists(SCRATCH_SAVE), "save file written")
 
 

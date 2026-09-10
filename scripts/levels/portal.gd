@@ -19,16 +19,6 @@ signal activated(by: CharacterController)
 var _used := false
 
 
-const ABILITY_NAMES := {
-	&"enhanced_jump": "Triple jump",
-	&"double_jump": "Double jump",
-	&"turbo": "Kart turbo",
-	&"vehicle_jump": "Kart jump",
-}
-
-var _locked_notice_left := 0.0
-
-
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	_refresh_label()
@@ -58,17 +48,17 @@ func _refresh_label() -> void:
 	if label == null:
 		return
 	if returns_to_hub:
-		label.text = "Home"
+		label.text = tr(&"PORTAL_HOME")
 		return
 	if level == null:
 		label.text = "?"
 		return
 	var missing := get_missing_abilities()
 	if missing.is_empty():
-		label.text = level.display_name
+		label.text = tr(level.display_name)
 		label.modulate = Color.WHITE
 	else:
-		label.text = "%s\nNeeds: %s" % [level.display_name, ABILITY_NAMES.get(StringName(missing[0]), missing[0])]
+		label.text = "%s\n%s" % [tr(level.display_name), tr(&"PORTAL_NEEDS") % AbilityComponent.display_name(StringName(missing[0]))]
 		label.modulate = Color(1.0, 0.6, 0.5)
 
 

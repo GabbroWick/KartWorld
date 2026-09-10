@@ -6,7 +6,7 @@
 [resource]
 script = ExtResource("1_definition")
 id = &"fox"
-display_name = "Fox"
+display_name = "CHAR_FOX"
 visual_scene = ExtResource("2_visual")
 visual_scale = 0.74
 capsule_height = 1.25

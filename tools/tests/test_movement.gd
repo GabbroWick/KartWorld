@@ -44,7 +44,7 @@ func _run() -> void:
 		return
 
 	_check(_player.definition != null, "player has a CharacterDefinition")
-	_check(_player.definition.display_name == "Leopard", "loaded character is the Leopard")
+	_check(_player.definition.display_name == "CHAR_LEOPARD", "loaded character is the Leopard")
 	_check(_player.abilities.has(&"double_jump"), "leopard starts with double_jump")
 	_check(_player.health.current_health == _player.definition.max_health, "health initialised")
 	_check(_player.visual_root.get_children().any(func(c: Node) -> bool: return c.has_method(&"animate")),

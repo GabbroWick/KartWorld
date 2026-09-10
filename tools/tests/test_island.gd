@@ -118,7 +118,7 @@ func _test_npcs_alive() -> void:
 	_player.motor.reset()
 	await _steps(20)
 	var prompt: String = _player.interaction.get_prompt()
-	_check(prompt.begins_with("E  talk"), "prompt offers to talk (%s)" % prompt)
+	_check(prompt == tr(&"PROMPT_TALK") % tr(&"CHAR_FOX"), "prompt offers to talk (%s)" % prompt)
 	var said := [""]
 	behaviour.spoke.connect(func(line: String) -> void: said[0] = line)
 	await _hold(InputActions.INTERACT, 3)

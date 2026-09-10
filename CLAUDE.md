@@ -16,7 +16,7 @@ process. `ARCHITECTURE.md` explains the code; `README.md` is for humans.
 | 5 — first level | done | objectives, stars, checkpoint, game HUD, 35 checks |
 | 6 — combat | done | melee, slime enemy, contact damage, i-frames, death, defeat objective, 33 checks |
 | 7 — progression | done | ProgressionManager autoload, reward abilities, triple jump unlock, JSON save, 29 checks |
-| 8 — polish | in progress | done: procedural animation, swipe arc, kart slopes+tilt, controls hint, health refill, NPC wander/talk, hub stars, gated Cliff Steps level, Web export, Kenney models (kart, trees, rocks, plants, star, flag), Meshy leopard (static mesh). next: rigged leopard via Mixamo, fox/panda/slime models, VFX, audio |
+| 8 — polish | in progress | done: procedural animation, kart slopes + 4-ray visual suspension, controls hint, health refill, NPC wander/talk, hub stars, gated Cliff Steps level, Web export, Kenney models, Meshy+Mixamo rigged leopard (idle/walk/run/jump/fall/attack/hurt), Italian localization. next: fox/panda/slime models, VFX, audio |
 
 Decided: **Compatibility renderer on all platforms** (Web needs it, cartoon
 style does not need Forward+). **Character scale locked** after playtesting
@@ -89,6 +89,15 @@ suites exit non-zero on failure.
 * Tests are scenes under `tools/tests/` (autoloads are unavailable to
   `--script` main loops).
 * Commit per feature with a conventional message; never rewrite history.
+* **The game is Italian.** Every player-facing string is a key in
+  `translations/text.csv` (columns en/it), shown through `tr()`; data files
+  (`display_name`, objective `description`, `dialogue_lines`) hold keys.
+  GameManager forces locale `it`. Tests compare with `tr(&"KEY")`. Adding
+  text = add a CSV row; the `.translation` files regenerate on import.
+* Character clips: `RiggedCharacterVisual` merges Mixamo "without skin" FBX
+  clips into the rig at start-up; one-shots (`attack`, `hurt`) via
+  `play_action()`; the controller routes `combat.attacked` / `hurt` to it and
+  hides the swipe arc when the model has an attack clip.
 
 ## Engine gotchas (cost real time already)
 

@@ -6,7 +6,7 @@
 [resource]
 script = ExtResource("1_definition")
 id = &"slime"
-display_name = "Slime"
+display_name = "ENEMY_SLIME"
 visual_scene = ExtResource("2_visual")
 visual_scale = 1.0
 body_radius = 0.5

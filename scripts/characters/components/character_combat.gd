@@ -13,6 +13,8 @@ signal hit(target: Node)
 var character: CharacterController
 var definition: CharacterDefinition
 
+## Placeholder claw arc; off when the model animates the attack itself.
+var show_swipe := true
 var is_attacking := false
 var cooldown_left := 0.0
 var _active_left := 0.0
@@ -101,7 +103,7 @@ func try_attack() -> bool:
 	cooldown_left = definition.melee_cooldown
 	_hit_this_swing.clear()
 	hitbox.monitoring = true
-	swipe.visible = true
+	swipe.visible = show_swipe
 	attacked.emit()
 	return true
 

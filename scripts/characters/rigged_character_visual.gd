@@ -16,6 +16,8 @@ const MIXAMO_CLIP := &"mixamo_com"
 @export var run_clip: PackedScene
 @export var jump_clip: PackedScene
 @export var fall_clip: PackedScene
+@export var attack_clip: PackedScene
+@export var hurt_clip: PackedScene
 ## The character's run speed (m/s) that `speed_ratio` = 1 stands for.
 @export_range(1.0, 30.0, 0.5) var reference_speed := 10.0
 ## Ground speed baked into the walk / run clips before root motion was
@@ -30,6 +32,7 @@ const MIXAMO_CLIP := &"mixamo_com"
 var player: AnimationPlayer
 var _current := &""
 var _was_airborne := false
+var _action := &""
 
 
 func _ready() -> void:
@@ -43,7 +46,7 @@ func _ready() -> void:
 	var library := player.get_animation_library(&"")
 	_register(library, &"idle", library.get_animation(MIXAMO_CLIP), true)
 	library.remove_animation(MIXAMO_CLIP)
-	for entry in [[&"walk", walk_clip, true], [&"run", run_clip, true], [&"jump", jump_clip, false], [&"fall", fall_clip, true]]:
+	for entry in [[&"walk", walk_clip, true], [&"run", run_clip, true], [&"jump", jump_clip, false], [&"fall", fall_clip, true], [&"attack", attack_clip, false], [&"hurt", hurt_clip, false]]:
 		var scene: PackedScene = entry[1]
 		if scene == null:
 			continue
@@ -53,11 +56,30 @@ func _ready() -> void:
 	_play(&"idle", 1.0)
 
 
+## One-shot clips (attack, hurt) take over until they finish.
+func play_action(action: StringName, speed_scale: float = 1.0) -> bool:
+	if player == null or not player.has_animation(action):
+		return false
+	_action = action
+	player.speed_scale = speed_scale
+	player.play(action, blend_time * 0.5)
+	_current = action
+	return true
+
+
+func has_action(action: StringName) -> bool:
+	return player != null and player.has_animation(action)
+
+
 func animate(delta: float, speed_ratio: float, grounded: bool) -> void:
 	# Real clips do the walking; keep only a touch of lean and the land squash.
 	super.animate(delta, speed_ratio, grounded)
 	if player == null:
 		return
+	if _action != &"":
+		if player.is_playing() and player.current_animation == _action:
+			return
+		_action = &""
 	var speed := speed_ratio * reference_speed
 	if not grounded:
 		var clip := &"jump" if (not _was_airborne and player.has_animation(&"jump")) else &"fall"

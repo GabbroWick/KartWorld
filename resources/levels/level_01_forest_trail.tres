@@ -6,9 +6,9 @@
 [resource]
 script = ExtResource("1_definition")
 id = &"forest_trail"
-display_name = "Forest Trail"
+display_name = "LEVEL_FOREST_TRAIL_NAME"
 world = &"forest"
-description = "Follow the trail through the woods to the far clearing."
+description = "LEVEL_FOREST_TRAIL_DESC"
 scene = ExtResource("2_scene")
 required_abilities = PackedStringArray()
 star_count = 2

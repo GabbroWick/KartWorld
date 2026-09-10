@@ -55,7 +55,7 @@ func _test_hub_setup() -> void:
 		_check(portal.level != null and portal.level.id == &"forest_trail",
 			"hub portal leads to the Forest Trail level")
 		_check(not portal.returns_to_hub, "hub portal is an outbound portal")
-		_check(portal.label.text == "Forest Trail", "portal shows the level name")
+		_check(portal.label.text == tr(&"LEVEL_FOREST_TRAIL_NAME"), "portal shows the level name")
 	var site := _manager.world.find_children("*", "Marker3D", true, false).filter(
 		func(n: Node) -> bool: return n.is_in_group(&"portal_site"))
 	_check(site.size() == 1, "hub still has its portal_site marker")

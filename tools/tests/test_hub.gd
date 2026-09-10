@@ -56,7 +56,7 @@ func _test_hub_setup() -> void:
 	if locked.size() == 1:
 		var portal: Portal = locked[0]
 		_check(portal.level.id == &"cliff_steps", "the locked portal leads to Cliff Steps")
-		_check(portal.label.text.contains("Triple jump"), "locked portal says what it needs (%s)" % portal.label.text.replace("\n", " / "))
+		_check(portal.label.text.contains(tr(&"ABILITY_ENHANCED_JUMP")), "locked portal says what it needs (%s)" % portal.label.text.replace("\n", " / "))
 
 
 func _test_persistent_star() -> void:
@@ -100,7 +100,7 @@ func _test_unlock_and_enter() -> void:
 	_check(_manager.is_in_hub() and ProgressionManager.has_ability(&"enhanced_jump"), "Forest Trail beaten, triple jump unlocked")
 	var portal: Portal = _portals().filter(func(p: Portal) -> bool: return p.level and p.level.id == &"cliff_steps")[0]
 	_check(not portal.is_locked(), "Cliff Steps portal is now open")
-	_check(portal.label.text == "Cliff Steps", "portal label no longer shows the requirement (%s)" % portal.label.text)
+	_check(portal.label.text == tr(&"LEVEL_CLIFF_STEPS_NAME"), "portal label no longer shows the requirement (%s)" % portal.label.text)
 	_manager._loaded_at = -1000.0
 	_player.global_position = portal.global_position + Vector3(0, 0.3, 0)
 	_player.motor.reset()

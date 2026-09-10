@@ -16,8 +16,15 @@ var players: Array[Node] = []
 var _mouse_captured := false
 
 
+## The game is Italian regardless of the OS language. Strings live in
+## translations/text.csv (keys with en/it columns); code and data use keys
+## and call tr() at display time.
+const LOCALE := "it"
+
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	TranslationServer.set_locale(LOCALE)
 	# Browsers only allow pointer lock from a user gesture: on the Web the
 	# first click captures the mouse (see _unhandled_input), on desktop we
 	# capture right away.

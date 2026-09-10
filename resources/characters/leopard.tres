@@ -6,7 +6,7 @@
 [resource]
 script = ExtResource("1_definition")
 id = &"leopard"
-display_name = "Leopard"
+display_name = "CHAR_LEOPARD"
 visual_scene = ExtResource("2_visual")
 visual_scale = 0.8
 capsule_height = 1.35

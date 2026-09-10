@@ -254,7 +254,7 @@ is_player_controlled = false
 [node name="Behaviour" type="Node" parent="NPCs/Fox"]
 script = ExtResource("12_npc")
 wander_radius = 4.0
-dialogue_lines = PackedStringArray("Hi! The portal is over by the beach.", "Press K to call your kart. It goes anywhere!", "I saw a star up on the mountain...")
+dialogue_lines = PackedStringArray("NPC_FOX_1", "NPC_FOX_2", "NPC_FOX_3")
 
 [node name="Panda" parent="NPCs" instance=ExtResource("7_character")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 4.5, 22)
@@ -264,4 +264,4 @@ is_player_controlled = false
 [node name="Behaviour" type="Node" parent="NPCs/Panda"]
 script = ExtResource("12_npc")
 wander_radius = 3.0
-dialogue_lines = PackedStringArray("Slimes hate a good whack. Press J!", "Some portals only open when you learn new tricks.", "Zzz... oh! Hello.")
+dialogue_lines = PackedStringArray("NPC_PANDA_1", "NPC_PANDA_2", "NPC_PANDA_3")

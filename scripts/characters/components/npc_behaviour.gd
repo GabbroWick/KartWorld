@@ -100,7 +100,7 @@ func can_interact(_player: CharacterController) -> bool:
 
 
 func get_prompt() -> String:
-	return "E  talk to %s" % _character.definition.display_name
+	return tr(&"PROMPT_TALK") % tr(_character.definition.display_name)
 
 
 func get_interaction_position() -> Vector3:
@@ -112,7 +112,7 @@ func interact(_player: CharacterController) -> void:
 		return
 	var line := dialogue_lines[_line_index % dialogue_lines.size()]
 	_line_index += 1
-	say(line)
+	say(tr(line))
 
 
 func say(line: String) -> void:

@@ -57,7 +57,7 @@ func _test_setup() -> void:
 	_check(enemies.size() == 2, "level has two enemies (%d)" % enemies.size())
 	if enemies.size() > 0:
 		var enemy: Enemy = enemies[0]
-		_check(enemy.definition.display_name == "Slime", "enemies use the slime definition")
+		_check(enemy.definition.display_name == "ENEMY_SLIME", "enemies use the slime definition")
 		_check(enemy.health.current_health == 2.0, "slime has 2 health")
 		_check(enemy.visual_root.get_child_count() == 1, "slime has its placeholder visual")
 	var defeat: DefeatEnemiesObjective = null
@@ -102,7 +102,7 @@ func _test_attack_kills() -> void:
 	_check(hits[0] == 2, "after the cooldown the next swing hits (%d)" % hits[0])
 	_check(died[0], "second hit kills the slime")
 	_check(defeat.defeated == 1, "defeat objective counts 1/2")
-	_check(defeat.get_status_text() == "Defeat the slimes 1/2", "objective text shows progress (%s)" % defeat.get_status_text())
+	_check(defeat.get_status_text() == tr(&"OBJ_DEFEAT_SLIMES") + " 1/2", "objective text shows progress (%s)" % defeat.get_status_text())
 	await _steps(30)
 	_check(get_tree().get_nodes_in_group(Enemy.GROUP).size() == 1, "dead slime is removed from the scene")
 

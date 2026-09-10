@@ -9,8 +9,8 @@ extends Node
 signal completed(objective: Objective)
 signal progress_changed(objective: Objective)
 
-## Shown on the HUD.
-@export var description := "Do the thing"
+## Shown on the HUD; a translation key (see translations/text.csv).
+@export var description := "OBJ_DO_THE_THING"
 ## Optional objectives never block level completion (secrets, bonus stars).
 @export var optional := false
 
@@ -30,7 +30,7 @@ func _start() -> void:
 
 ## Text for the HUD, e.g. "Collect stars 1/3". Override for progress.
 func get_status_text() -> String:
-	return description
+	return tr(description)
 
 
 func complete() -> void:

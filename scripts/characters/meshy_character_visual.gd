@@ -20,6 +20,9 @@ extends Node3D
 @export_range(0.01, 200.0, 0.01) var model_scale := 1.0
 ## Meshy models face +Z; our characters face -Z.
 @export var flip_forward := true
+## Lift the model so its bind-pose bounds touch the ground. Off for rigged
+## models whose clips already keep the feet at y = 0 (Mixamo).
+@export var auto_ground := true
 ## Metallic 0 / roughness 1 / no normal map: matches the flat Kenney props.
 @export var flatten_materials := true
 ## Procedural motion strength (0 = static model).
@@ -44,7 +47,8 @@ func _ready() -> void:
 		_instance.rotation.y = PI
 	var bounds := _measure(_instance, _instance.transform)
 	# Feet on the ground, centred on the character's axis.
-	_instance.position -= Vector3(bounds.get_center().x, bounds.position.y, bounds.get_center().z)
+	if auto_ground:
+		_instance.position -= Vector3(bounds.get_center().x, bounds.position.y, bounds.get_center().z)
 	if flatten_materials:
 		_flatten(_instance)
 

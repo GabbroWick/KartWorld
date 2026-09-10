@@ -51,12 +51,12 @@ completion_delay = 1.5
 
 [node name="ReachTop" type="Node" parent="LevelController"]
 script = ExtResource("7_reach")
-description = "Climb to the top of the cliff"
+description = "OBJ_CLIMB_CLIFF"
 goal_zone = NodePath("../../GoalZone")
 
 [node name="CollectStars" type="Node" parent="LevelController"]
 script = ExtResource("8_collect")
-description = "Collect stars"
+description = "OBJ_COLLECT_STARS"
 optional = true
 kind = &"star"
 required = 0

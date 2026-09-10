@@ -84,6 +84,8 @@ func _apply_definition() -> void:
 		collision.position.y = definition.capsule_height * 0.5
 
 	_spawn_visual()
+	combat.attacked.connect(_on_attacked)
+	hurt.connect(_on_hurt_visual)
 
 
 func _spawn_visual() -> void:
@@ -95,6 +97,19 @@ func _spawn_visual() -> void:
 	_visual_instance = definition.visual_scene.instantiate() as Node3D
 	_visual_instance.scale = Vector3.ONE * definition.visual_scale
 	visual_root.add_child(_visual_instance)
+	# A model with a real attack clip does not need the placeholder swipe arc.
+	combat.show_swipe = not (_visual_instance.has_method(&"has_action")
+		and _visual_instance.call(&"has_action", &"attack"))
+
+
+func _on_attacked() -> void:
+	if _visual_instance and _visual_instance.has_method(&"play_action"):
+		_visual_instance.call(&"play_action", &"attack", 1.4)
+
+
+func _on_hurt_visual(_amount: float, _source: Node) -> void:
+	if _visual_instance and _visual_instance.has_method(&"play_action"):
+		_visual_instance.call(&"play_action", &"hurt", 1.2)
 
 
 func _animate_visual(delta: float) -> void:

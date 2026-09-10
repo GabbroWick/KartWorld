@@ -6,7 +6,7 @@
 [resource]
 script = ExtResource("1_definition")
 id = &"panda"
-display_name = "Panda"
+display_name = "CHAR_PANDA"
 visual_scene = ExtResource("2_visual")
 visual_scale = 0.88
 capsule_height = 1.5

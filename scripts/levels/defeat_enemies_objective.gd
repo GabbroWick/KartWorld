@@ -22,7 +22,7 @@ func _start() -> void:
 
 
 func get_status_text() -> String:
-	return "%s %d/%d" % [description, defeated, target]
+	return "%s %d/%d" % [tr(description), defeated, target]
 
 
 func _on_enemy_died(_enemy: Enemy) -> void:

@@ -6,9 +6,9 @@
 [resource]
 script = ExtResource("1_definition")
 id = &"cliff_steps"
-display_name = "Cliff Steps"
+display_name = "LEVEL_CLIFF_STEPS_NAME"
 world = &"mountain"
-description = "Big jumps up the cliff. You will need the triple jump."
+description = "LEVEL_CLIFF_STEPS_DESC"
 scene = ExtResource("2_scene")
 required_abilities = PackedStringArray("enhanced_jump")
 star_count = 3

@@ -65,8 +65,8 @@ extends Resource
 @export_range(0.3, 5.0, 0.1) var melee_range := 1.5
 @export_range(0.3, 5.0, 0.1) var melee_width := 1.4
 ## How long the hitbox stays live.
-@export_range(0.05, 1.0, 0.01) var melee_active_time := 0.15
-@export_range(0.05, 5.0, 0.05) var melee_cooldown := 0.45
+@export_range(0.05, 1.0, 0.01) var melee_active_time := 0.3
+@export_range(0.05, 5.0, 0.05) var melee_cooldown := 0.6
 
 @export_group("Abilities")
 ## Abilities the character starts with. Others get unlocked by progression.

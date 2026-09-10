@@ -56,19 +56,19 @@ completion_delay = 1.5
 
 [node name="ReachClearing" type="Node" parent="LevelController"]
 script = ExtResource("7_reach")
-description = "Reach the far clearing"
+description = "OBJ_REACH_CLEARING"
 goal_zone = NodePath("../../GoalZone")
 
 [node name="CollectStars" type="Node" parent="LevelController"]
 script = ExtResource("8_collect")
-description = "Collect stars"
+description = "OBJ_COLLECT_STARS"
 optional = true
 kind = &"star"
 required = 0
 
 [node name="DefeatSlimes" type="Node" parent="LevelController"]
 script = ExtResource("9_defeat")
-description = "Defeat the slimes"
+description = "OBJ_DEFEAT_SLIMES"
 optional = true
 required = 0
 

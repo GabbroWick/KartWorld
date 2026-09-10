@@ -24,7 +24,7 @@ func _start() -> void:
 
 
 func get_status_text() -> String:
-	return "%s %d/%d" % [description, collected, target]
+	return "%s %d/%d" % [tr(description), collected, target]
 
 
 func _on_collected(item: Collectible, _by: CharacterController) -> void:

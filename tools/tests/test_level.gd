@@ -49,8 +49,10 @@ func _run() -> void:
 
 
 func _test_hud_in_hub() -> void:
+	_check(TranslationServer.get_locale().begins_with("it"), "game locale is Italian (%s)" % TranslationServer.get_locale())
+	_check(tr(&"HUD_HUB_HINT") != "HUD_HUB_HINT" and tr(&"HUD_HUB_HINT").contains("isola"), "hub hint is translated to Italian (%s)" % tr(&"HUD_HUB_HINT"))
 	_check(_hud.hearts.current == 5 and _hud.hearts.maximum == 5, "HUD shows five hearts in the hub (%d/%d)" % [_hud.hearts.current, _hud.hearts.maximum])
-	_check(_hud.objective_label.text.begins_with("Explore"), "HUD shows the hub hint")
+	_check(_hud.objective_label.text == tr(&"HUD_HUB_HINT"), "HUD shows the hub hint")
 	_check(_hud.stars_label.text == "", "no star counter in the hub")
 
 
@@ -67,7 +69,7 @@ func _test_load() -> void:
 	_check(current != null and current is ReachDestinationObjective,
 		"current objective is the required 'reach' one")
 	_check(_level.stars_total == 2, "level counts its two stars (%d)" % _level.stars_total)
-	_check(_hud.objective_label.text == "Reach the far clearing",
+	_check(_hud.objective_label.text == tr(&"OBJ_REACH_CLEARING"),
 		"HUD shows the objective (%s)" % _hud.objective_label.text)
 	_check(_hud.stars_label.text == "0/2", "HUD shows 0/2 stars (%s)" % _hud.stars_label.text)
 	var stars := get_tree().get_nodes_in_group(&"star")
@@ -89,7 +91,7 @@ func _test_star() -> void:
 	_check(_hud.stars_label.text == "1/2", "HUD shows 1/2 stars (%s)" % _hud.stars_label.text)
 	_check(not is_instance_valid(star) or star.is_queued_for_deletion(), "collected star disappears")
 	var collect: CollectObjective = _level.objectives[1]
-	_check(collect.get_status_text() == "Collect stars 1/2", "collect objective reports progress (%s)" % collect.get_status_text())
+	_check(collect.get_status_text() == tr(&"OBJ_COLLECT_STARS") + " 1/2", "collect objective reports progress (%s)" % collect.get_status_text())
 	_check(not collect.is_complete, "optional star objective is not complete yet")
 
 
@@ -148,13 +150,13 @@ func _test_goal() -> void:
 	await _hold(&"move_forward", 60)
 	await _steps(5)
 	_check(done[0] == 1, "reaching the clearing completes the level with 1 star (got %d)" % done[0])
-	_check(_hud.objective_label.text == "Level complete!", "HUD announces completion (%s)" % _hud.objective_label.text)
+	_check(_hud.objective_label.text == tr(&"HUD_LEVEL_COMPLETE"), "HUD announces completion (%s)" % _hud.objective_label.text)
 	_check(not _manager.is_in_hub(), "return home waits for the completion delay")
 	await _steps(120)
 	_check(_manager.is_in_hub(), "party is back in the hub after the delay")
 	_check(result[0] != null and result[0].id == &"forest_trail" and result[1] == 1,
 		"LevelManager reported forest_trail completed with 1 star")
-	_check(_hud.objective_label.text.begins_with("Explore"), "HUD shows the hub hint again")
+	_check(_hud.objective_label.text == tr(&"HUD_HUB_HINT"), "HUD shows the hub hint again")
 	_check(_player.health.current_health == _player.health.max_health,
 		"hearts are refilled when the level ends (%.0f)" % _player.health.current_health)
 	_check(_hud.stars_label.text == "1", "hub shows the total stars earned (%s)" % _hud.stars_label.text)

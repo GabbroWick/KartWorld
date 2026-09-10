@@ -139,6 +139,11 @@ attack={
 ]
 }
 
+[internationalization]
+
+locale/translations=PackedStringArray("res://translations/text.en.translation", "res://translations/text.it.translation")
+locale/fallback="it"
+
 [layer_names]
 
 3d_physics/layer_1="world"

@@ -1,0 +1,36 @@
+keys,en,it
+HUD_HUB_HINT,Explore the island. Find a portal!,Esplora l'isola. Trova un portale!
+HUD_LEVEL_COMPLETE,Level complete!,Livello completato!
+HUD_NEW_ABILITY,New ability: %s!,Nuova abilità: %s!
+HUD_CONTROLS_FOOT,WASD move · Shift run · Space jump · J attack · E use · K kart,WASD muovi · Shift corri · Spazio salta · J attacca · E usa · K kart
+HUD_CONTROLS_KART,W/S gas/brake · A/D steer · Shift turbo · Space jump · E leave,W/S gas/freno · A/D sterza · Shift turbo · Spazio salta · E scendi
+PROMPT_LEAVE_KART,E  leave kart,E  scendi dal kart
+PROMPT_ENTER_KART,E  enter kart,E  sali sul kart
+PROMPT_SUMMON_KART,K  summon kart,K  chiama il kart
+PROMPT_TALK,E  talk to %s,E  parla con %s
+ABILITY_ENHANCED_JUMP,Triple jump,Salto triplo
+ABILITY_DOUBLE_JUMP,Double jump,Salto doppio
+ABILITY_RUN,Run,Corsa
+ABILITY_TURBO,Kart turbo,Turbo del kart
+ABILITY_VEHICLE_JUMP,Kart jump,Salto del kart
+PORTAL_HOME,Home,Casa
+PORTAL_NEEDS,Needs: %s,Serve: %s
+CHAR_LEOPARD,Leopard,Leopardo
+CHAR_FOX,Fox,Volpe
+CHAR_PANDA,Panda,Panda
+ENEMY_SLIME,Slime,Slime
+VEHICLE_KART,Kart,Kart
+LEVEL_FOREST_TRAIL_NAME,Forest Trail,Sentiero nel Bosco
+LEVEL_FOREST_TRAIL_DESC,Follow the trail through the woods to the far clearing.,Segui il sentiero nel bosco fino alla radura.
+LEVEL_CLIFF_STEPS_NAME,Cliff Steps,Scalini della Rupe
+LEVEL_CLIFF_STEPS_DESC,Big jumps up the cliff. You will need the triple jump.,Grandi salti su per la rupe. Ti serve il salto triplo.
+OBJ_REACH_CLEARING,Reach the far clearing,Raggiungi la radura
+OBJ_COLLECT_STARS,Collect stars,Raccogli le stelle
+OBJ_DEFEAT_SLIMES,Defeat the slimes,Sconfiggi gli slime
+OBJ_CLIMB_CLIFF,Climb to the top of the cliff,Arriva in cima alla rupe
+NPC_FOX_1,Hi! The portal is over by the beach.,Ciao! Il portale è laggiù vicino alla spiaggia.
+NPC_FOX_2,Press K to call your kart. It goes anywhere!,Premi K per chiamare il kart. Va dappertutto!
+NPC_FOX_3,I saw a star up on the mountain...,Ho visto una stella su in montagna...
+NPC_PANDA_1,Slimes hate a good whack. Press J!,Gli slime odiano una bella botta. Premi J!
+NPC_PANDA_2,Some portals only open when you learn new tricks.,Alcuni portali si aprono solo quando impari nuovi trucchi.
+NPC_PANDA_3,Zzz... oh! Hello.,Zzz... oh! Ciao.

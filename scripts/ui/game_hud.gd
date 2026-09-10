@@ -5,7 +5,6 @@ extends CanvasLayer
 ## size. Reads state through signals from the character, the LevelManager and
 ## the current LevelController; polls only the cheap "what can I do" prompt.
 
-const HUB_OBJECTIVE := "Explore the island. Find a portal!"
 
 @onready var hearts: HeartBar = $Root/TopLeft/Hearts
 @onready var star_row: HBoxContainer = $Root/TopRight/StarRow
@@ -15,16 +14,7 @@ const HUB_OBJECTIVE := "Explore the island. Find a portal!"
 @onready var notice_label: Label = $Root/Notice/Text
 @onready var controls_label: Label = $Root/BottomRight/Controls
 
-const CONTROLS_FOOT := "WASD move · Shift run · Space jump · J attack · E use · K kart"
-const CONTROLS_KART := "W/S gas/brake · A/D steer · Shift turbo · Space jump · E leave"
 
-## Friendly names for ability ids, for the unlock notice.
-const ABILITY_NAMES := {
-	&"enhanced_jump": "Triple jump",
-	&"double_jump": "Double jump",
-	&"turbo": "Kart turbo",
-	&"vehicle_jump": "Kart jump",
-}
 const NOTICE_TIME := 3.0
 
 var _notice_left := 0.0
@@ -55,7 +45,7 @@ func bind_level_manager(manager: LevelManager) -> void:
 func _process(delta: float) -> void:
 	prompt_label.text = _prompt_text()
 	if is_instance_valid(_player):
-		controls_label.text = CONTROLS_KART if _player.driver.is_driving else CONTROLS_FOOT
+		controls_label.text = tr(&"HUD_CONTROLS_KART") if _player.driver.is_driving else tr(&"HUD_CONTROLS_FOOT")
 	if _notice_left > 0.0:
 		_notice_left -= delta
 		if _notice_left <= 0.0:
@@ -68,7 +58,7 @@ func show_notice(text: String) -> void:
 
 
 func _on_ability_unlocked(id: StringName) -> void:
-	show_notice("New ability: %s!" % ABILITY_NAMES.get(id, String(id)))
+	show_notice(tr(&"HUD_NEW_ABILITY") % AbilityComponent.display_name(id))
 
 
 func _refresh_hub_stars() -> void:
@@ -90,7 +80,7 @@ func _set_stars_text(text: String) -> void:
 
 func _on_hub_loaded() -> void:
 	_level = null
-	objective_label.text = HUB_OBJECTIVE
+	objective_label.text = tr(&"HUD_HUB_HINT")
 	_refresh_hub_stars()
 
 
@@ -110,7 +100,7 @@ func _refresh_objective() -> void:
 	if not is_instance_valid(_level):
 		return
 	if _level.is_complete:
-		objective_label.text = "Level complete!"
+		objective_label.text = tr(&"HUD_LEVEL_COMPLETE")
 		return
 	var objective := _level.get_current_objective()
 	objective_label.text = objective.get_status_text() if objective else ""
@@ -125,12 +115,12 @@ func _prompt_text() -> String:
 		return ""
 	var driver := _player.driver
 	if driver.is_driving:
-		return "E  leave kart"
+		return tr(&"PROMPT_LEAVE_KART")
 	var interaction := _player.interaction.get_prompt()
 	if interaction != "":
 		return interaction
 	if driver.is_vehicle_in_reach():
-		return "E  enter kart"
+		return tr(&"PROMPT_ENTER_KART")
 	if driver.vehicle != null:
-		return "K  summon kart"
+		return tr(&"PROMPT_SUMMON_KART")
 	return ""

@@ -77,8 +77,9 @@ func _tilt_to_ground(delta: float) -> void:
 	var space := get_world_3d().direct_space_state
 	var heights: Array[float] = []
 	for corner: Vector3 in corners:
-		var origin := global_transform * (corner + Vector3.UP * size.y)
-		var query := PhysicsRayQueryParameters3D.create(origin, origin + Vector3.DOWN * (size.y + 2.5), 1)
+		# Start high: on a steep climb the front corners' ground is above the body.
+		var origin := global_transform * (corner + Vector3.UP * (size.y + 2.5))
+		var query := PhysicsRayQueryParameters3D.create(origin, origin + Vector3.DOWN * (size.y + 5.5), 1)
 		query.exclude = [get_rid()]
 		var hit := space.intersect_ray(query)
 		if hit.is_empty():

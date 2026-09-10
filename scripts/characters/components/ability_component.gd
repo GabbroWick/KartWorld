@@ -15,6 +15,22 @@ const RUN := &"run"
 ## One more air jump on top of the definition's max_air_jumps.
 const ENHANCED_JUMP := &"enhanced_jump"
 
+## Translation keys for the player-facing name of each ability id.
+const NAME_KEYS := {
+	&"enhanced_jump": &"ABILITY_ENHANCED_JUMP",
+	&"double_jump": &"ABILITY_DOUBLE_JUMP",
+	&"run": &"ABILITY_RUN",
+	&"turbo": &"ABILITY_TURBO",
+	&"vehicle_jump": &"ABILITY_VEHICLE_JUMP",
+}
+
+
+## Translated display name for an ability id (falls back to the id itself).
+static func display_name(id: StringName) -> String:
+	if NAME_KEYS.has(id):
+		return TranslationServer.translate(NAME_KEYS[id])
+	return String(id)
+
 var _unlocked: Dictionary[StringName, bool] = {}
 
 
