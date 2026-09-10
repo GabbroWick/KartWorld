@@ -27,6 +27,8 @@ func _ready() -> void:
 
 
 func _run() -> void:
+	ProgressionManager.save_path = "user://test_level_save.json"
+	ProgressionManager.reset()
 	await get_tree().process_frame
 	_scene = (load(MAIN_SCENE) as PackedScene).instantiate() as Node3D
 	get_tree().root.add_child(_scene)
@@ -150,9 +152,10 @@ func _test_goal() -> void:
 	_check(result[0] != null and result[0].id == &"forest_trail" and result[1] == 1,
 		"LevelManager reported forest_trail completed with 1 star")
 	_check(_hud.objective_label.text.begins_with("Explore"), "HUD shows the hub hint again")
-	_check(_hud.stars_label.text == "", "star counter cleared in the hub")
+	_check(_hud.stars_label.text == "★ 1", "hub shows the total stars earned (%s)" % _hud.stars_label.text)
 	await _steps(20)
 	_check(_player.is_on_floor(), "character stands on the island")
+	ProgressionManager.reset()
 
 
 func _steps(count: int) -> void:

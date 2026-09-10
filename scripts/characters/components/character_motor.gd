@@ -63,6 +63,14 @@ func reset() -> void:
 		body.velocity = Vector3.ZERO
 
 
+## Air jumps available: the definition's count, plus one with enhanced_jump.
+func get_max_air_jumps() -> int:
+	var count := definition.max_air_jumps
+	if abilities.has(AbilityComponent.ENHANCED_JUMP):
+		count += 1
+	return count
+
+
 func get_gravity_strength() -> float:
 	return _base_gravity * definition.gravity_scale
 
@@ -93,7 +101,7 @@ func _try_jump() -> void:
 		return
 	if body.is_on_floor() or _coyote_timer > 0.0:
 		_do_jump(1.0, 0)
-	elif abilities.has(AbilityComponent.DOUBLE_JUMP) and air_jumps_used < definition.max_air_jumps:
+	elif abilities.has(AbilityComponent.DOUBLE_JUMP) and air_jumps_used < get_max_air_jumps():
 		air_jumps_used += 1
 		_do_jump(definition.air_jump_scale, air_jumps_used)
 

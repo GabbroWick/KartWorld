@@ -1,6 +1,6 @@
 # KartWorld — Architecture
 
-Status: Phase 0–6. This document describes what exists today and the
+Status: Phase 0–7. This document describes what exists today and the
 extension points that were deliberately left open. It is updated when the
 architecture materially changes, not on every commit.
 
@@ -20,6 +20,7 @@ architecture materially changes, not on every commit.
 ```text
 /root
 ├── GameManager                    autoload: mouse capture, player registry
+├── ProgressionManager             autoload: level results, unlocks, save file
 └── Main (scenes/main.tscn)        entry point, spawns the pieces
     ├── World (island_hub.tscn)    terrain, light, props, NPCs, spawn marker
     ├── Character (character.tscn) spawned at the world's PlayerSpawn marker
@@ -207,6 +208,30 @@ Main
   `player.set_spawn_transform(respawn_point, false)`; only one is active at
   a time; the flag turns green. Respawn after a fall or death already uses
   the spawn transform, so nothing else changes.
+
+## Progression and saving
+
+`ProgressionManager` (autoload) is the only thing that persists:
+
+* `best_stars`: level id → best stars in one run (total = sum of bests, so
+  replaying never inflates the count).
+* `unlocked_abilities`: ability ids granted by progression, on top of what
+  each definition starts with.
+* `record_level_completion(def, stars)` — connected to
+  `LevelManager.level_completed` by `Main`; the first completion grants the
+  level's `reward_abilities` (data on `LevelDefinition`).
+* `apply_to(AbilityComponent)` pushes unlocked abilities onto a freshly
+  spawned character or vehicle; `ability_unlocked` reaches live ones. The
+  manager never knows what an ability does — `CharacterMotor` reads
+  `enhanced_jump` as one more air jump, a future `ranged_attack` component
+  will read its own id.
+* Saved as JSON to `save_path` (`user://save.json`) after every change,
+  loaded in `_ready()`. Tests point `save_path` at a scratch file and call
+  `reset()`. The file carries a `version` for future migrations.
+
+Kept out on purpose: settings, character/kart selection and customisation
+(separate concerns, later phases), and any per-level checkpoint state (a
+level always restarts from its spawn).
 
 ## Combat
 

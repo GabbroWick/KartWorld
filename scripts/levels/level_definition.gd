@@ -17,3 +17,5 @@ extends Resource
 @export var has_boss := false
 ## Levels unlocked from the start; others get unlocked by progression.
 @export var unlocked_by_default := true
+## Ability ids granted the first time the level is completed.
+@export var reward_abilities: PackedStringArray = PackedStringArray()

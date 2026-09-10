@@ -31,6 +31,7 @@ func _ready() -> void:
 	_spawn_player()
 	_spawn_vehicle()
 	level_manager.setup(self, world_scene, player, vehicle, camera_rig)
+	_wire_progression()
 	if game_hud:
 		game_hud.bind_player(player)
 		game_hud.bind_level_manager(level_manager)
@@ -62,6 +63,19 @@ func _spawn_player() -> void:
 	camera_rig.set_target(player)
 	if hud.has_method(&"bind_player"):
 		hud.call(&"bind_player", player)
+
+
+## Progression grants abilities on top of the definitions' starters, now and
+## whenever something new gets unlocked, and records level results.
+func _wire_progression() -> void:
+	ProgressionManager.apply_to(player.abilities)
+	if vehicle:
+		ProgressionManager.apply_to(vehicle.abilities)
+	ProgressionManager.ability_unlocked.connect(func(id: StringName) -> void:
+		player.abilities.unlock(id)
+		if vehicle:
+			vehicle.abilities.unlock(id))
+	level_manager.level_completed.connect(ProgressionManager.record_level_completion)
 
 
 ## One vehicle per player, parked beside the spawn until summoned. It is a

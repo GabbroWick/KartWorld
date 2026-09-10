@@ -11,6 +11,18 @@ const HUB_OBJECTIVE := "Explore the island. Find a portal!"
 @onready var stars_label: Label = $Root/TopRight/Stars
 @onready var objective_label: Label = $Root/TopCenter/Objective
 @onready var prompt_label: Label = $Root/Bottom/Prompt
+@onready var notice_label: Label = $Root/Notice/Text
+
+## Friendly names for ability ids, for the unlock notice.
+const ABILITY_NAMES := {
+	&"enhanced_jump": "Triple jump",
+	&"double_jump": "Double jump",
+	&"turbo": "Kart turbo",
+	&"vehicle_jump": "Kart jump",
+}
+const NOTICE_TIME := 3.0
+
+var _notice_left := 0.0
 
 var _player: CharacterController
 var _manager: LevelManager
@@ -27,14 +39,36 @@ func bind_level_manager(manager: LevelManager) -> void:
 	_manager = manager
 	_manager.level_loaded.connect(_on_level_loaded)
 	_manager.hub_loaded.connect(_on_hub_loaded)
+	ProgressionManager.ability_unlocked.connect(_on_ability_unlocked)
+	ProgressionManager.changed.connect(_refresh_hub_stars)
 	if _manager.is_in_hub():
 		_on_hub_loaded()
 	else:
 		_on_level_loaded(_manager.current_level)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	prompt_label.text = _prompt_text()
+	if _notice_left > 0.0:
+		_notice_left -= delta
+		if _notice_left <= 0.0:
+			notice_label.text = ""
+
+
+func show_notice(text: String) -> void:
+	notice_label.text = text
+	_notice_left = NOTICE_TIME
+
+
+func _on_ability_unlocked(id: StringName) -> void:
+	show_notice("New ability: %s!" % ABILITY_NAMES.get(id, String(id)))
+
+
+func _refresh_hub_stars() -> void:
+	if _manager == null or not _manager.is_in_hub():
+		return
+	var total := ProgressionManager.get_total_stars()
+	stars_label.text = "★ %d" % total if total > 0 else ""
 
 
 func _on_health_changed(current: float, maximum: float) -> void:
@@ -46,7 +80,7 @@ func _on_health_changed(current: float, maximum: float) -> void:
 func _on_hub_loaded() -> void:
 	_level = null
 	objective_label.text = HUB_OBJECTIVE
-	stars_label.text = ""
+	_refresh_hub_stars()
 
 
 func _on_level_loaded(_definition: LevelDefinition) -> void:

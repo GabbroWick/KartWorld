@@ -12,6 +12,8 @@ signal ability_locked(id: StringName)
 
 const DOUBLE_JUMP := &"double_jump"
 const RUN := &"run"
+## One more air jump on top of the definition's max_air_jumps.
+const ENHANCED_JUMP := &"enhanced_jump"
 
 var _unlocked: Dictionary[StringName, bool] = {}
 

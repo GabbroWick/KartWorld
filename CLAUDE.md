@@ -15,8 +15,8 @@ process. `ARCHITECTURE.md` explains the code; `README.md` is for humans.
 | 4 — portal | done | LevelDefinition + LevelManager + Portal, first level scene, 33 checks |
 | 5 — first level | done | objectives, stars, checkpoint, game HUD, 35 checks |
 | 6 — combat | done | melee, slime enemy, contact damage, i-frames, death, defeat objective, 33 checks |
-| 7 — progression | **next** | completed levels, stars, first unlockable ability, save/load |
-| 8 — polish | todo | |
+| 7 — progression | done | ProgressionManager autoload, reward abilities, triple jump unlock, JSON save, 29 checks |
+| 8 — polish | **next** | animation, models, effects, sound, UI feedback |
 
 Decided: **Compatibility renderer on all platforms** (Web needs it, cartoon
 style does not need Forward+). **Character scale locked** after playtesting
@@ -42,6 +42,7 @@ $G --headless --path . res://tools/tests/test_island_runner.tscn   # island suit
 $G --headless --path . res://tools/tests/test_portal_runner.tscn   # portal / level-swap suite
 $G --headless --path . res://tools/tests/test_level_runner.tscn    # objectives / stars / checkpoint / HUD suite
 $G --headless --path . res://tools/tests/test_combat_runner.tscn   # melee / enemies / damage / death suite
+$G --headless --path . res://tools/tests/test_progression_runner.tscn  # unlocks / best stars / save suite
 $G --path . res://tools/tests/test_lighting_runner.tscn            # lighting suite (needs a window)
 $G --path . res://tools/capture_screenshot.tscn -- out.png 120     # render a frame to PNG
 $G --path . res://tools/capture_screenshot.tscn -- out.png 120 drive   # ...while driving the kart
@@ -119,20 +120,25 @@ suites exit non-zero on failure.
   `VisualRoot/Hitbox`), `scripts/enemies/` (Enemy + EnemyDefinition), scene
   `scenes/enemies/enemy.tscn`, data `resources/enemies/slime.tres`. Damage is
   duck-typed: anything with `take_damage(amount, source)`.
+* Progression: `scripts/core/progression_manager.gd` (autoload). Rewards are
+  `LevelDefinition.reward_abilities`; abilities are ids read by whoever
+  implements them (`enhanced_jump` → `CharacterMotor.get_max_air_jumps`).
+  Tests that complete levels set `ProgressionManager.save_path` to a scratch
+  file and call `reset()` — never let a test write the real `user://save.json`.
 * Groups: `terrain`, `player_spawn`, `portal_site`, `portal`, `level_manager`,
   `level_controller`, `collectible`, `star`, `checkpoint`, `enemy`.
 * Physics layers: 1 world, 2 player, 3 enemy, 4 interactable, 5 vehicle.
   Player mask = world|vehicle (17); vehicle mask = world (1); portal area on
   layer 4 with mask player|vehicle (18).
 
-## Next step (Phase 7 — progression)
+## Next step (Phase 8 — polish)
 
-`ProgressionManager` autoload: completed levels, best stars per level, total
-stars, unlocked abilities; listens to `LevelManager.level_completed`. Save to
-`user://save.json` on every change, load at start, `reset()` for tests. First
-unlockable ability: decide a cheap one (e.g. the kart `turbo` or the
-character `double_jump` locked at start and granted by finishing the Forest
-Trail) — starting abilities come from the definitions minus what progression
-says is locked. HUD: total stars in the hub. Portal `required_abilities` and
-`LevelDefinition.unlocked_by_default` are already there to gate content.
-Add `tools/tests/test_progression*` before calling it done.
+The vertical slice is functionally complete (design doc §25 / master prompt
+§4). Polish is where the human and the 8-year-old designer should steer:
+which feels bad, what looks confusing. Candidates, cheapest first: squash &
+stretch on jump/land, attack swipe arc, hit flash on enemies, star pickup
+burst + sound, level-complete fanfare, kart engine hum and turbo whoosh,
+footstep/skid particles, a "level complete" card with stars, an ability-gated
+second portal (`required_abilities = ["enhanced_jump"]`) to prove the gate,
+touch controls for Android/iOS, a pause menu. Keep every effect a component
+or a scene, never a special case in a controller.

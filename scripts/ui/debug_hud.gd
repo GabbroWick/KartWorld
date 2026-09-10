@@ -50,6 +50,6 @@ func _process(_delta: float) -> void:
 		state,
 		horizontal,
 		_player.motor.air_jumps_used,
-		_player.definition.max_air_jumps,
+		_player.motor.get_max_air_jumps(),
 		Engine.get_frames_per_second(),
 	]

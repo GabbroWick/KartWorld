@@ -3,7 +3,7 @@
 3D cartoon adventure game (Godot 4 / GDScript).
 Design spec: [KARTWORLD_GAME_DESIGN.md](KARTWORLD_GAME_DESIGN.md) — development rules: [CLAUDE_CODE_MASTER_PROMPT.md](CLAUDE_CODE_MASTER_PROMPT.md).
 
-**Current state: Phase 6 — hub, kart, portal, a first level and combat.**
+**Current state: Phase 7 — hub, kart, portal, a first level, combat and progression.**
 A generic third-person character (configured as the leopard) walks, runs, jumps
 and double-jumps around a procedurally generated cartoon island: beach, forest,
 mountain, a house, two NPC placeholders (fox, panda). The player can summon a
@@ -11,10 +11,12 @@ futuristic kart, get in, drive, turbo, jump and get out again, and walk (or
 drive) into a portal that loads the first level: follow the trail, grab stars,
 touch a checkpoint, swat the slimes, jump the gap, reach the clearing — the
 level completes and the party returns to the island. Enemies hurt on contact,
-hearts run out, the checkpoint brings you back. A HUD shows health, stars, the
-current objective and what the interact key does. No saving or progression yet
-— that is deliberate, see the roadmap below. Everything is placeholder art on
-purpose.
+hearts run out, the checkpoint brings you back. Finishing the level for the
+first time unlocks the triple jump; best stars per level and unlocked
+abilities are saved to disk and restored on the next launch. A HUD shows
+health, stars, the current objective, what the interact key does and new
+unlocks. Polish (animation, real models, sound) is the next phase.
+Everything is placeholder art on purpose.
 
 ---
 
@@ -76,8 +78,17 @@ $G --headless --path . res://tools/tests/test_island_runner.tscn   # island hub 
 $G --headless --path . res://tools/tests/test_portal_runner.tscn   # portals and levels (33 checks)
 $G --headless --path . res://tools/tests/test_level_runner.tscn    # objectives, stars, checkpoint, HUD (35 checks)
 $G --headless --path . res://tools/tests/test_combat_runner.tscn   # melee, enemies, damage, death (33 checks)
+$G --headless --path . res://tools/tests/test_progression_runner.tscn  # unlocks, best stars, save/load (29 checks)
 $G --path . res://tools/tests/test_lighting_runner.tscn            # lighting (6 checks, needs a window)
 ```
+
+Tests that complete levels point `ProgressionManager.save_path` at a scratch
+file, so running them never touches your real save
+(`%APPDATA%\Godot\app_userdata\KartWorld\save.json`).
+
+* **Progression**: fresh state, first completion records stars and grants the
+  reward ability live (triple jump works), best stars kept per level, reward
+  not granted twice, save file round-trips, HUD total stars and unlock notice.
 
 * **Combat**: attack action and swing, hitbox damages and kills a slime,
   cooldown, defeat objective counting, slime chasing the player, contact
@@ -128,7 +139,7 @@ scenes/          Godot scenes
   dev/               movement_gym.tscn (arena + main wiring, used by tests)
   ui/                game_hud.tscn (player HUD), debug_hud.tscn (F3 overlay)
 scripts/         GDScript, mirrors the scene layout
-  core/              autoload, entry point, input action names
+  core/              autoloads (GameManager, ProgressionManager), entry point, input actions, step-up
   characters/        controller, data definition, components (incl. driver), creature placeholder
   vehicles/          controller, data definition, components (input, motor, abilities)
   levels/            level definition, level manager, portal, level controller, objectives
@@ -158,7 +169,7 @@ time, each verified before the next starts.
 - [x] **Phase 4** — portal and level transitions
 - [x] **Phase 5** — first level: objectives, stars, checkpoint, HUD
 - [x] **Phase 6** — combat: melee attack, enemies, damage, death, respawn
-- [ ] **Phase 7** — progression and basic save
+- [x] **Phase 7** — progression: level results, first unlockable ability, save/load
 - [ ] **Phase 8** — polish: animation, models, effects, sound, UI
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for how the pieces fit together and which
