@@ -79,7 +79,7 @@ environment = SubResource("environment")
 [node name="SunLight" type="DirectionalLight3D" parent="."]
 ; Keep at the origin: a positioned DirectionalLight3D breaks its shadow frustum (see ARCHITECTURE.md).
 rotation_degrees = Vector3(-52, -38, 0)
-light_energy = 1.25
+light_energy = 0.72
 shadow_enabled = true
 shadow_opacity = 0.7
 directional_shadow_max_distance = 110.0

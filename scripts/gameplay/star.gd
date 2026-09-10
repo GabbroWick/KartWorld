@@ -17,6 +17,7 @@ func _ready() -> void:
 	kind = &"star"
 	add_to_group(&"star")
 	_base_y = visual.position.y
+	FlatMaterial.apply_fill(visual)
 
 
 func _process(delta: float) -> void:

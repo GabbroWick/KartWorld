@@ -42,5 +42,8 @@ static func try_step(body: CharacterBody3D, horizontal_motion: Vector3, max_heig
 	var rise := max_height - collision.get_travel().length()
 	if rise <= 0.001:
 		return false
-	body.global_position.y += rise + 0.01
+	# Land on the step, not on its edge: the forward probe was verified free,
+	# so the body moves up and onto it in one go. Otherwise floor snapping can
+	# pull a long body (the kart) back down before it has cleared the lip.
+	body.global_position += Vector3.UP * (rise + 0.01) + probe
 	return true

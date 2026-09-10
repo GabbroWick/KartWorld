@@ -46,5 +46,8 @@ static func _recolored(material: StandardMaterial3D) -> StandardMaterial3D:
 		copy.albedo_color = COLORS[key]
 		copy.metallic_specular = 0.0
 		copy.roughness = 1.0
+		copy.emission_enabled = true
+		copy.emission = COLORS[key] * FlatMaterial.FILL
+		copy.set_meta(FlatMaterial.FILLED, true)
 		_cache[key] = copy
 	return _cache[key]

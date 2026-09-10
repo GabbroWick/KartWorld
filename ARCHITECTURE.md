@@ -151,13 +151,15 @@ Vehicle (vehicle.tscn, CharacterBody3D, layer 5 "vehicle")
   to tick, hands throttle/steer/jump to the motor, and exposes
   `mount()` / `dismount()` / `place()`.
 * **`VehicleMotor`** is deliberately not a wheel simulation: a signed forward
-  speed, a yaw rate that grows with speed (and shrinks in the air), gravity and
-  a jump. After `move_and_slide()` the speed is re-projected on the forward
-  axis, so a wall simply kills the speed it blocked. `floor_max_angle` comes
-  from the definition (`max_slope_degrees`, 60° for the kart) and
-  `floor_constant_speed` keeps the same pace up and down hills. The physics
-  body stays upright; `VehicleController._tilt_to_ground()` leans the model
-  onto the floor normal so the kart reads as driving on the hill.
+  speed, an explicit `heading` yaw that steering changes, gravity and a jump.
+  The body itself is aligned to the smoothed floor normal every tick
+  (`ground_up`, also set as `up_direction`) and driven along the slope plane,
+  pressed onto it, so the collision box lies flat on hills instead of resting
+  on an edge; in the air it eases back upright. After `move_and_slide()` the
+  speed is re-projected on the 3D forward axis, so a wall simply kills the
+  speed it blocked. `floor_max_angle` comes from the definition
+  (`max_slope_degrees`, 60° for the kart) and `floor_constant_speed` keeps the
+  same pace up and down hills. The model needs no extra tilt.
 * **`VehicleAbility`** is the base for abilities that own behaviour. They are
   independent nodes under `AbilityNodes`; the controller only calls
   `try_activate()` and `tick()`. Whether an ability is *unlocked* stays in
@@ -423,12 +425,16 @@ files, on any renderer, with shadows on:
 
 * `Environment`: `tonemap_mode = Linear`, `ambient_light_source = Disabled`,
   `reflected_light_source = Disabled`, sky used only as background.
-* One `DirectionalLight3D` at the origin: `light_energy = 1.25` (so a flat
-  face under the 52° sun gets 1.25 × 0.79 ≈ 1.0 × albedo), `shadow_enabled`,
-  **`shadow_opacity = 0.7`** — the semi-transparent shadow *is* the fill
-  light; there is no ambient term at all.
-* Placeholder materials come from `FlatMaterial` (`metallic_specular = 0`,
-  roughness 1), so no highlights add on top.
+* One `DirectionalLight3D` at the origin: `light_energy = 0.72`,
+  `shadow_enabled`, `shadow_opacity = 0.7`. There is no ambient light and no
+  second light.
+* The ambient term lives in the materials: everything emits
+  `FlatMaterial.FILL` (0.28) × its own albedo — `FlatMaterial.flat()` for
+  colours, `flat_vertex_colored()` (a 10-line shader) for the terrain,
+  `with_fill()` / `apply_fill()` for imported materials (Kenney, Meshy,
+  textured: emission texture with MULTIPLY). Sunlit faces therefore get
+  sun + fill = the authored colour; faces turned away get the fill alone
+  (≈ 0.44 sRGB on a 0.5 grey), never black.
 
 Why no ambient: Godot's Compatibility renderer re-adds the whole base pass
 (ambient and sun) once more whenever a shadowed light is present

@@ -121,13 +121,28 @@ suites exit non-zero on failure.
   it by material name. Kenney cars face +Z (`KenneyVehicleVisual` flips).
 * `PropScatter` picks model variants from a second RNG: consuming the layout
   RNG for anything else silently moves every prop and breaks the island suite.
+* Kart physics: the CharacterBody3D box is aligned to the smoothed floor
+  normal (`VehicleMotor.ground_up`, `up_direction`) and driven along the
+  slope plane with a -2 m/s press along the normal; yaw is an explicit
+  `motor.heading` (rebuilding yaw from a tilted basis drifts). An upright box
+  on a 50° slope rests on its edge 1.7 m above ground and stalls — do not go
+  back to that. Speed after `move_and_slide` = `velocity.dot(forward)` (3D).
+* `StepUp.try_step` moves the body up AND forward onto the ledge; lifting
+  only lets floor snapping pull a long body back off the lip (kart vs the
+  portal plinth).
+* `make web` / `make test` / `make serve` (GNU make from GnuWin32 is on PATH).
 * Lighting recipe (palette renders as authored on every renderer, shadows on):
   `tonemap_mode = 0`, `ambient_light_source = 1` (Disabled),
-  `reflected_light_source = 1`, one sun `light_energy = 1.25`,
-  `shadow_enabled = true`, `shadow_opacity = 0.7` (= the fill light).
-  Reason: Compatibility re-adds the base pass when a shadowed light and any
-  ambient coexist (godot#90259). Any ambient or second light → ~1.3× brighter.
-  `test_lighting_runner.tscn` (windowed) guards this.
+  `reflected_light_source = 1`, ONE sun `light_energy = 0.72`,
+  `shadow_enabled = true`, `shadow_opacity = 0.7`. "Ambient" is a material
+  term instead: every material emits `FlatMaterial.FILL` (0.28) × its albedo
+  (`FlatMaterial.flat/with_fill/apply_fill`, the terrain shader
+  `shaders/flat_vertex_fill.gdshader`, KenneyPalette, MeshyCharacterVisual).
+  Reason: Compatibility doubles the base pass when a shadowed light coexists
+  with ambient OR a second light (godot#90259) — a fill light is not an
+  option. New materials/models must go through `FlatMaterial.apply_fill`
+  (textured: emission_operator MULTIPLY, else the glow is 100%).
+  `test_lighting_runner.tscn` (windowed) guards sunlit and shaded faces.
 * Materials: use `FlatMaterial.flat(color)`; `StandardMaterial3D.specular`
   does not exist (`metallic_specular`). `PlaceholderMaterial` is a Godot
   built-in name — do not reuse it.

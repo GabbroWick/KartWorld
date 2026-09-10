@@ -73,6 +73,7 @@ func _rebuild() -> void:
 	add_child(_instance)
 	if apply_palette:
 		KenneyPalette.apply(_instance)
+	FlatMaterial.apply_fill(_instance)
 	bounds = _measure(_instance, _instance.transform)
 	_build_collision()
 

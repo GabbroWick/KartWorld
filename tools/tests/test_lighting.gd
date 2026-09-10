@@ -71,6 +71,35 @@ func _run() -> void:
 	var grey := _pixel(image, camera, quad.global_position)
 	_check_color(grey, quad_color, "sunlit 50 percent grey quad renders as authored")
 
+	# Faces turned away from the sun must stay readable: the material fill
+	# term (FlatMaterial.FILL) stands in for ambient light. Two vertical quads
+	# face opposite ways along the sun's azimuth; the darker one is the one
+	# turned away, and it must be lit by the fill alone.
+	var sun_dir: Vector3 = -sun.global_basis.z
+	var along := Vector3(sun_dir.x, 0.0, sun_dir.z).normalized()
+	var darkest := 1.0
+	for sign in [1.0, -1.0]:
+		var away := MeshInstance3D.new()
+		var away_mesh := QuadMesh.new()
+		away_mesh.size = Vector2(2, 2)
+		away_mesh.material = FlatMaterial.flat(quad_color)
+		away.mesh = away_mesh
+		away.position = probe + Vector3(-3.0 * sign, 1.2, 0.0)
+		away.look_at(away.position + along * sign, Vector3.UP)
+		scene.add_child(away)
+		var side_camera := Camera3D.new()
+		side_camera.position = away.position - along * sign * 4.0
+		scene.add_child(side_camera)
+		side_camera.look_at(away.position, Vector3.UP)
+		side_camera.make_current()
+		for i in 10:
+			await get_tree().process_frame
+		await RenderingServer.frame_post_draw
+		var shade := _pixel(get_tree().root.get_texture().get_image(), side_camera, away.position)
+		darkest = minf(darkest, shade.r)
+	_check(darkest > 0.2 and darkest < 0.45,
+		"a face turned away from the sun is lit by the fill, not black (got %.2f, want 0.2-0.45)" % darkest)
+
 	print("  renderer: %s" % RenderingServer.get_current_rendering_method())
 	_finish()
 

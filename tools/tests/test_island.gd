@@ -80,14 +80,14 @@ func _test_kart_climbs_mountain() -> void:
 	Input.action_press(InputActions.ACCELERATE)
 	for i in 180:
 		await _steps(1)
-		max_tilt = maxf(max_tilt, rad_to_deg(acos(clampf(kart.visual_root.global_basis.y.dot(Vector3.UP), -1.0, 1.0))))
+		max_tilt = maxf(max_tilt, rad_to_deg(acos(clampf(kart.global_basis.y.dot(Vector3.UP), -1.0, 1.0))))
 	Input.action_release(InputActions.ACCELERATE)
 	var climbed := kart.global_position.y - start_y
 	_check(climbed > 5.0, "kart climbs the mountain (%.1f m up in 3 s, slope max %.0f deg)"
 		% [climbed, max_tilt])
 	_check(max_tilt > 12.0, "kart model leans with the slope (max %.0f deg)" % max_tilt)
 	# The lean must follow the ground, not mirror it (a sign bug once did).
-	var agreement := kart.visual_root.global_basis.y.dot(kart.get_floor_normal()) if kart.is_on_floor() else 1.0
+	var agreement := kart.global_basis.y.dot(kart.get_floor_normal()) if kart.is_on_floor() else 1.0
 	_check(agreement > 0.97, "kart model's up matches the floor normal (dot %.3f)" % agreement)
 	_check(kart.is_on_floor(), "kart still on the ground on the hillside")
 	await _hold(InputActions.INTERACT, 3)
@@ -159,8 +159,10 @@ func _test_kart_on_terrain() -> void:
 	var start := kart.global_position
 	var airborne := 0
 	var top_speed := 0.0
+	# Two seconds: enough to prove the descent, short of the shore drop now
+	# that the kart keeps its speed on slopes.
 	Input.action_press(InputActions.ACCELERATE)
-	for i in 180:
+	for i in 110:
 		await _steps(1)
 		if not kart.is_on_floor():
 			airborne += 1
@@ -169,7 +171,7 @@ func _test_kart_on_terrain() -> void:
 	var travelled := Vector2(kart.global_position.x - start.x, kart.global_position.z - start.z).length()
 	_check(travelled > 15.0, "kart drove down the slope (%.1fm, top speed %.1f, from %s to %s, facing %s)"
 		% [travelled, top_speed, start, kart.global_position, -kart.global_basis.z])
-	_check(airborne < 90, "kart mostly kept contact with the terrain (%d airborne frames)" % airborne)
+	_check(airborne < 55, "kart mostly kept contact with the terrain (%d airborne frames)" % airborne)
 	_check(kart.global_position.y > 0.0, "kart did not fall through the terrain (y %.2f)" % kart.global_position.y)
 
 	Input.action_press(InputActions.INTERACT)

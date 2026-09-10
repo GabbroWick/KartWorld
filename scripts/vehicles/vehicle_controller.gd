@@ -53,57 +53,11 @@ func _physics_process(delta: float) -> void:
 
 	motor.drive(delta, input.throttle, input.steer, input.jump_pressed,
 		speed_multiplier, acceleration_multiplier)
-	_tilt_to_ground(delta)
 	if _visual_instance and _visual_instance.has_method(&"update_visual"):
 		_visual_instance.call(&"update_visual", motor.speed, delta)
 
 	if global_position.y < fall_limit:
 		fell_out_of_world.emit()
-
-
-## The physics body stays an upright box; the model is a visual suspension:
-## four rays at the wheel corners find the ground, pitch and roll come from
-## the height differences and the model is lowered onto the average contact
-## height, so the wheels sit on the terrain even where the box rests on an
-## edge (crests, slope changes).
-func _tilt_to_ground(delta: float) -> void:
-	var size := definition.collision_size
-	var half_w := size.x * 0.45
-	var half_l := size.z * 0.42
-	var corners: Array[Vector3] = [
-		Vector3(-half_w, 0.0, -half_l), Vector3(half_w, 0.0, -half_l),
-		Vector3(-half_w, 0.0, half_l), Vector3(half_w, 0.0, half_l),
-	]
-	var space := get_world_3d().direct_space_state
-	var heights: Array[float] = []
-	for corner: Vector3 in corners:
-		# Start high: on a steep climb the front corners' ground is above the body.
-		var origin := global_transform * (corner + Vector3.UP * (size.y + 2.5))
-		var query := PhysicsRayQueryParameters3D.create(origin, origin + Vector3.DOWN * (size.y + 5.5), 1)
-		query.exclude = [get_rid()]
-		var hit := space.intersect_ray(query)
-		if hit.is_empty():
-			heights.append(NAN)
-		else:
-			heights.append((hit.position as Vector3).y - global_position.y)
-
-	var target_basis := Basis.IDENTITY
-	var target_y := 0.0
-	var grounded := heights.all(func(h: float) -> bool: return not is_nan(h))
-	if grounded and is_on_floor():
-		var front := (heights[0] + heights[1]) * 0.5
-		var back := (heights[2] + heights[3]) * 0.5
-		var left := (heights[0] + heights[2]) * 0.5
-		var right := (heights[1] + heights[3]) * 0.5
-		var pitch := atan2(front - back, half_l * 2.0)
-		# +Z rotation lifts the right side, so a higher left means negative roll.
-		var roll := atan2(right - left, half_w * 2.0)
-		target_basis = Basis.from_euler(Vector3(pitch, 0.0, roll))
-		var mean := (heights[0] + heights[1] + heights[2] + heights[3]) * 0.25
-		target_y = clampf(mean, -0.6, 0.4)
-	var weight := minf(definition.tilt_speed * delta, 1.0)
-	visual_root.basis = visual_root.basis.slerp(target_basis, weight)
-	visual_root.position.y = lerpf(visual_root.position.y, target_y, weight)
 
 
 func is_driven() -> bool:
@@ -133,9 +87,11 @@ func dismount() -> Node:
 	return leaving
 
 
-## World position where a leaving driver should stand.
+## World position where a leaving driver should stand: beside the vehicle
+## on the flat, whatever the slope the body is aligned to.
 func get_exit_position() -> Vector3:
-	return global_transform * definition.exit_offset
+	var flat := Transform3D(Basis.from_euler(Vector3(0.0, motor.heading, 0.0)), global_position)
+	return flat * definition.exit_offset + Vector3.UP * 0.3
 
 
 ## Teleports the vehicle to a new place, at rest.
@@ -160,7 +116,7 @@ func get_heading_yaw() -> float:
 		_camera_reversed = false
 	elif not _camera_reversed and motor.speed < -1.0:
 		_camera_reversed = true
-	return global_rotation.y + (PI if _camera_reversed else 0.0)
+	return motor.heading + (PI if _camera_reversed else 0.0)
 
 
 func _apply_definition() -> void:

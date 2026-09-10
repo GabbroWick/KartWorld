@@ -107,4 +107,4 @@ func _flatten(node: Node) -> void:
 			flat.roughness_texture = null
 			flat.normal_enabled = false
 			flat.metallic_specular = 0.0
-			mesh_instance.set_surface_override_material(i, flat)
+			mesh_instance.set_surface_override_material(i, FlatMaterial.with_fill(flat))

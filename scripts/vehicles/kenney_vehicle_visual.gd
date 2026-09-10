@@ -22,6 +22,7 @@ func _ready() -> void:
 	if flip_forward:
 		_instance.rotation.y = PI
 	add_child(_instance)
+	FlatMaterial.apply_fill(_instance)
 	_collect_wheels(_instance)
 
 

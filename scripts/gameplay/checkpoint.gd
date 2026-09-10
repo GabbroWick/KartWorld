@@ -28,6 +28,7 @@ func _ready() -> void:
 	var material := (ring.mesh.surface_get_material(0) as StandardMaterial3D).duplicate()
 	ring.material_override = material
 	_set_ring_color(inactive_color)
+	FlatMaterial.apply_fill(flag)
 
 
 func _set_ring_color(color: Color) -> void:
