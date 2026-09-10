@@ -1,9 +1,40 @@
-[gd_scene load_steps=20 format=3]
+[gd_scene load_steps=44 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/props/island_terrain.tscn" id="1_terrain"]
 [ext_resource type="PackedScene" path="res://scenes/world/props/house.tscn" id="2_house"]
-[ext_resource type="PackedScene" path="res://scenes/world/props/placeholder_tree.tscn" id="3_tree"]
-[ext_resource type="PackedScene" path="res://scenes/world/props/placeholder_rock.tscn" id="4_rock"]
+[ext_resource type="PackedScene" path="res://scenes/world/props/kenney_tree.tscn" id="3_tree"]
+[ext_resource type="PackedScene" path="res://scenes/world/props/kenney_rock.tscn" id="4_rock"]
+[ext_resource type="PackedScene" path="res://scenes/world/props/kenney_plant.tscn" id="15_plant"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/tree_default.glb" id="20_t1"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/tree_detailed.glb" id="20_t2"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/tree_oak.glb" id="20_t3"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/tree_fat.glb" id="20_t4"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/tree_tall.glb" id="20_t5"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/tree_plateau.glb" id="20_t6"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/tree_simple.glb" id="20_t7"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/tree_pineDefaultA.glb" id="21_p1"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/tree_pineRoundA.glb" id="21_p2"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/tree_pineTallA.glb" id="21_p3"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/tree_pineSmallA.glb" id="21_p4"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/tree_palm.glb" id="22_palm1"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/tree_palmBend.glb" id="22_palm2"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/tree_palmDetailedTall.glb" id="22_palm3"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/rock_largeA.glb" id="23_r1"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/rock_largeC.glb" id="23_r2"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/rock_tallA.glb" id="23_r3"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/rock_tallD.glb" id="23_r4"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/stone_largeB.glb" id="23_r5"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/stone_tallC.glb" id="23_r6"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/rock_smallA.glb" id="24_s1"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/stone_smallD.glb" id="24_s2"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/flower_redA.glb" id="25_f1"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/flower_yellowB.glb" id="25_f2"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/flower_purpleC.glb" id="25_f3"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/grass_large.glb" id="25_f4"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/grass_leafs.glb" id="25_f5"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/mushroom_red.glb" id="25_f6"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/plant_bush.glb" id="25_f7"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/stump_round.glb" id="25_f8"]
 [ext_resource type="PackedScene" path="res://scenes/world/props/placeholder_block.tscn" id="5_block"]
 [ext_resource type="Script" path="res://scripts/world/prop_scatter.gd" id="6_scatter"]
 [ext_resource type="PackedScene" path="res://scenes/characters/character.tscn" id="7_character"]
@@ -121,6 +152,7 @@ persistent_id = &"hub_star_beach"
 [node name="Forest" type="Node3D" parent="."]
 script = ExtResource("6_scatter")
 prop_scene = ExtResource("3_tree")
+models = Array[PackedScene]([ExtResource("20_t1"), ExtResource("20_t2"), ExtResource("20_t3"), ExtResource("20_t4"), ExtResource("20_t5"), ExtResource("20_t6"), ExtResource("20_t7"), ExtResource("21_p1")])
 terrain_path = NodePath("../IslandTerrain")
 scatter_seed = 11
 count = 45
@@ -133,6 +165,7 @@ min_spacing = 3.5
 [node name="ScatteredTrees" type="Node3D" parent="."]
 script = ExtResource("6_scatter")
 prop_scene = ExtResource("3_tree")
+models = Array[PackedScene]([ExtResource("20_t1"), ExtResource("20_t3"), ExtResource("21_p1"), ExtResource("21_p2"), ExtResource("21_p3"), ExtResource("21_p4")])
 terrain_path = NodePath("../IslandTerrain")
 scatter_seed = 23
 count = 28
@@ -146,6 +179,7 @@ min_spacing = 7.0
 [node name="MountainRocks" type="Node3D" parent="."]
 script = ExtResource("6_scatter")
 prop_scene = ExtResource("4_rock")
+models = Array[PackedScene]([ExtResource("23_r5"), ExtResource("23_r6"), ExtResource("24_s2"), ExtResource("23_r3"), ExtResource("23_r5")])
 terrain_path = NodePath("../IslandTerrain")
 scatter_seed = 41
 count = 26
@@ -154,13 +188,14 @@ radius = 24.0
 min_height = 5.0
 max_slope_degrees = 55.0
 min_spacing = 3.0
-scale_min = 0.6
-scale_max = 2.2
+scale_min = 0.5
+scale_max = 1.3
 sink = 0.4
 
 [node name="BeachRocks" type="Node3D" parent="."]
 script = ExtResource("6_scatter")
 prop_scene = ExtResource("4_rock")
+models = Array[PackedScene]([ExtResource("23_r1"), ExtResource("23_r5"), ExtResource("24_s1"), ExtResource("24_s2")])
 terrain_path = NodePath("../IslandTerrain")
 scatter_seed = 5
 count = 14
@@ -171,8 +206,43 @@ max_height = 1.4
 max_slope_degrees = 40.0
 min_spacing = 6.0
 scale_min = 0.4
-scale_max = 1.1
+scale_max = 1.0
 sink = 0.5
+
+[node name="BeachPalms" type="Node3D" parent="."]
+script = ExtResource("6_scatter")
+prop_scene = ExtResource("3_tree")
+models = Array[PackedScene]([ExtResource("22_palm1"), ExtResource("22_palm2"), ExtResource("22_palm3")])
+terrain_path = NodePath("../IslandTerrain")
+scatter_seed = 77
+count = 16
+center = Vector2(0, 0)
+radius = 54.0
+exclusion_zones = Array[Vector3]([Vector3(0, 0, 40), Vector3(-12, 24, 10)])
+min_height = 0.5
+max_height = 1.8
+max_slope_degrees = 30.0
+min_spacing = 6.0
+scale_min = 0.9
+scale_max = 1.2
+
+[node name="Meadow" type="Node3D" parent="."]
+script = ExtResource("6_scatter")
+prop_scene = ExtResource("15_plant")
+models = Array[PackedScene]([ExtResource("25_f1"), ExtResource("25_f2"), ExtResource("25_f3"), ExtResource("25_f4"), ExtResource("25_f4"), ExtResource("25_f5"), ExtResource("25_f6"), ExtResource("25_f7"), ExtResource("25_f8")])
+terrain_path = NodePath("../IslandTerrain")
+blocks_movement = false
+scatter_seed = 91
+count = 110
+center = Vector2(4, 8)
+radius = 40.0
+exclusion_zones = Array[Vector3]([Vector3(14, 12, 9), Vector3(-12, 24, 4), Vector3(-30, 8, 4)])
+min_height = 1.8
+max_slope_degrees = 32.0
+min_spacing = 2.2
+scale_min = 0.8
+scale_max = 1.3
+sink = 0.05
 
 [node name="NPCs" type="Node3D" parent="."]
 

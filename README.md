@@ -30,6 +30,12 @@ No third-party addons or plugins. The project uses the **Compatibility**
 renderer (OpenGL 3 / WebGL 2) on every platform so the same build can target
 Windows, Web, Android and iOS with one look.
 
+3D props (trees, rocks, flowers, the kart, stars, flags) are CC0 models by
+[Kenney](https://www.kenney.nl) — Nature Kit, Car Kit, Platformer Kit, Mini
+Forest, Modular Buildings — under `assets/models/kenney/` (see its README and
+LICENSE.txt). Characters, enemies and buildings are still primitives, waiting
+for AI-generated models.
+
 ## Running the game
 
 **From the editor:** open the project folder in Godot and press <kbd>F5</kbd>
@@ -171,7 +177,7 @@ scripts/         GDScript, mirrors the scene layout
   gameplay/          collectible base, star, checkpoint
   enemies/           enemy definition, generic enemy brain
   camera/            third-person camera
-  world/             island terrain, prop scatter, placeholder props, flat material
+  world/             island terrain, prop scatter, ModelProp + KenneyPalette, placeholder props, flat material
   ui/                debug overlay
 resources/       data-driven configuration
   characters/        leopard (player), fox and panda (NPCs)
@@ -179,7 +185,8 @@ resources/       data-driven configuration
   levels/            level metadata (forest_trail, cliff_steps)
   enemies/           slime
 tools/           editor/CI helpers (input map setup, screenshots, tests)
-assets/          art and audio (placeholders for now)
+assets/models/kenney/   CC0 Kenney models (curated .glb subsets + colormap textures)
+art/             raw asset downloads (zips), not tracked
 ```
 
 ## Roadmap

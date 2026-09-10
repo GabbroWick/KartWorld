@@ -13,3 +13,6 @@ desktop.ini
 .DS_Store
 .vscode/
 .idea/
+
+# Raw asset downloads (zips); curated copies live in assets/models/
+art/

@@ -168,6 +168,35 @@ Vehicle (vehicle.tscn, CharacterBody3D, layer 5 "vehicle")
 * The camera is re-targeted by `Main` through the driver's signals and gets a
   wider framing (`set_framing`) at the wheel. No second camera.
 
+## Real models (Kenney)
+
+`assets/models/kenney/<kit>/*.glb` are imported by Godot as scenes. Three
+pieces turn them into game props without per-model code:
+
+* **`ModelProp`** (StaticBody3D, `scripts/world/model_prop.gd`): instantiates
+  `model` at `model_scale`, measures its bounds and builds collision —
+  `BOX` for rocks, `TRUNK` (narrow cylinder, lower part only) for trees so
+  the player brushes past the canopy, `NONE` for flowers. Template scenes
+  `kenney_tree.tscn`, `kenney_rock.tscn`, `kenney_plant.tscn` fix scale and
+  collision per category.
+* **`PropScatter.models`**: a list of model variants; each placed prop gets
+  one from a *separate* seeded RNG, so adding or reordering models never
+  moves the props (the island suite depends on that layout).
+* **`KenneyPalette`**: the Nature Kit ships teal leaves and pink bark. The
+  palette remaps materials **by name** (`leafsGreen`, `woodBark`, `stone`…)
+  onto the island's greens and browns, applied as per-surface overrides with
+  one cached copy per material — the imported resources are never edited.
+  Kits that use a texture (Car, Platformer, Mini Forest, Buildings) are left
+  alone; their `.glb` files reference an external `Textures/colormap.png`
+  that must stay next to them.
+* **`KenneyVehicleVisual`**: wraps a Car Kit model as a vehicle visual and
+  spins every `wheel*` node from the speed the controller feeds through
+  `update_visual(speed, delta)`. Kenney cars face +Z, so it flips them.
+
+Kenney units are ~1/3 of ours (a tree is 1.6 units tall): trees use 2.8×,
+rocks 3×, plants 2.2×, the star 2.5×, the flag 3×. The Car Kit is already
+life-size (race-future is 2.66 m long, matching the kart's collision box).
+
 ## Level system
 
 ```text
@@ -231,7 +260,8 @@ Main
   subclasses or just different `kind` values.
 * **`Checkpoint`** (Area3D, group `checkpoint`): touching it calls
   `player.set_spawn_transform(respawn_point, false)`; only one is active at
-  a time; the flag turns green. Respawn after a fall or death already uses
+  a time; the emissive ring on the ground turns from red to green (the Kenney
+  flag itself is textured, so state lives on the ring, not the flag). Respawn after a fall or death already uses
   the spawn transform, so nothing else changes.
 
 ## Progression and saving

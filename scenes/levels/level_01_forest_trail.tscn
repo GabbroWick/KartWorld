@@ -1,7 +1,11 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/props/placeholder_block.tscn" id="1_block"]
-[ext_resource type="PackedScene" path="res://scenes/world/props/placeholder_tree.tscn" id="2_tree"]
+[ext_resource type="PackedScene" path="res://scenes/world/props/kenney_tree.tscn" id="2_tree"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/tree_default.glb" id="20_t1"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/tree_detailed.glb" id="20_t2"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/tree_pineDefaultA.glb" id="21_p1"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/nature-kit/tree_oak.glb" id="20_t3"]
 [ext_resource type="PackedScene" path="res://scenes/world/props/portal.tscn" id="3_portal"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/star.tscn" id="4_star"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/checkpoint.tscn" id="5_checkpoint"]
@@ -134,23 +138,25 @@ returns_to_hub = true
 
 [node name="TreeA" parent="." instance=ExtResource("2_tree")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -12)
+model = ExtResource("20_t1")
 
 [node name="TreeB" parent="." instance=ExtResource("2_tree")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -18)
-trunk_height = 2.4
-canopy_color = Color(0.2, 0.52, 0.26, 1)
+transform = Transform3D(0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, 0.7071, 5, 0, -18)
+model = ExtResource("21_p1")
 
 [node name="TreeC" parent="." instance=ExtResource("2_tree")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -22)
-trunk_height = 1.8
+model = ExtResource("20_t3")
 
 [node name="TreeD" parent="." instance=ExtResource("2_tree")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, -33)
+model = ExtResource("20_t2")
 
 [node name="TreeE" parent="." instance=ExtResource("2_tree")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 0, -38)
-trunk_height = 2.6
-canopy_radius = 1.8
+model = ExtResource("20_t1")
+model_scale = 3.2
 
 [node name="TreeF" parent="." instance=ExtResource("2_tree")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -48)
+model = ExtResource("21_p1")

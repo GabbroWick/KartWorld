@@ -344,7 +344,8 @@ func _test_sea() -> void:
 func _clear_heading(from: Vector3, length: float) -> Vector3:
 	var props: PackedVector3Array = []
 	for scatter: PropScatter in _scene.get("world").find_children("*", "PropScatter", true, false):
-		props.append_array(scatter.placed_positions)
+		if scatter.blocks_movement:
+			props.append_array(scatter.placed_positions)
 	for i in 24:
 		var angle := TAU * i / 24.0
 		var dir := Vector3(sin(angle), 0.0, cos(angle))

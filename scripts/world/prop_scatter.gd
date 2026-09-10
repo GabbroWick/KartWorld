@@ -11,6 +11,16 @@ extends Node3D
 	set(value):
 		prop_scene = value
 		_request_rebuild()
+## Optional model variants. When set, `prop_scene` must be a ModelProp template
+## and each placed prop gets one of these (seeded), so one rule scatters a
+## mixed forest.
+@export var models: Array[PackedScene] = []:
+	set(value):
+		models = value
+		_request_rebuild()
+## False for decoration the player walks through (flowers, grass): tests and
+## pathing may ignore these props.
+@export var blocks_movement := true
 ## Terrain to scatter on. Empty = first node in the "terrain" group.
 @export var terrain_path: NodePath:
 	set(value):
@@ -98,6 +108,10 @@ func rebuild() -> void:
 
 	var rng := RandomNumberGenerator.new()
 	rng.seed = scatter_seed
+	# Separate stream for picking variants, so adding or reordering models
+	# never moves the props themselves.
+	var variant_rng := RandomNumberGenerator.new()
+	variant_rng.seed = scatter_seed * 7919 + 1
 	var attempts := count * 12
 	while placed_positions.size() < count and attempts > 0:
 		attempts -= 1
@@ -116,6 +130,8 @@ func rebuild() -> void:
 		prop.rotation.y = rng.randf_range(0.0, TAU)
 		prop.scale = Vector3.ONE * rng.randf_range(scale_min, scale_max)
 		prop.set_meta(&"scattered", true)
+		if not models.is_empty() and prop is ModelProp:
+			(prop as ModelProp).model = models[variant_rng.randi_range(0, models.size() - 1)]
 		add_child(prop)
 
 

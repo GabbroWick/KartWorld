@@ -3,7 +3,8 @@ extends Area3D
 ## Touch it and it becomes the player's respawn point for this level.
 ##
 ## Reusable in every level: it only talks to the character's spawn transform,
-## which is what respawn() already uses. The flag turns green once activated.
+## which is what respawn() already uses. The ring on the ground turns green
+## once activated.
 
 signal activated(checkpoint: Checkpoint, by: CharacterController)
 
@@ -13,15 +14,27 @@ const GROUP := &"checkpoint"
 @export var inactive_color := Color(0.9, 0.3, 0.3)
 
 @onready var respawn_point: Marker3D = $RespawnPoint
-@onready var flag: PlaceholderBlock = $Pole/Flag
+@onready var flag: Node3D = $Flag
+@onready var ring: MeshInstance3D = $Ring
 
 var is_active := false
+var ring_color := Color.WHITE
 
 
 func _ready() -> void:
 	add_to_group(GROUP)
 	body_entered.connect(_on_body_entered)
-	flag.color = inactive_color
+	# Own copy of the ring material so checkpoints do not share state.
+	var material := (ring.mesh.surface_get_material(0) as StandardMaterial3D).duplicate()
+	ring.material_override = material
+	_set_ring_color(inactive_color)
+
+
+func _set_ring_color(color: Color) -> void:
+	ring_color = color
+	var material := ring.material_override as StandardMaterial3D
+	material.albedo_color = color
+	material.emission = color
 
 
 func _on_body_entered(body: Node3D) -> void:
@@ -37,14 +50,14 @@ func activate(player: CharacterController) -> void:
 		if other != self and other is Checkpoint:
 			other.deactivate()
 	is_active = true
-	flag.color = active_color
+	_set_ring_color(active_color)
 	player.set_spawn_transform(respawn_point.global_transform, false)
 	activated.emit(self, player)
 
 
 func deactivate() -> void:
 	is_active = false
-	flag.color = inactive_color
+	_set_ring_color(inactive_color)
 
 
 func _player_from(body: Node3D) -> CharacterController:

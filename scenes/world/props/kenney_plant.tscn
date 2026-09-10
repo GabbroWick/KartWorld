@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/model_prop.gd" id="1_prop"]
+
+[node name="KenneyPlant" type="StaticBody3D"]
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("1_prop")
+model_scale = 2.2
+collision_mode = 0

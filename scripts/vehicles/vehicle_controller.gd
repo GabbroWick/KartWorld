@@ -54,6 +54,8 @@ func _physics_process(delta: float) -> void:
 	motor.drive(delta, input.throttle, input.steer, input.jump_pressed,
 		speed_multiplier, acceleration_multiplier)
 	_tilt_to_ground(delta)
+	if _visual_instance and _visual_instance.has_method(&"update_visual"):
+		_visual_instance.call(&"update_visual", motor.speed, delta)
 
 	if global_position.y < fall_limit:
 		fell_out_of_world.emit()

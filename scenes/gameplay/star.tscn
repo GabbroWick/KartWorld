@@ -1,30 +1,7 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/star.gd" id="1_star"]
-
-[sub_resource type="StandardMaterial3D" id="mat_star"]
-albedo_color = Color(1, 0.85, 0.2, 1)
-emission_enabled = true
-emission = Color(1, 0.8, 0.2, 1)
-emission_energy_multiplier = 0.6
-metallic_specular = 0.0
-roughness = 1.0
-
-[sub_resource type="CylinderMesh" id="mesh_star"]
-material = SubResource("mat_star")
-top_radius = 0.55
-bottom_radius = 0.55
-height = 0.18
-radial_segments = 5
-rings = 1
-
-[sub_resource type="CylinderMesh" id="mesh_core"]
-material = SubResource("mat_star")
-top_radius = 0.3
-bottom_radius = 0.3
-height = 0.26
-radial_segments = 5
-rings = 1
+[ext_resource type="PackedScene" path="res://assets/models/kenney/platformer-kit/star.glb" id="2_model"]
 
 [sub_resource type="SphereShape3D" id="shape_pickup"]
 radius = 0.9
@@ -41,10 +18,5 @@ shape = SubResource("shape_pickup")
 [node name="Visual" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 
-[node name="Disc" type="MeshInstance3D" parent="Visual"]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0)
-mesh = SubResource("mesh_star")
-
-[node name="Core" type="MeshInstance3D" parent="Visual"]
-transform = Transform3D(0.809, 0, -0.588, 0, 0, -1, 0.588, 0, 0.809, 0, 0, 0)
-mesh = SubResource("mesh_core")
+[node name="Model" parent="Visual" instance=ExtResource("2_model")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0, -0.45, 0)

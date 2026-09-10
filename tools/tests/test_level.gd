@@ -101,7 +101,7 @@ func _test_checkpoint() -> void:
 	_player.motor.reset()
 	await _steps(5)
 	_check(checkpoint.is_active, "touching the checkpoint activates it")
-	_check(checkpoint.flag.color == checkpoint.active_color, "flag turns green")
+	_check(checkpoint.ring_color == checkpoint.active_color, "checkpoint ring turns green")
 	_check(_player.spawn_transform.origin.distance_to(checkpoint.respawn_point.global_position) < 0.5,
 		"respawn point moved to the checkpoint")
 	_check(_player.spawn_transform.origin.distance_to(before) > 5.0, "respawn point actually changed")

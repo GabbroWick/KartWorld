@@ -16,7 +16,7 @@ process. `ARCHITECTURE.md` explains the code; `README.md` is for humans.
 | 5 — first level | done | objectives, stars, checkpoint, game HUD, 35 checks |
 | 6 — combat | done | melee, slime enemy, contact damage, i-frames, death, defeat objective, 33 checks |
 | 7 — progression | done | ProgressionManager autoload, reward abilities, triple jump unlock, JSON save, 29 checks |
-| 8 — polish | in progress | done: procedural animation, swipe arc, kart slopes+tilt, controls hint, health refill, NPC wander/talk, hub stars, gated Cliff Steps level. next: real models, VFX, audio |
+| 8 — polish | in progress | done: procedural animation, swipe arc, kart slopes+tilt, controls hint, health refill, NPC wander/talk, hub stars, gated Cliff Steps level, Web export, Kenney models (kart, trees, rocks, plants, star, flag). next: AI character models (Meshy), VFX, audio |
 
 Decided: **Compatibility renderer on all platforms** (Web needs it, cartoon
 style does not need Forward+). **Character scale locked** after playtesting
@@ -66,7 +66,12 @@ suites exit non-zero on failure.
 ## Conventions
 
 * Scenes in `scenes/`, scripts mirror them in `scripts/`, data in `resources/`,
-  dev/test helpers in `tools/`. Placeholder art is primitives only.
+  dev/test helpers in `tools/`. Real models live in `assets/models/kenney/`
+  (CC0, curated .glb subsets; raw zips in untracked `art/`). Characters,
+  enemies, house and portal are still primitives.
+* Props from models: instance `scenes/world/props/kenney_{tree,rock,plant}.tscn`
+  and set `model`; never hand-place raw .glb scenes (no collision, no palette).
+  Scatter variety = `PropScatter.models`.
 * Gameplay reads actions from `InputActions`, never keys. Bindings come from
   `tools/setup_input_map.gd`.
 * A character = `scenes/characters/character.tscn` + a `CharacterDefinition`
@@ -94,6 +99,12 @@ suites exit non-zero on failure.
   (hitboxes) under a Node3D and reach them by NodePath.
 * Children `_ready` before parents: a component that touches the character's
   `@onready` fields must defer its setup one frame.
+* Kenney kits: units ~1/3 of ours; Car/Platformer/Mini Forest/Buildings .glb
+  reference an external `Textures/colormap.png` (keep the folder next to the
+  models); the Nature Kit is untextured and teal — `KenneyPalette` recolours
+  it by material name. Kenney cars face +Z (`KenneyVehicleVisual` flips).
+* `PropScatter` picks model variants from a second RNG: consuming the layout
+  RNG for anything else silently moves every prop and breaks the island suite.
 * Lighting recipe (palette renders as authored on every renderer, shadows on):
   `tonemap_mode = 0`, `ambient_light_source = 1` (Disabled),
   `reflected_light_source = 1`, one sun `light_energy = 1.25`,
@@ -151,14 +162,18 @@ suites exit non-zero on failure.
   Player mask = world|vehicle (17); vehicle mask = world (1); portal area on
   layer 4 with mask player|vehicle (18).
 
-## Next step (Phase 8 — polish)
+## Next step (Phase 8 — polish, continued)
 
-The vertical slice is functionally complete (design doc §25 / master prompt
-§4). Polish is where the human and the 8-year-old designer should steer:
-which feels bad, what looks confusing. Candidates, cheapest first: squash &
-stretch on jump/land, attack swipe arc, hit flash on enemies, star pickup
-burst + sound, level-complete fanfare, kart engine hum and turbo whoosh,
-footstep/skid particles, a "level complete" card with stars, an ability-gated
-second portal (`required_abilities = ["enhanced_jump"]`) to prove the gate,
-touch controls for Android/iOS, a pause menu. Keep every effect a component
-or a scene, never a special case in a controller.
+Decided with the human (2026-09-10): real models from **Kenney** (done for
+props/kart/pickups) and **Meshy** for characters (leopard, fox, panda, slime)
+— rigged GLB with animations; the placeholder's `animate(delta, speed_ratio,
+grounded)` contract is what a rigged model must implement (drive an
+AnimationTree). Audio: ElevenLabs SFX / Suno music, synthetic placeholders
+acceptable meanwhile. Web export works and is verified headless.
+
+Candidates next, cheapest first: hit flash on enemies, star pickup burst +
+sound, level-complete card with stars, kart engine hum and turbo whoosh,
+footstep/skid particles, a pause menu, touch controls, Cliff Steps rebuilt
+with Platformer Kit `block-grass-*` pieces, the house from Modular Buildings
+(needs a door and the pad test kept). Keep every effect a component or a
+scene, never a special case in a controller.

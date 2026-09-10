@@ -1,10 +1,25 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/checkpoint.gd" id="1_checkpoint"]
-[ext_resource type="PackedScene" path="res://scenes/world/props/placeholder_block.tscn" id="2_block"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney/platformer-kit/flag.glb" id="2_flag"]
 
 [sub_resource type="BoxShape3D" id="shape_zone"]
 size = Vector3(5, 3, 5)
+
+[sub_resource type="StandardMaterial3D" id="mat_ring"]
+albedo_color = Color(0.9, 0.3, 0.3, 1)
+emission_enabled = true
+emission = Color(0.9, 0.3, 0.3, 1)
+emission_energy_multiplier = 0.8
+metallic_specular = 0.0
+roughness = 1.0
+
+[sub_resource type="TorusMesh" id="mesh_ring"]
+material = SubResource("mat_ring")
+inner_radius = 1.5
+outer_radius = 1.75
+rings = 24
+ring_segments = 8
 
 [node name="Checkpoint" type="Area3D" groups=["checkpoint"]]
 collision_layer = 8
@@ -18,12 +33,9 @@ shape = SubResource("shape_zone")
 [node name="RespawnPoint" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
 
-[node name="Pole" parent="." instance=ExtResource("2_block")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 1.5, 0)
-size = Vector3(0.18, 3, 0.18)
-color = Color(0.85, 0.85, 0.9, 1)
+[node name="Flag" parent="." instance=ExtResource("2_flag")]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -1.8, 0, 0)
 
-[node name="Flag" parent="Pole" instance=ExtResource("2_block")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 1.1, 0)
-size = Vector3(0.9, 0.6, 0.06)
-color = Color(0.9, 0.3, 0.3, 1)
+[node name="Ring" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.12, 0)
+mesh = SubResource("mesh_ring")
