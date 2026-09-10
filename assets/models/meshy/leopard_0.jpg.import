@@ -2,17 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c3kyt1aqdafnr"
-path.s3tc="res://.godot/imported/colormap.png-910d0bd4d21aa6121f1dc5742926fc61.s3tc.ctex"
+uid="uid://cgov3botuumri"
+path.s3tc="res://.godot/imported/leopard_0.jpg-18be49b1537b9e60895e5e067716078c.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
+generator_parameters={
+"md5": "20ede5f7b2f7af85d973766e2dc869c3"
+}
 
 [deps]
 
-source_file="res://assets/models/kenney/car-kit/Textures/colormap.png"
-dest_files=["res://.godot/imported/colormap.png-910d0bd4d21aa6121f1dc5742926fc61.s3tc.ctex"]
+source_file="res://assets/models/meshy/leopard_0.jpg"
+dest_files=["res://.godot/imported/leopard_0.jpg-18be49b1537b9e60895e5e067716078c.s3tc.ctex"]
 
 [params]
 

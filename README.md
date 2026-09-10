@@ -33,8 +33,8 @@ Windows, Web, Android and iOS with one look.
 3D props (trees, rocks, flowers, the kart, stars, flags) are CC0 models by
 [Kenney](https://www.kenney.nl) — Nature Kit, Car Kit, Platformer Kit, Mini
 Forest, Modular Buildings — under `assets/models/kenney/` (see its README and
-LICENSE.txt). Characters, enemies and buildings are still primitives, waiting
-for AI-generated models.
+LICENSE.txt). The leopard is an AI-generated model (Meshy) under
+`assets/models/meshy/`; NPCs, enemies and buildings are still primitives.
 
 ## Running the game
 

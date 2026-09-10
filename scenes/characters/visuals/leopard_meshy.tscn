@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/characters/meshy_character_visual.gd" id="1_visual"]
+[ext_resource type="PackedScene" path="res://assets/models/meshy/leopard.glb" id="2_model"]
+
+[node name="LeopardMeshy" type="Node3D"]
+script = ExtResource("1_visual")
+model = ExtResource("2_model")
+flip_forward = true
+flatten_materials = true
+motion = 1.0

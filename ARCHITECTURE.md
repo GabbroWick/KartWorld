@@ -105,6 +105,13 @@ bobs, wags the tail and tucks up in the air. A real rigged model replaces this
 by implementing the same `animate()` (driving an AnimationTree instead), so
 the controller never changes.
 
+The leopard now uses that contract with a real model: `MeshyCharacterVisual`
+wraps `assets/models/meshy/leopard.glb` (an unrigged Meshy export), grounds
+and flips it, flattens its PBR material to match the flat props, and gives
+the whole body a walk bob, a forward lean with speed, a stretch in the air and
+a squash on landing. Limbs stay in the A-pose until the mesh is rigged. Fox,
+panda and the slime still use the primitive placeholder.
+
 ### NPCs and interaction
 
 `NpcBehaviour` is a child node of an NPC `character.tscn` instance: wander

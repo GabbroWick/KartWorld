@@ -2,17 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c3kyt1aqdafnr"
-path.s3tc="res://.godot/imported/colormap.png-910d0bd4d21aa6121f1dc5742926fc61.s3tc.ctex"
+uid="uid://cpvokwgi0edsm"
+path.s3tc="res://.godot/imported/leopard_2.jpg-2685c3c1e31da95695bc26566e0b0e88.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
+generator_parameters={
+"md5": "62f3f117788c9a8009dc91ec3c56ce8f"
+}
 
 [deps]
 
-source_file="res://assets/models/kenney/car-kit/Textures/colormap.png"
-dest_files=["res://.godot/imported/colormap.png-910d0bd4d21aa6121f1dc5742926fc61.s3tc.ctex"]
+source_file="res://assets/models/meshy/leopard_2.jpg"
+dest_files=["res://.godot/imported/leopard_2.jpg-2685c3c1e31da95695bc26566e0b0e88.s3tc.ctex"]
 
 [params]
 
@@ -22,12 +25,12 @@ compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1
-roughness/mode=0
-roughness/src_normal=""
+roughness/mode=1
+roughness/src_normal="res://assets/models/meshy/leopard_2.jpg"
 process/channel_remap/red=0
 process/channel_remap/green=1
 process/channel_remap/blue=2

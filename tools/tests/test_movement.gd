@@ -47,8 +47,8 @@ func _run() -> void:
 	_check(_player.definition.display_name == "Leopard", "loaded character is the Leopard")
 	_check(_player.abilities.has(&"double_jump"), "leopard starts with double_jump")
 	_check(_player.health.current_health == _player.definition.max_health, "health initialised")
-	_check(_player.visual_root.get_children().any(func(c: Node) -> bool: return c is CreaturePlaceholder),
-		"placeholder visual instantiated")
+	_check(_player.visual_root.get_children().any(func(c: Node) -> bool: return c.has_method(&"animate")),
+		"character visual instantiated and animatable")
 
 	await _test_input_map()
 	await _test_grounding()

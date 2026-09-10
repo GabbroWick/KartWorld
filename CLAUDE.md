@@ -16,7 +16,7 @@ process. `ARCHITECTURE.md` explains the code; `README.md` is for humans.
 | 5 — first level | done | objectives, stars, checkpoint, game HUD, 35 checks |
 | 6 — combat | done | melee, slime enemy, contact damage, i-frames, death, defeat objective, 33 checks |
 | 7 — progression | done | ProgressionManager autoload, reward abilities, triple jump unlock, JSON save, 29 checks |
-| 8 — polish | in progress | done: procedural animation, swipe arc, kart slopes+tilt, controls hint, health refill, NPC wander/talk, hub stars, gated Cliff Steps level, Web export, Kenney models (kart, trees, rocks, plants, star, flag). next: AI character models (Meshy), VFX, audio |
+| 8 — polish | in progress | done: procedural animation, swipe arc, kart slopes+tilt, controls hint, health refill, NPC wander/talk, hub stars, gated Cliff Steps level, Web export, Kenney models (kart, trees, rocks, plants, star, flag), Meshy leopard (static mesh). next: rigged leopard via Mixamo, fox/panda/slime models, VFX, audio |
 
 Decided: **Compatibility renderer on all platforms** (Web needs it, cartoon
 style does not need Forward+). **Character scale locked** after playtesting
@@ -72,6 +72,13 @@ suites exit non-zero on failure.
 * Props from models: instance `scenes/world/props/kenney_{tree,rock,plant}.tscn`
   and set `model`; never hand-place raw .glb scenes (no collision, no palette).
   Scatter variety = `PropScatter.models`.
+* Character models: `assets/models/meshy/<name>.glb` wrapped by
+  `scripts/characters/meshy_character_visual.gd` (feet on ground, flip to -Z,
+  flattened PBR, whole-body procedural `animate()`); the definition's
+  `visual_scene` points at `scenes/characters/visuals/<name>_meshy.tscn`.
+  Meshy exports: pivot at centre, faces +Z, metallic 1.0 — never use raw.
+  A rigged model (Mixamo FBX) should subclass MeshyCharacterVisual and drive
+  an AnimationTree from the same `animate()` call.
 * Gameplay reads actions from `InputActions`, never keys. Bindings come from
   `tools/setup_input_map.gd`.
 * A character = `scenes/characters/character.tscn` + a `CharacterDefinition`
