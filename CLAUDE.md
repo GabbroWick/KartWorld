@@ -11,7 +11,7 @@ process. `ARCHITECTURE.md` explains the code; `README.md` is for humans.
 | 0 — project setup | done | Godot 4.7.2, git, input map, structure |
 | 1 — character | done | walk/run/jump/double jump, camera, 62 headless checks |
 | 2 — island hub | done | procedural island, forest, mountain, house, NPCs |
-| 3 — kart | done | separate entity, summon, enter/exit, drive, turbo, jump, 47 checks |
+| 3 — kart | done | separate entity, summon, enter/exit, drive, turbo, jump, camera auto-align at the wheel |
 | 4 — portal | **next** | portal on the PortalSite, level scene load, return to hub |
 | 5 — first level | todo | objective, star, checkpoint |
 | 6 — combat | todo | enemy, damage, death, respawn |

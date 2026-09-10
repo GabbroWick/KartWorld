@@ -184,8 +184,15 @@ Adding touch controls later means adding events to the Input Map (or feeding
 `ThirdPersonCamera` is a `Node3D` (yaw) → `PitchPivot` (pitch) → `SpringArm3D`
 (collision-aware distance) → `Camera3D`. It follows a target with a
 frame-rate-independent lerp and runs at a late physics priority so it moves
-after the character has moved. `set_target()` / `set_yaw()` exist so the kart
-and level transitions can re-point it.
+after the character has moved. `set_target()` / `set_yaw()` / `set_framing()`
+exist so the kart and level transitions can re-point it.
+
+**Auto align** (`auto_align`, on at the wheel, off on foot): after
+`auto_align_delay` seconds without look input the yaw eases toward the
+target's `get_heading_yaw()`, so the camera swings back behind the kart on its
+own while the player can still look around at any time. Any target that
+implements `get_heading_yaw()` gets the behaviour; the character does not, on
+purpose — free camera on foot is the platformer convention.
 
 The camera is the only place allowed to read a physical device directly (mouse
 motion), because that is its job. The character asks the camera rig for a basis;

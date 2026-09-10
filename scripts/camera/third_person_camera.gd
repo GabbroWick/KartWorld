@@ -22,6 +22,15 @@ extends Node3D
 @export var min_pitch_degrees := -65.0
 @export var max_pitch_degrees := 30.0
 
+@export_group("Auto align")
+## When on, the camera swings back behind the target's heading after the
+## player stops looking around. Used at the wheel, off on foot.
+@export var auto_align := false
+## Seconds without look input before auto align kicks in.
+@export_range(0.0, 5.0, 0.1) var auto_align_delay := 0.8
+## Higher = swings behind faster. Frame-rate independent.
+@export_range(0.5, 20.0, 0.5) var auto_align_speed := 3.0
+
 ## Seconds of mouse motion ignored after the cursor gets captured: the OS warp
 ## to the window centre arrives as one huge motion event and would yank the view.
 const CAPTURE_SETTLE_TIME := 0.15
@@ -36,6 +45,7 @@ var _yaw := 0.0
 var _pitch := deg_to_rad(-12.0)
 var _mouse_delta := Vector2.ZERO
 var _mouse_blocked_until := 0.0
+var _last_look_time := -1000.0
 
 
 func _ready() -> void:
@@ -80,9 +90,15 @@ func _update_rotation(delta: float) -> void:
 		InputActions.CAMERA_UP, InputActions.CAMERA_DOWN
 	) * stick_sensitivity * delta
 
+	if look.length_squared() > 0.0:
+		_last_look_time = _now()
 	_yaw -= look.x
 	_pitch -= look.y * (-1.0 if invert_y else 1.0)
 	_pitch = clampf(_pitch, deg_to_rad(min_pitch_degrees), deg_to_rad(max_pitch_degrees))
+
+	if auto_align and is_instance_valid(target) and target.has_method(&"get_heading_yaw") 			and _now() - _last_look_time >= auto_align_delay:
+		var heading: float = target.call(&"get_heading_yaw")
+		_yaw = lerp_angle(_yaw, heading, 1.0 - exp(-auto_align_speed * delta))
 
 	rotation.y = _yaw
 	pitch_pivot.rotation.x = _pitch
@@ -112,6 +128,7 @@ func get_yaw() -> float:
 
 func set_target(new_target: Node3D, snap: bool = true) -> void:
 	target = new_target
+	_last_look_time = _now()
 	if snap and is_instance_valid(target):
 		global_position = _desired_position()
 

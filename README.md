@@ -65,7 +65,7 @@ line per check and exits non-zero on failure.
 ```bash
 G="C:/Godot/Godot_v4.7.2/Godot_v4.7.2-stable_win64_console.exe"
 $G --headless --path . res://tools/tests/test_runner.tscn          # movement (70 checks)
-$G --headless --path . res://tools/tests/test_kart_runner.tscn     # kart (47 checks)
+$G --headless --path . res://tools/tests/test_kart_runner.tscn     # kart (52 checks)
 $G --headless --path . res://tools/tests/test_island_runner.tscn   # island hub (48 checks)
 $G --path . res://tools/tests/test_lighting_runner.tscn            # lighting (6 checks, needs a window)
 ```

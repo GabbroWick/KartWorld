@@ -101,6 +101,11 @@ func get_speed() -> float:
 	return motor.speed
 
 
+## Yaw the camera should sit behind. Reversing keeps the camera behind too.
+func get_heading_yaw() -> float:
+	return global_rotation.y
+
+
 func _apply_definition() -> void:
 	abilities.setup(definition.starting_abilities)
 	health.setup(definition.max_health)

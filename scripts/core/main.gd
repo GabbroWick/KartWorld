@@ -79,11 +79,13 @@ func _spawn_vehicle() -> void:
 func _on_entered_vehicle(driven: VehicleController) -> void:
 	camera_rig.set_framing(VEHICLE_FRAMING.x, VEHICLE_FRAMING.y)
 	camera_rig.set_target(driven, false)
+	camera_rig.auto_align = true
 
 
 func _on_exited_vehicle(_left: VehicleController) -> void:
 	camera_rig.set_framing(CHARACTER_FRAMING.x, CHARACTER_FRAMING.y)
 	camera_rig.set_target(player, false)
+	camera_rig.auto_align = false
 
 
 func _find_spawn_point() -> Node3D:

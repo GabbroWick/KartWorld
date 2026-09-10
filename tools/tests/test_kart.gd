@@ -41,6 +41,7 @@ func _run() -> void:
 	await _test_drive()
 	await _test_steer()
 	await _test_brake_and_reverse()
+	await _test_camera_align()
 	await _test_turbo()
 	await _test_jump()
 	await _test_wall()
@@ -112,6 +113,21 @@ func _test_steer() -> void:
 	await _steps(10)
 
 
+func _test_camera_align() -> void:
+	# Kart is stopped here. Knock the camera off the heading, give no look
+	# input: it must swing back behind the kart on its own.
+	_check(_camera_rig.auto_align, "auto align is on at the wheel")
+	var kart_yaw := _kart.global_rotation.y
+	_camera_rig.set_yaw(kart_yaw + 1.2)
+	await _steps(120)
+	var gap_after := absf(wrapf(_camera_rig.get_yaw() - kart_yaw, -PI, PI))
+	_check(gap_after < 0.15, "camera settles behind the kart (1.20 -> %.2f rad off heading)" % gap_after)
+	# Looking around overrides it while the stick is held.
+	await _hold(InputActions.CAMERA_RIGHT, 20)
+	var gap_look := absf(wrapf(_camera_rig.get_yaw() - kart_yaw, -PI, PI))
+	_check(gap_look > 0.4, "manual look still moves the camera off the heading (%.2f rad)" % gap_look)
+
+
 func _test_brake_and_reverse() -> void:
 	_check(_kart.get_speed() > 2.0, "kart is still rolling before braking (%.1f)" % _kart.get_speed())
 	await _hold(InputActions.BRAKE, 40)
@@ -180,6 +196,10 @@ func _test_exit() -> void:
 	_check(_kart.driver == null, "kart has no driver after exit")
 	_check(_player.visible, "character is visible again")
 	_check(_camera_rig.target == _player, "camera follows the character again")
+	_check(not _camera_rig.auto_align, "auto align is off on foot")
+	_camera_rig.set_yaw(1.0)
+	await _steps(90)
+	_check(absf(_camera_rig.get_yaw() - 1.0) < 0.01, "on foot the camera stays where the player put it")
 	var gap := _player.global_position.distance_to(_kart.global_position)
 	_check(gap > 1.0 and gap < 4.0, "character stands beside the kart (%.1fm)" % gap)
 	await _steps(30)
