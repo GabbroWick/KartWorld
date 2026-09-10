@@ -96,7 +96,8 @@ func _tilt_to_ground(delta: float) -> void:
 		var left := (heights[0] + heights[2]) * 0.5
 		var right := (heights[1] + heights[3]) * 0.5
 		var pitch := atan2(front - back, half_l * 2.0)
-		var roll := atan2(left - right, half_w * 2.0)
+		# +Z rotation lifts the right side, so a higher left means negative roll.
+		var roll := atan2(right - left, half_w * 2.0)
 		target_basis = Basis.from_euler(Vector3(pitch, 0.0, roll))
 		var mean := (heights[0] + heights[1] + heights[2] + heights[3]) * 0.25
 		target_y = clampf(mean, -0.6, 0.4)

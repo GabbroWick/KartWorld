@@ -86,6 +86,9 @@ func _test_kart_climbs_mountain() -> void:
 	_check(climbed > 5.0, "kart climbs the mountain (%.1f m up in 3 s, slope max %.0f deg)"
 		% [climbed, max_tilt])
 	_check(max_tilt > 12.0, "kart model leans with the slope (max %.0f deg)" % max_tilt)
+	# The lean must follow the ground, not mirror it (a sign bug once did).
+	var agreement := kart.visual_root.global_basis.y.dot(kart.get_floor_normal()) if kart.is_on_floor() else 1.0
+	_check(agreement > 0.97, "kart model's up matches the floor normal (dot %.3f)" % agreement)
 	_check(kart.is_on_floor(), "kart still on the ground on the hillside")
 	await _hold(InputActions.INTERACT, 3)
 	await _steps(20)
