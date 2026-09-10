@@ -42,10 +42,7 @@ func _apply() -> void:
 	trunk_mesh.bottom_radius = trunk_radius
 	trunk_mesh.height = trunk_height
 	trunk_mesh.radial_segments = 8
-	var trunk_material := StandardMaterial3D.new()
-	trunk_material.albedo_color = Color(0.42, 0.28, 0.17)
-	trunk_material.roughness = 1.0
-	trunk_mesh.material = trunk_material
+	trunk_mesh.material = FlatMaterial.flat(Color(0.42, 0.28, 0.17))
 	trunk.mesh = trunk_mesh
 	trunk.position.y = trunk_height * 0.5
 
@@ -54,10 +51,7 @@ func _apply() -> void:
 	canopy_mesh.bottom_radius = canopy_radius
 	canopy_mesh.height = canopy_height
 	canopy_mesh.radial_segments = 10
-	var canopy_material := StandardMaterial3D.new()
-	canopy_material.albedo_color = canopy_color
-	canopy_material.roughness = 0.95
-	canopy_mesh.material = canopy_material
+	canopy_mesh.material = FlatMaterial.flat(canopy_color)
 	canopy.mesh = canopy_mesh
 	canopy.position.y = trunk_height + canopy_height * 0.4
 

@@ -8,6 +8,7 @@ extends Node
 
 signal player_registered(player: Node)
 signal player_unregistered(player: Node)
+signal mouse_capture_changed(captured: bool)
 
 ## Active player characters, in join order. Index 0 is player one.
 var players: Array[Node] = []
@@ -33,6 +34,7 @@ func set_mouse_captured(captured: bool) -> void:
 		return
 	_mouse_captured = captured
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if captured else Input.MOUSE_MODE_VISIBLE
+	mouse_capture_changed.emit(captured)
 
 
 func is_mouse_captured() -> bool:

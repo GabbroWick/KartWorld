@@ -22,6 +22,12 @@ extends Node3D
 @export var min_pitch_degrees := -65.0
 @export var max_pitch_degrees := 30.0
 
+## Seconds of mouse motion ignored after the cursor gets captured: the OS warp
+## to the window centre arrives as one huge motion event and would yank the view.
+const CAPTURE_SETTLE_TIME := 0.15
+## Largest per-event mouse delta accepted, in pixels. Bigger = a warp, not a hand.
+const MAX_MOUSE_DELTA := 300.0
+
 @onready var pitch_pivot: Node3D = $PitchPivot
 @onready var spring_arm: SpringArm3D = $PitchPivot/SpringArm3D
 @onready var camera: Camera3D = $PitchPivot/SpringArm3D/Camera3D
@@ -29,6 +35,7 @@ extends Node3D
 var _yaw := 0.0
 var _pitch := deg_to_rad(-12.0)
 var _mouse_delta := Vector2.ZERO
+var _mouse_blocked_until := 0.0
 
 
 func _ready() -> void:
@@ -38,11 +45,25 @@ func _ready() -> void:
 	_yaw = rotation.y
 	if is_instance_valid(target):
 		global_position = _desired_position()
+	GameManager.mouse_capture_changed.connect(_on_mouse_capture_changed)
+	_on_mouse_capture_changed(GameManager.is_mouse_captured())
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and GameManager.is_mouse_captured():
+		if _now() < _mouse_blocked_until or event.relative.length() > MAX_MOUSE_DELTA:
+			return
 		_mouse_delta += event.relative
+
+
+func _on_mouse_capture_changed(captured: bool) -> void:
+	_mouse_delta = Vector2.ZERO
+	if captured:
+		_mouse_blocked_until = _now() + CAPTURE_SETTLE_TIME
+
+
+func _now() -> float:
+	return Time.get_ticks_msec() / 1000.0
 
 
 func _physics_process(delta: float) -> void:

@@ -29,10 +29,7 @@ func _apply() -> void:
 		return
 	var box_mesh := BoxMesh.new()
 	box_mesh.size = size
-	var material := StandardMaterial3D.new()
-	material.albedo_color = color
-	material.roughness = 0.9
-	box_mesh.material = material
+	box_mesh.material = FlatMaterial.flat(color)
 	mesh_instance.mesh = box_mesh
 
 	var shape := BoxShape3D.new()

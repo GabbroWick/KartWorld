@@ -156,9 +156,38 @@ core is stable.
 
 ## Rendering
 
-Forward+ on desktop; Godot's per-platform overrides will select the mobile and
-compatibility renderers for Android/iOS and Web. No shaders or post-processing
-yet, so this choice is still cheap to revisit — see "Open questions".
+**Compatibility (OpenGL 3 / WebGL 2) on every platform** — decided in
+Phase 2. It is the only renderer that runs on Web, which the design targets,
+and the cartoon style needs none of the Forward+-only effects. One renderer
+means one look and one thing to test; moving up to Forward+ later would be
+painless (superset), the reverse would not.
+
+### Lighting recipe
+
+Lighting is authored so the palette renders exactly as written in the scene
+files, on any renderer, with shadows on:
+
+* `Environment`: `tonemap_mode = Linear`, `ambient_light_source = Disabled`,
+  `reflected_light_source = Disabled`, sky used only as background.
+* One `DirectionalLight3D` at the origin: `light_energy = 1.25` (so a flat
+  face under the 52° sun gets 1.25 × 0.79 ≈ 1.0 × albedo), `shadow_enabled`,
+  **`shadow_opacity = 0.7`** — the semi-transparent shadow *is* the fill
+  light; there is no ambient term at all.
+* Placeholder materials come from `FlatMaterial` (`metallic_specular = 0`,
+  roughness 1), so no highlights add on top.
+
+Why no ambient: Godot's Compatibility renderer re-adds the whole base pass
+(ambient and sun) once more whenever a shadowed light is present
+([godotengine/godot#90259](https://github.com/godotengine/godot/issues/90259)),
+which made the island ~1.3× brighter in sRGB and clipped the greens. Only
+"one shadowed sun, zero ambient" renders correctly, and that configuration is
+pixel-identical between Compatibility and Forward+ (measured: grass authored
+0.42/0.68/0.32 → rendered 0.43/0.69/0.33 on both).
+
+`tools/tests/test_lighting_runner.tscn` measures a sunlit grass patch and a
+50 % grey reference quad every run and fails if either drifts from its
+authored colour, so an engine upgrade that fixes (or changes) the bug is
+caught immediately.
 
 ## Engine gotchas found so far
 
@@ -179,13 +208,21 @@ yet, so this choice is still cheap to revisit — see "Open questions".
   run as *scenes* (`tools/tests/*_runner.tscn`) instead.
 * **Simulated input needs one physics tick** to reach a character that polls
   `Input`, which the tests account for.
+* **Compatibility + shadows + ambient = overexposure.** See the lighting
+  recipe above; keep ambient disabled and use `shadow_opacity` for fill.
+* **`StandardMaterial3D` has no `specular` property in Godot 4** — it is
+  `metallic_specular`. Setting `specular` only logs a "SpatialMaterial
+  remapped parameter" warning and does nothing.
+* **`PlaceholderMaterial` is a built-in Godot class** (placeholder for missing
+  resources). A `class_name` clashing with it fails with "Static function not
+  found in base GDScriptNativeClass". Ours is `FlatMaterial`.
+* **Capturing the mouse warps it.** The first `InputEventMouseMotion` after
+  `MOUSE_MODE_CAPTURED` carries the jump to the window centre. The camera
+  ignores motion for 0.15 s after capture and drops any single delta over
+  300 px, otherwise the view starts in a random direction on every launch.
 
 ## Open questions (for the human developer)
 
-* **Renderer.** Forward+ looks best on Windows but Web export needs the
-  compatibility renderer and mobile prefers the mobile one. Right now nothing
-  depends on Forward+ features, so switching is a one-line change. Worth
-  deciding before writing shaders or lighting-heavy art.
 * **Character scale.** The leopard is 1.6 m of collision capsule with a ~1.9 m
   visual. The island was laid out against the measured movement, so changing
   the scale later means re-tuning `leopard.tres` and re-running both suites,

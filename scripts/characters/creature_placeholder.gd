@@ -67,8 +67,5 @@ func _paint(node: Node, materials: Dictionary) -> void:
 		_paint(child, materials)
 
 
-func _material(color: Color, roughness: float = 0.9) -> StandardMaterial3D:
-	var material := StandardMaterial3D.new()
-	material.albedo_color = color
-	material.roughness = roughness
-	return material
+func _material(color: Color, roughness: float = 1.0) -> StandardMaterial3D:
+	return FlatMaterial.flat(color, roughness)

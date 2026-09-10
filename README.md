@@ -18,7 +18,9 @@ roadmap below. Everything is placeholder art on purpose.
   On this machine: `C:\Godot\Godot_v4.7.2\Godot_v4.7.2-stable_win64.exe`
 * Git
 
-No third-party addons or plugins.
+No third-party addons or plugins. The project uses the **Compatibility**
+renderer (OpenGL 3 / WebGL 2) on every platform so the same build can target
+Windows, Web, Android and iOS with one look.
 
 ## Running the game
 

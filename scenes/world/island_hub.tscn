@@ -22,9 +22,9 @@ sky_material = SubResource("sky_material")
 [sub_resource type="Environment" id="environment"]
 background_mode = 2
 sky = SubResource("sky")
-ambient_light_source = 3
-ambient_light_energy = 0.6
-tonemap_mode = 2
+ambient_light_source = 1
+reflected_light_source = 1
+tonemap_mode = 0
 
 [sub_resource type="StandardMaterial3D" id="water_material"]
 transparency = 1
@@ -43,8 +43,9 @@ environment = SubResource("environment")
 [node name="SunLight" type="DirectionalLight3D" parent="."]
 ; Keep at the origin: a positioned DirectionalLight3D breaks its shadow frustum (see ARCHITECTURE.md).
 rotation_degrees = Vector3(-52, -38, 0)
-light_energy = 1.1
+light_energy = 1.25
 shadow_enabled = true
+shadow_opacity = 0.7
 directional_shadow_max_distance = 110.0
 
 [node name="IslandTerrain" parent="." instance=ExtResource("1_terrain")]

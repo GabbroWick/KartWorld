@@ -15,9 +15,9 @@ sky_material = SubResource("sky_material")
 [sub_resource type="Environment" id="environment"]
 background_mode = 2
 sky = SubResource("sky")
-ambient_light_source = 3
-ambient_light_energy = 0.6
-tonemap_mode = 2
+ambient_light_source = 1
+reflected_light_source = 1
+tonemap_mode = 0
 
 [node name="TestArena" type="Node3D"]
 
@@ -28,8 +28,9 @@ environment = SubResource("environment")
 ; NOTE: keep a DirectionalLight3D at the origin. A non-zero position breaks the
 ; directional shadow frustum in Godot 4.7 and drops the whole scene into shadow.
 rotation_degrees = Vector3(-50, -35, 0)
-light_energy = 1.1
+light_energy = 1.25
 shadow_enabled = true
+shadow_opacity = 0.7
 directional_shadow_max_distance = 70.0
 
 [node name="PlayerSpawn" type="Marker3D" parent="." groups=["player_spawn"]]

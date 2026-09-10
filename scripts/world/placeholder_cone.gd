@@ -37,10 +37,7 @@ func _apply() -> void:
 	cone.height = height
 	cone.radial_segments = sides
 	cone.rings = 1
-	var material := StandardMaterial3D.new()
-	material.albedo_color = color
-	material.roughness = 0.95
-	cone.material = material
+	cone.material = FlatMaterial.flat(color)
 	mesh_instance.mesh = cone
 	mesh_instance.position.y = height * 0.5
 	collision.shape = cone.create_convex_shape()

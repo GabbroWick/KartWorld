@@ -179,12 +179,7 @@ func rebuild() -> void:
 				_add_triangle(surface, b, c, d)
 
 	var array_mesh := surface.commit()
-	var material := StandardMaterial3D.new()
-	material.vertex_color_use_as_albedo = true
-	# Palette colours are authored in sRGB; without this they render washed out.
-	material.vertex_color_is_srgb = true
-	material.roughness = 1.0
-	array_mesh.surface_set_material(0, material)
+	array_mesh.surface_set_material(0, FlatMaterial.flat_vertex_colored())
 	mesh_instance.mesh = array_mesh
 	collision.shape = array_mesh.create_trimesh_shape()
 

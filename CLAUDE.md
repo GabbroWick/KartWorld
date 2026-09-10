@@ -18,8 +18,9 @@ process. `ARCHITECTURE.md` explains the code; `README.md` is for humans.
 | 7 — progression | todo | |
 | 8 — polish | todo | |
 
-Open decisions for the human: renderer (Forward+ vs compatibility for Web),
-final character scale. Both cheap to change today, documented in ARCHITECTURE.md.
+Decided: **Compatibility renderer on all platforms** (Web needs it, cartoon
+style does not need Forward+). Still open for the human: final character scale
+(cheap to change; see ARCHITECTURE.md).
 
 ## Loop
 
@@ -35,6 +36,7 @@ Godot binary (this machine): `C:\Godot\Godot_v4.7.2\Godot_v4.7.2-stable_win64_co
 G="/c/Godot/Godot_v4.7.2/Godot_v4.7.2-stable_win64_console.exe"
 $G --headless --path . res://tools/tests/test_runner.tscn          # movement suite
 $G --headless --path . res://tools/tests/test_island_runner.tscn   # island suite
+$G --path . res://tools/tests/test_lighting_runner.tscn            # lighting suite (needs a window)
 $G --path . res://tools/capture_screenshot.tscn -- out.png 120     # render a frame to PNG
 $G --path . --quit-after 400                                       # run the game 400 frames
 $G --headless --path . --editor --quit                             # reimport / refresh class cache
@@ -71,6 +73,21 @@ suites exit non-zero on failure.
 * `Input.action_press()` reaches a polling character one physics tick later.
 * Hand-written `Transform3D(...)` in `.tscn` lists basis columns X, Y, Z then
   origin; prefer `rotation_degrees` for readability.
+* Lighting recipe (palette renders as authored on every renderer, shadows on):
+  `tonemap_mode = 0`, `ambient_light_source = 1` (Disabled),
+  `reflected_light_source = 1`, one sun `light_energy = 1.25`,
+  `shadow_enabled = true`, `shadow_opacity = 0.7` (= the fill light).
+  Reason: Compatibility re-adds the base pass when a shadowed light and any
+  ambient coexist (godot#90259). Any ambient or second light → ~1.3× brighter.
+  `test_lighting_runner.tscn` (windowed) guards this.
+* Materials: use `FlatMaterial.flat(color)`; `StandardMaterial3D.specular`
+  does not exist (`metallic_specular`). `PlaceholderMaterial` is a Godot
+  built-in name — do not reuse it.
+* First mouse-motion event after capturing the cursor is the OS warp to the
+  window centre; the camera ignores it (`CAPTURE_SETTLE_TIME`). Symptom was a
+  random camera heading on every launch and in screenshots.
+* The screenshot tool runs windowed, so it *does* capture the mouse; keep the
+  physical cursor still or rely on the settle window.
 
 ## Where things are
 
