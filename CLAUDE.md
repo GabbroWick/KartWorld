@@ -121,12 +121,12 @@ suites exit non-zero on failure.
   it by material name. Kenney cars face +Z (`KenneyVehicleVisual` flips).
 * `PropScatter` picks model variants from a second RNG: consuming the layout
   RNG for anything else silently moves every prop and breaks the island suite.
-* Kart physics: the CharacterBody3D box is aligned to the smoothed floor
-  normal (`VehicleMotor.ground_up`, `up_direction`) and driven along the
-  slope plane with a -2 m/s press along the normal; yaw is an explicit
-  `motor.heading` (rebuilding yaw from a tilted basis drifts). An upright box
-  on a 50° slope rests on its edge 1.7 m above ground and stalls — do not go
-  back to that. Speed after `move_and_slide` = `velocity.dot(forward)` (3D).
+* Kart physics: the body is an upright CharacterBody3D with a **sphere**
+  collider (r = 0.6) and the model is a 4-ray visual suspension. A box
+  collider rested on its front edge 1.7 m above a 50° slope and stalled; a
+  slope-aligned box (tried, reverted) drifted while parked, stuttered and
+  broke steering. Do not re-project speed from the velocity every tick
+  either — the motor owns `speed`, walls take it away.
 * `StepUp.try_step` moves the body up AND forward onto the ledge; lifting
   only lets floor snapping pull a long body back off the lip (kart vs the
   portal plinth).

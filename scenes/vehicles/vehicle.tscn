@@ -7,8 +7,8 @@
 [ext_resource type="Script" path="res://scripts/characters/components/ability_component.gd" id="5_abilities"]
 [ext_resource type="Script" path="res://scripts/vehicles/components/turbo_ability.gd" id="6_turbo"]
 
-[sub_resource type="BoxShape3D" id="shape_body"]
-size = Vector3(1.6, 0.8, 2.6)
+[sub_resource type="SphereShape3D" id="shape_body"]
+radius = 0.6
 
 [node name="Vehicle" type="CharacterBody3D"]
 collision_layer = 16
@@ -17,7 +17,7 @@ floor_snap_length = 0.6
 script = ExtResource("1_controller")
 
 [node name="Collision" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 shape = SubResource("shape_body")
 
 [node name="VisualRoot" type="Node3D" parent="."]

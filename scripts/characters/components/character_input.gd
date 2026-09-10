@@ -20,6 +20,7 @@ var jump_held := false
 var interact_pressed := false
 var summon_pressed := false
 var attack_pressed := false
+var emote_pressed := false
 
 ## AI/NPC drivers set a world-space direction instead of a stick axis.
 var uses_world_direction := false
@@ -47,6 +48,7 @@ func poll() -> void:
 	interact_pressed = Input.is_action_just_pressed(InputActions.INTERACT)
 	summon_pressed = Input.is_action_just_pressed(InputActions.SUMMON_KART)
 	attack_pressed = Input.is_action_just_pressed(InputActions.ATTACK)
+	emote_pressed = Input.is_action_just_pressed(InputActions.EMOTE)
 
 
 func clear() -> void:
@@ -58,3 +60,4 @@ func clear() -> void:
 	interact_pressed = false
 	summon_pressed = false
 	attack_pressed = false
+	emote_pressed = false

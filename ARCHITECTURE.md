@@ -133,7 +133,7 @@ not anyone is driving it; local co-op later means one vehicle per player.
 
 ```text
 Vehicle (vehicle.tscn, CharacterBody3D, layer 5 "vehicle")
-├── Collision          BoxShape3D sized from the definition
+├── Collision          SphereShape3D (r 0.6) — see "Collider = sphere"
 ├── VisualRoot         instantiated placeholder model
 ├── InputSource        VehicleInput: throttle / steer / turbo / jump / interact
 ├── Motor              VehicleMotor: arcade driving physics
@@ -151,15 +151,19 @@ Vehicle (vehicle.tscn, CharacterBody3D, layer 5 "vehicle")
   to tick, hands throttle/steer/jump to the motor, and exposes
   `mount()` / `dismount()` / `place()`.
 * **`VehicleMotor`** is deliberately not a wheel simulation: a signed forward
-  speed, an explicit `heading` yaw that steering changes, gravity and a jump.
-  The body itself is aligned to the smoothed floor normal every tick
-  (`ground_up`, also set as `up_direction`) and driven along the slope plane,
-  pressed onto it, so the collision box lies flat on hills instead of resting
-  on an edge; in the air it eases back upright. After `move_and_slide()` the
-  speed is re-projected on the 3D forward axis, so a wall simply kills the
-  speed it blocked. `floor_max_angle` comes from the definition
-  (`max_slope_degrees`, 60° for the kart) and `floor_constant_speed` keeps the
-  same pace up and down hills. The model needs no extra tilt.
+  speed, a yaw rate that grows with speed (and shrinks in the air), gravity and
+  a jump. After `move_and_slide()` the speed is re-projected on the forward
+  axis, so a wall simply kills the speed it blocked. `floor_max_angle` comes
+  from the definition (`max_slope_degrees`, 60° for the kart) and
+  `floor_constant_speed` keeps the same pace up and down hills.
+* **Collider = sphere** (radius 0.6, `VehicleController._apply_definition`).
+  A box rests on its front edge on steep slopes, metres above the ground, and
+  stalls; a sphere rolls up anything under `floor_max_angle` and stops
+  cleanly where it gets steeper. The body stays upright — the model does the
+  leaning: `_tilt_to_ground()` casts four rays at the wheel corners (starting
+  2.5 m up so steep climbs still hit), derives pitch and roll from the height
+  differences and lowers the model onto the mean contact height — a visual
+  suspension over a simple physics body.
 * **`VehicleAbility`** is the base for abilities that own behaviour. They are
   independent nodes under `AbilityNodes`; the controller only calls
   `try_activate()` and `tick()`. Whether an ability is *unlocked* stays in

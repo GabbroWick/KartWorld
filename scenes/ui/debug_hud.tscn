@@ -24,7 +24,7 @@ offset_bottom = -34.0
 grow_vertical = 0
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
 theme_override_constants/outline_size = 5
-text = "WASD move   Shift run   Space jump (x2)   Mouse look   Esc free cursor   F3 hide"
+text = "WASD move   Shift run   Space jump (x2)   Mouse look   H dance   Esc free cursor   F3 hide"
 
 [node name="State" type="Label" parent="Root"]
 anchor_top = 1.0

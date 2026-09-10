@@ -22,6 +22,7 @@ func _initialize() -> void:
 		"run": [_key(KEY_SHIFT), _button(JOY_BUTTON_B)],
 		"interact": [_key(KEY_E), _button(JOY_BUTTON_X)],
 		"attack": [_key(KEY_J), _mouse(MOUSE_BUTTON_LEFT), _button(JOY_BUTTON_RIGHT_SHOULDER)],
+		"emote": [_key(KEY_H), _mouse(MOUSE_BUTTON_RIGHT), _button(JOY_BUTTON_DPAD_UP)],
 
 		# Kart. Same physical keys as walking where the meaning matches
 		# (W = go, S = stop, Shift = faster); the vehicle reads its own actions.

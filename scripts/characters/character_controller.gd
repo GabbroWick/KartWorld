@@ -59,6 +59,8 @@ func _physics_process(delta: float) -> void:
 	motor.move(delta, wish_dir, input.run_held, input.jump_pressed, input.jump_released)
 	_face_direction(wish_dir, delta)
 	combat.tick(delta, input.attack_pressed)
+	if input.emote_pressed and is_on_floor() and not combat.is_attacking 			and _visual_instance and _visual_instance.has_method(&"play_action"):
+		_visual_instance.call(&"play_action", &"emote", 1.0)
 	_tick_invulnerability(delta)
 	_animate_visual(delta)
 

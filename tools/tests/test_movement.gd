@@ -58,6 +58,7 @@ func _run() -> void:
 	await _test_short_hop()
 	await _test_double_jump()
 	await _test_camera()
+	await _test_emote()
 	await _test_step_up()
 	await _test_collision()
 	await _test_fall_respawn()
@@ -194,6 +195,23 @@ func _test_camera() -> void:
 			"forward input follows the camera direction (dot %.2f)"
 			% moved.normalized().dot(camera_forward.normalized()))
 	await _steps(20)
+
+
+func _test_emote() -> void:
+	# Right click / H plays the dance clip once, then locomotion resumes.
+	var visual: Node = _player.visual_root.get_children().filter(func(c: Node) -> bool: return c.has_method(&"animate"))[0]
+	if not visual.has_method(&"play_action"):
+		return
+	await _steps(10)
+	await _press(InputActions.EMOTE)
+	await _steps(2)
+	var ap := visual.get("player") as AnimationPlayer
+	_check(ap != null and ap.current_animation == "emote", "emote action plays the dance clip (%s)" % (ap.current_animation if ap else "-"))
+	await _steps(30)
+	_check(ap.current_animation == "emote", "dance keeps playing while idle")
+	await _hold(&"move_forward", 90)
+	await _steps(5)
+	_check(ap.current_animation != "emote", "dance ends and locomotion resumes (%s)" % ap.current_animation)
 
 
 func _test_step_up() -> void:

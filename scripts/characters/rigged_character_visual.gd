@@ -18,6 +18,8 @@ const MIXAMO_CLIP := &"mixamo_com"
 @export var fall_clip: PackedScene
 @export var attack_clip: PackedScene
 @export var hurt_clip: PackedScene
+## Optional celebration / greeting, played on the emote action.
+@export var emote_clip: PackedScene
 ## The character's run speed (m/s) that `speed_ratio` = 1 stands for.
 @export_range(1.0, 30.0, 0.5) var reference_speed := 10.0
 ## Ground speed baked into the walk / run clips before root motion was
@@ -46,7 +48,7 @@ func _ready() -> void:
 	var library := player.get_animation_library(&"")
 	_register(library, &"idle", library.get_animation(MIXAMO_CLIP), true)
 	library.remove_animation(MIXAMO_CLIP)
-	for entry in [[&"walk", walk_clip, true], [&"run", run_clip, true], [&"jump", jump_clip, false], [&"fall", fall_clip, true], [&"attack", attack_clip, false], [&"hurt", hurt_clip, false]]:
+	for entry in [[&"walk", walk_clip, true], [&"run", run_clip, true], [&"jump", jump_clip, false], [&"fall", fall_clip, true], [&"attack", attack_clip, false], [&"hurt", hurt_clip, false], [&"emote", emote_clip, false]]:
 		var scene: PackedScene = entry[1]
 		if scene == null:
 			continue
@@ -77,7 +79,8 @@ func animate(delta: float, speed_ratio: float, grounded: bool) -> void:
 	if player == null:
 		return
 	if _action != &"":
-		if player.is_playing() and player.current_animation == _action:
+		var moving := speed_ratio > 0.1 or not grounded
+		if player.is_playing() and player.current_animation == _action and not (_action == &"emote" and moving):
 			return
 		_action = &""
 	var speed := speed_ratio * reference_speed

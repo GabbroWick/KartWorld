@@ -2,7 +2,7 @@ keys,en,it
 HUD_HUB_HINT,Explore the island. Find a portal!,Esplora l'isola. Trova un portale!
 HUD_LEVEL_COMPLETE,Level complete!,Livello completato!
 HUD_NEW_ABILITY,New ability: %s!,Nuova abilità: %s!
-HUD_CONTROLS_FOOT,WASD move · Shift run · Space jump · J attack · E use · K kart,WASD muovi · Shift corri · Spazio salta · J attacca · E usa · K kart
+HUD_CONTROLS_FOOT,WASD move · Shift run · Space jump · J attack · E use · K kart · right-click dance,WASD muovi · Shift corri · Spazio salta · J attacca · E usa · K kart · tasto dx balla
 HUD_CONTROLS_KART,W/S gas/brake · A/D steer · Shift turbo · Space jump · E leave,W/S gas/freno · A/D sterza · Shift turbo · Spazio salta · E scendi
 PROMPT_LEAVE_KART,E  leave kart,E  scendi dal kart
 PROMPT_ENTER_KART,E  enter kart,E  sali sul kart

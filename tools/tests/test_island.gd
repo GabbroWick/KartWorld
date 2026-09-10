@@ -52,6 +52,7 @@ func _run() -> void:
 	_test_scatter(world)
 	await _test_walk()
 	await _test_house()
+	await _test_kart_parked_still()
 	await _test_kart_on_terrain()
 	await _test_kart_climbs_mountain()
 	await _test_npcs_alive()
@@ -80,14 +81,14 @@ func _test_kart_climbs_mountain() -> void:
 	Input.action_press(InputActions.ACCELERATE)
 	for i in 180:
 		await _steps(1)
-		max_tilt = maxf(max_tilt, rad_to_deg(acos(clampf(kart.global_basis.y.dot(Vector3.UP), -1.0, 1.0))))
+		max_tilt = maxf(max_tilt, rad_to_deg(acos(clampf(kart.visual_root.global_basis.y.dot(Vector3.UP), -1.0, 1.0))))
 	Input.action_release(InputActions.ACCELERATE)
 	var climbed := kart.global_position.y - start_y
 	_check(climbed > 5.0, "kart climbs the mountain (%.1f m up in 3 s, slope max %.0f deg)"
 		% [climbed, max_tilt])
 	_check(max_tilt > 12.0, "kart model leans with the slope (max %.0f deg)" % max_tilt)
 	# The lean must follow the ground, not mirror it (a sign bug once did).
-	var agreement := kart.global_basis.y.dot(kart.get_floor_normal()) if kart.is_on_floor() else 1.0
+	var agreement := kart.visual_root.global_basis.y.dot(kart.get_floor_normal()) if kart.is_on_floor() else 1.0
 	_check(agreement > 0.97, "kart model's up matches the floor normal (dot %.3f)" % agreement)
 	_check(kart.is_on_floor(), "kart still on the ground on the hillside")
 	await _hold(InputActions.INTERACT, 3)
@@ -129,6 +130,15 @@ func _test_npcs_alive() -> void:
 	_check(said[0] != "", "pressing E makes the fox talk (%s)" % said[0])
 	_check(behaviour._bubble != null and behaviour._bubble.visible, "speech bubble is visible")
 	_check(not _player.driver.is_driving, "talking did not put the player in the kart")
+
+
+func _test_kart_parked_still() -> void:
+	# A parked kart on the (slightly sloped) pad must not creep on its own.
+	var kart := _player.driver.vehicle
+	var before := kart.global_position
+	await _steps(90)
+	_check(kart.global_position.distance_to(before) < 0.05,
+		"parked kart stays put (%.3f m in 1.5 s)" % kart.global_position.distance_to(before))
 
 
 func _test_kart_on_terrain() -> void:
