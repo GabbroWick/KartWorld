@@ -22,6 +22,7 @@ var vehicle: VehicleController
 
 @onready var camera_rig: ThirdPersonCamera = $CameraRig
 @onready var hud: CanvasLayer = $HUD
+@onready var game_hud: CanvasLayer = $GameHUD
 @onready var level_manager: LevelManager = $LevelManager
 
 
@@ -30,6 +31,9 @@ func _ready() -> void:
 	_spawn_player()
 	_spawn_vehicle()
 	level_manager.setup(self, world_scene, player, vehicle, camera_rig)
+	if game_hud:
+		game_hud.bind_player(player)
+		game_hud.bind_level_manager(level_manager)
 
 
 func _build_world() -> void:

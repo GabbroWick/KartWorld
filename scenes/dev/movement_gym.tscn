@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/core/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/world/test_arena.tscn" id="2_world"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://scenes/vehicles/vehicle.tscn" id="7_vehicle"]
 [ext_resource type="Resource" path="res://resources/vehicles/basic_kart.tres" id="8_kart"]
 [ext_resource type="Script" path="res://scripts/levels/level_manager.gd" id="9_levels"]
+[ext_resource type="PackedScene" path="res://scenes/ui/game_hud.tscn" id="10_game_hud"]
 
 [node name="MovementGym" type="Node3D"]
 script = ExtResource("1_main")
@@ -24,3 +25,6 @@ script = ExtResource("9_levels")
 [node name="CameraRig" parent="." instance=ExtResource("5_camera")]
 
 [node name="HUD" parent="." instance=ExtResource("6_hud")]
+visible = false
+
+[node name="GameHUD" parent="." instance=ExtResource("10_game_hud")]

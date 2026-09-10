@@ -11,6 +11,6 @@ world = &"forest"
 description = "Follow the trail through the woods to the far clearing."
 scene = ExtResource("2_scene")
 required_abilities = PackedStringArray()
-star_count = 1
+star_count = 2
 has_boss = false
 unlocked_by_default = true

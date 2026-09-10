@@ -13,8 +13,8 @@ process. `ARCHITECTURE.md` explains the code; `README.md` is for humans.
 | 2 — island hub | done | procedural island, forest, mountain, house, NPCs |
 | 3 — kart | done | separate entity, summon, enter/exit, drive, turbo, jump, camera auto-align at the wheel |
 | 4 — portal | done | LevelDefinition + LevelManager + Portal, first level scene, 33 checks |
-| 5 — first level | **next** | objective, star, checkpoint, basic HUD |
-| 6 — combat | todo | enemy, damage, death, respawn |
+| 5 — first level | done | objectives, stars, checkpoint, game HUD, 35 checks |
+| 6 — combat | **next** | enemy, melee attack, damage, death, respawn, defeat objective |
 | 7 — progression | todo | |
 | 8 — polish | todo | |
 
@@ -39,7 +39,8 @@ G="/c/Godot/Godot_v4.7.2/Godot_v4.7.2-stable_win64_console.exe"
 $G --headless --path . res://tools/tests/test_runner.tscn          # movement suite
 $G --headless --path . res://tools/tests/test_kart_runner.tscn     # kart suite
 $G --headless --path . res://tools/tests/test_island_runner.tscn   # island suite
-$G --headless --path . res://tools/tests/test_portal_runner.tscn   # portal / level suite
+$G --headless --path . res://tools/tests/test_portal_runner.tscn   # portal / level-swap suite
+$G --headless --path . res://tools/tests/test_level_runner.tscn    # objectives / stars / checkpoint / HUD suite
 $G --path . res://tools/tests/test_lighting_runner.tscn            # lighting suite (needs a window)
 $G --path . res://tools/capture_screenshot.tscn -- out.png 120     # render a frame to PNG
 $G --path . res://tools/capture_screenshot.tscn -- out.png 120 drive   # ...while driving the kart
@@ -110,17 +111,21 @@ suites exit non-zero on failure.
   `scenes/world/props/portal.tscn`. Every hostable scene has a `player_spawn`
   Marker3D. LevelManager is found via group `level_manager`.
 * Steps/kerbs: `scripts/core/step_up.gd`, called by both motors.
-* Groups: `terrain`, `player_spawn`, `portal_site`, `portal`, `level_manager`.
+* In-level gameplay: `scripts/levels/level_controller.gd` + `objective.gd`
+  subclasses (reach, collect); `scripts/gameplay/` collectible, star,
+  checkpoint; scenes in `scenes/gameplay/`. HUD: `scripts/ui/game_hud.gd`.
+* Groups: `terrain`, `player_spawn`, `portal_site`, `portal`, `level_manager`,
+  `level_controller`, `collectible`, `star`, `checkpoint`.
 * Physics layers: 1 world, 2 player, 3 enemy, 4 interactable, 5 vehicle.
   Player mask = world|vehicle (17); vehicle mask = world (1); portal area on
   layer 4 with mask player|vehicle (18).
 
-## Next step (Phase 5 — first level)
+## Next step (Phase 6 — combat)
 
-Fill `level_01_forest_trail.tscn`: a `LevelController` node in the level with
-`Objective` child nodes (reach destination, collect N), a `Star` collectible
-(Area3D + spinning placeholder), a `Checkpoint` (Area3D that calls
-`player.set_spawn_transform(..., false)`), completion → `LevelManager.
-complete_level(stars)` → hub. Real HUD (`scenes/ui/game_hud.tscn`): health,
-stars, objective text, interaction prompt; keep the F3 debug overlay. Add
-`tools/tests/test_level*` before calling it done.
+`CharacterCombat` component (attack action → short-lived hitbox Area3D in
+front, damage, cooldown), `attack` input action (J / mouse left / RB), a
+placeholder `Enemy` (CharacterBody3D on layer 3 with HealthComponent, simple
+patrol/chase, contact damage with knockback and invulnerability frames on the
+player), enemy death, player death via HealthComponent → respawn at the
+checkpoint + health restore, `DefeatEnemiesObjective`. Put one or two enemies
+on the Forest Trail. Add `tools/tests/test_combat*` before calling it done.

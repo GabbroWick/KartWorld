@@ -1,8 +1,13 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/props/placeholder_block.tscn" id="1_block"]
 [ext_resource type="PackedScene" path="res://scenes/world/props/placeholder_tree.tscn" id="2_tree"]
 [ext_resource type="PackedScene" path="res://scenes/world/props/portal.tscn" id="3_portal"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/star.tscn" id="4_star"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/checkpoint.tscn" id="5_checkpoint"]
+[ext_resource type="Script" path="res://scripts/levels/level_controller.gd" id="6_controller"]
+[ext_resource type="Script" path="res://scripts/levels/reach_destination_objective.gd" id="7_reach"]
+[ext_resource type="Script" path="res://scripts/levels/collect_objective.gd" id="8_collect"]
 
 [sub_resource type="ProceduralSkyMaterial" id="sky_material"]
 sky_top_color = Color(0.25, 0.45, 0.8, 1)
@@ -20,8 +25,8 @@ ambient_light_source = 1
 reflected_light_source = 1
 tonemap_mode = 0
 
-[sub_resource type="PlaneMesh" id="void_mesh"]
-size = Vector2(400, 400)
+[sub_resource type="BoxShape3D" id="shape_goal"]
+size = Vector3(8, 4, 8)
 
 [node name="ForestTrail" type="Node3D"]
 
@@ -38,6 +43,22 @@ directional_shadow_max_distance = 90.0
 [node name="PlayerSpawn" type="Marker3D" parent="." groups=["player_spawn"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 
+[node name="LevelController" type="Node" parent="." groups=["level_controller"]]
+script = ExtResource("6_controller")
+completion_delay = 1.5
+
+[node name="ReachClearing" type="Node" parent="LevelController"]
+script = ExtResource("7_reach")
+description = "Reach the far clearing"
+goal_zone = NodePath("../../GoalZone")
+
+[node name="CollectStars" type="Node" parent="LevelController"]
+script = ExtResource("8_collect")
+description = "Collect stars"
+optional = true
+kind = &"star"
+required = 0
+
 [node name="Start" parent="." instance=ExtResource("1_block")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 size = Vector3(16, 1, 16)
@@ -53,13 +74,45 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, -0.5, -28)
 size = Vector3(20, 1, 6)
 color = Color(0.62, 0.52, 0.36, 1)
 
+[node name="GapEdge" parent="." instance=ExtResource("1_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, -0.5, -32.5)
+size = Vector3(6, 1, 3)
+color = Color(0.62, 0.52, 0.36, 1)
+
 [node name="Clearing" parent="." instance=ExtResource("1_block")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, -0.5, -40)
-size = Vector3(16, 1, 18)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, -0.5, -44)
+size = Vector3(16, 1, 14)
 color = Color(0.4, 0.66, 0.34, 1)
 
+[node name="SecretLedge" parent="." instance=ExtResource("1_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27, 3.6, -44)
+size = Vector3(4, 0.4, 4)
+color = Color(0.55, 0.4, 0.8, 1)
+
+[node name="Checkpoint" parent="." instance=ExtResource("5_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -28)
+
+[node name="StarTrail" parent="." instance=ExtResource("4_star")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -18)
+
+[node name="StarSecret" parent="." instance=ExtResource("4_star")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27, 3.8, -44)
+
+[node name="GoalZone" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 2, -44)
+collision_layer = 8
+collision_mask = 18
+
+[node name="Shape" type="CollisionShape3D" parent="GoalZone"]
+shape = SubResource("shape_goal")
+
+[node name="GoalMarker" parent="." instance=ExtResource("1_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0.05, -44)
+size = Vector3(6, 0.1, 6)
+color = Color(1, 0.85, 0.3, 1)
+
 [node name="ReturnPortal" parent="." instance=ExtResource("3_portal")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, -46)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, -49)
 returns_to_hub = true
 
 [node name="TreeA" parent="." instance=ExtResource("2_tree")]
@@ -78,9 +131,9 @@ trunk_height = 1.8
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, -33)
 
 [node name="TreeE" parent="." instance=ExtResource("2_tree")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 0, -36)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 0, -38)
 trunk_height = 2.6
 canopy_radius = 1.8
 
 [node name="TreeF" parent="." instance=ExtResource("2_tree")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -46)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -48)

@@ -3,14 +3,16 @@
 3D cartoon adventure game (Godot 4 / GDScript).
 Design spec: [KARTWORLD_GAME_DESIGN.md](KARTWORLD_GAME_DESIGN.md) — development rules: [CLAUDE_CODE_MASTER_PROMPT.md](CLAUDE_CODE_MASTER_PROMPT.md).
 
-**Current state: Phase 4 — island hub, kart and the first portal.**
+**Current state: Phase 5 — hub, kart, portal and a first playable level.**
 A generic third-person character (configured as the leopard) walks, runs, jumps
 and double-jumps around a procedurally generated cartoon island: beach, forest,
 mountain, a house, two NPC placeholders (fox, panda). The player can summon a
 futuristic kart, get in, drive, turbo, jump and get out again, and walk (or
-drive) into a portal that loads the first level and come back through its
-return portal. No objectives, stars, combat or saving yet — that is deliberate,
-see the roadmap below. Everything is placeholder art on purpose.
+drive) into a portal that loads the first level: follow the trail, grab stars,
+touch a checkpoint, jump the gap, reach the clearing — the level completes and
+the party returns to the island. A HUD shows health, stars, the current
+objective and what the interact key does. No combat or saving yet — that is
+deliberate, see the roadmap below. Everything is placeholder art on purpose.
 
 ---
 
@@ -69,8 +71,14 @@ $G --headless --path . res://tools/tests/test_runner.tscn          # movement (7
 $G --headless --path . res://tools/tests/test_kart_runner.tscn     # kart (56 checks)
 $G --headless --path . res://tools/tests/test_island_runner.tscn   # island hub (48 checks)
 $G --headless --path . res://tools/tests/test_portal_runner.tscn   # portals and levels (33 checks)
+$G --headless --path . res://tools/tests/test_level_runner.tscn    # objectives, stars, checkpoint, HUD (35 checks)
 $G --path . res://tools/tests/test_lighting_runner.tscn            # lighting (6 checks, needs a window)
 ```
+
+* **Level**: LevelController and objectives, HUD texts in hub and level,
+  star pickup and counters, checkpoint moving the respawn point, dying and
+  respawning at the checkpoint, health on the HUD, reaching the goal
+  completing the level and the automatic return home with the result.
 
 * **Portals**: hub portal metadata, grace period after a load, walking and
   driving into a portal, level scene replacing the hub, player and kart at
@@ -105,14 +113,16 @@ scenes/          Godot scenes
   camera/            third-person camera rig
   vehicles/          generic vehicle scene + kart placeholder visual
   levels/            adventure level scenes (level_01_forest_trail.tscn)
+  gameplay/          star.tscn, checkpoint.tscn
   world/             island_hub.tscn, test_arena.tscn, props/ (terrain, house, portal, block, tree, cone, rock)
   dev/               movement_gym.tscn (arena + main wiring, used by tests)
-  ui/                debug overlay
+  ui/                game_hud.tscn (player HUD), debug_hud.tscn (F3 overlay)
 scripts/         GDScript, mirrors the scene layout
   core/              autoload, entry point, input action names
   characters/        controller, data definition, components (incl. driver), creature placeholder
   vehicles/          controller, data definition, components (input, motor, abilities)
-  levels/            level definition, level manager, portal
+  levels/            level definition, level manager, portal, level controller, objectives
+  gameplay/          collectible base, star, checkpoint
   camera/            third-person camera
   world/             island terrain, prop scatter, placeholder props, flat material
   ui/                debug overlay
@@ -134,7 +144,7 @@ time, each verified before the next starts.
 - [x] **Phase 2** — island hub: terrain, forest, mountain, house, NPC placeholders
 - [x] **Phase 3** — kart: summon, enter/exit, driving, turbo, jump
 - [x] **Phase 4** — portal and level transitions
-- [ ] **Phase 5** — first level: objective, star, checkpoint
+- [x] **Phase 5** — first level: objectives, stars, checkpoint, HUD
 - [ ] **Phase 6** — combat: enemy, damage, death, respawn
 - [ ] **Phase 7** — progression and basic save
 - [ ] **Phase 8** — polish: animation, models, effects, sound, UI

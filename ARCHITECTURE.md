@@ -1,6 +1,6 @@
 # KartWorld — Architecture
 
-Status: Phase 0–4. This document describes what exists today and the
+Status: Phase 0–5. This document describes what exists today and the
 extension points that were deliberately left open. It is updated when the
 architecture materially changes, not on every commit.
 
@@ -174,6 +174,48 @@ Main
   freed from inside a physics callback.
 * Every scene that can host the party — hub or level — needs a `Marker3D` in
   group `player_spawn`; that is the whole contract.
+
+### Inside a level
+
+```text
+<Level scene root>
+├── LevelController          objectives, star count, completion
+│   ├── ReachClearing        ReachDestinationObjective (goal_zone = ../../GoalZone)
+│   └── CollectStars         CollectObjective (optional)
+├── GoalZone                 Area3D
+├── Checkpoint, Star, Star   gameplay props
+└── geometry, portal, trees
+```
+
+* **`Objective`** (Node) is the base: `description`, `optional`,
+  `completed` / `progress_changed`, `get_status_text()`. Subclasses:
+  `ReachDestinationObjective` (an Area3D goal zone) and `CollectObjective`
+  (N collectibles of a kind, 0 = all present). Defeat-enemies comes with
+  combat. New objective types are new subclasses; levels pick and configure
+  them in the scene, never in code.
+* **`LevelController`** (group `level_controller`, a child of the level
+  root) collects its `Objective` children and the level's stars, exposes
+  `get_current_objective()` for the HUD, and when every non-optional
+  objective is complete emits `completed(stars)` and — after
+  `completion_delay` — calls `LevelManager.complete_level()`. Levels with a
+  goal portal instead set `auto_return = false`.
+* **`Collectible`** (Area3D base, group `collectible`): `kind`, `amount`,
+  `collected(item, by)`; touching it on foot or in the kart collects.
+  `Star` adds spin/bob and the `star` group. Coins, keys and power-ups are
+  subclasses or just different `kind` values.
+* **`Checkpoint`** (Area3D, group `checkpoint`): touching it calls
+  `player.set_spawn_transform(respawn_point, false)`; only one is active at
+  a time; the flag turns green. Respawn after a fall or death already uses
+  the spawn transform, so nothing else changes.
+
+### HUD
+
+`scenes/ui/game_hud.tscn` (`GameHUD`, CanvasLayer 2): hearts, star counter,
+current objective, interaction prompt. Anchored containers, no fixed pixel
+positions. It binds to the character's `HealthComponent` signals and to the
+`LevelManager`'s `level_loaded` / `hub_loaded`, then to the current
+`LevelController`. The F3 developer overlay (`debug_hud.tscn`) stays, hidden
+by default.
 
 ## World
 

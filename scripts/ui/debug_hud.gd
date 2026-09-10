@@ -1,7 +1,6 @@
 extends CanvasLayer
-## Minimal on-screen helper for the prototype: control list + live movement
-## state. Not the real game UI (health / stars / objectives come in a later
-## phase) — it exists so the prototype can be tested at a glance.
+## Developer overlay (F3): control list + live movement state. Hidden by
+## default; the player-facing HUD is scenes/ui/game_hud.tscn.
 
 const CONTROLS_FOOT := "WASD move   Shift run   Space jump (x2)   K summon kart   E enter kart   Mouse look   Esc cursor   F3 hide"
 const CONTROLS_KART := "W/S gas/brake   A/D steer   Shift turbo   Space jump   E leave kart   Mouse look   Esc cursor   F3 hide"
