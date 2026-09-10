@@ -60,7 +60,7 @@ func _test_load() -> void:
 	if _level == null:
 		_finish()
 		return
-	_check(_level.objectives.size() == 2, "two objectives configured (%d)" % _level.objectives.size())
+	_check(_level.objectives.size() == 3, "three objectives configured (%d)" % _level.objectives.size())
 	var current := _level.get_current_objective()
 	_check(current != null and current is ReachDestinationObjective,
 		"current objective is the required 'reach' one")

@@ -21,6 +21,7 @@ func _initialize() -> void:
 		"jump": [_key(KEY_SPACE), _button(JOY_BUTTON_A)],
 		"run": [_key(KEY_SHIFT), _button(JOY_BUTTON_B)],
 		"interact": [_key(KEY_E), _button(JOY_BUTTON_X)],
+		"attack": [_key(KEY_J), _mouse(MOUSE_BUTTON_LEFT), _button(JOY_BUTTON_RIGHT_SHOULDER)],
 
 		# Kart. Same physical keys as walking where the meaning matches
 		# (W = go, S = stop, Shift = faster); the vehicle reads its own actions.
@@ -57,6 +58,13 @@ func _key(keycode: Key) -> InputEventKey:
 	var event := InputEventKey.new()
 	# Physical so WASD stays in the same place on AZERTY/QWERTZ keyboards.
 	event.physical_keycode = keycode
+	event.device = -1
+	return event
+
+
+func _mouse(index: MouseButton) -> InputEventMouseButton:
+	var event := InputEventMouseButton.new()
+	event.button_index = index
 	event.device = -1
 	return event
 

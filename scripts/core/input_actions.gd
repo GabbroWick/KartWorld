@@ -14,6 +14,7 @@ const MOVE_RIGHT := &"move_right"
 const JUMP := &"jump"
 const RUN := &"run"
 const INTERACT := &"interact"
+const ATTACK := &"attack"
 
 const ACCELERATE := &"accelerate"
 const BRAKE := &"brake"
@@ -31,7 +32,7 @@ const DEBUG_TOGGLE_HUD := &"debug_toggle_hud"
 ## Every action this project expects to exist. Used by the setup/validation tools.
 const ALL: Array[StringName] = [
 	MOVE_FORWARD, MOVE_BACKWARD, MOVE_LEFT, MOVE_RIGHT,
-	JUMP, RUN, INTERACT,
+	JUMP, RUN, INTERACT, ATTACK,
 	ACCELERATE, BRAKE, TURBO, SUMMON_KART,
 	CAMERA_LEFT, CAMERA_RIGHT, CAMERA_UP, CAMERA_DOWN,
 	TOGGLE_MOUSE_CAPTURE, DEBUG_TOGGLE_HUD,

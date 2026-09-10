@@ -3,16 +3,18 @@
 3D cartoon adventure game (Godot 4 / GDScript).
 Design spec: [KARTWORLD_GAME_DESIGN.md](KARTWORLD_GAME_DESIGN.md) — development rules: [CLAUDE_CODE_MASTER_PROMPT.md](CLAUDE_CODE_MASTER_PROMPT.md).
 
-**Current state: Phase 5 — hub, kart, portal and a first playable level.**
+**Current state: Phase 6 — hub, kart, portal, a first level and combat.**
 A generic third-person character (configured as the leopard) walks, runs, jumps
 and double-jumps around a procedurally generated cartoon island: beach, forest,
 mountain, a house, two NPC placeholders (fox, panda). The player can summon a
 futuristic kart, get in, drive, turbo, jump and get out again, and walk (or
 drive) into a portal that loads the first level: follow the trail, grab stars,
-touch a checkpoint, jump the gap, reach the clearing — the level completes and
-the party returns to the island. A HUD shows health, stars, the current
-objective and what the interact key does. No combat or saving yet — that is
-deliberate, see the roadmap below. Everything is placeholder art on purpose.
+touch a checkpoint, swat the slimes, jump the gap, reach the clearing — the
+level completes and the party returns to the island. Enemies hurt on contact,
+hearts run out, the checkpoint brings you back. A HUD shows health, stars, the
+current objective and what the interact key does. No saving or progression yet
+— that is deliberate, see the roadmap below. Everything is placeholder art on
+purpose.
 
 ---
 
@@ -46,6 +48,7 @@ The main scene is `scenes/main.tscn`.
 | Move | `W` `A` `S` `D` | Left stick |
 | Run | `Shift` (hold) | `B` (hold) |
 | Jump / double jump | `Space` (tap = short hop) | `A` |
+| Attack | `J` or left mouse button | `RB` |
 | Look around | Mouse, or arrow keys | Right stick |
 | Summon the kart | `K` | `Y` |
 | Enter / leave the kart | `E` | `X` |
@@ -67,13 +70,19 @@ line per check and exits non-zero on failure.
 
 ```bash
 G="C:/Godot/Godot_v4.7.2/Godot_v4.7.2-stable_win64_console.exe"
-$G --headless --path . res://tools/tests/test_runner.tscn          # movement (71 checks)
+$G --headless --path . res://tools/tests/test_runner.tscn          # movement (73 checks)
 $G --headless --path . res://tools/tests/test_kart_runner.tscn     # kart (56 checks)
 $G --headless --path . res://tools/tests/test_island_runner.tscn   # island hub (48 checks)
 $G --headless --path . res://tools/tests/test_portal_runner.tscn   # portals and levels (33 checks)
 $G --headless --path . res://tools/tests/test_level_runner.tscn    # objectives, stars, checkpoint, HUD (35 checks)
+$G --headless --path . res://tools/tests/test_combat_runner.tscn   # melee, enemies, damage, death (33 checks)
 $G --path . res://tools/tests/test_lighting_runner.tscn            # lighting (6 checks, needs a window)
 ```
+
+* **Combat**: attack action and swing, hitbox damages and kills a slime,
+  cooldown, defeat objective counting, slime chasing the player, contact
+  damage with invulnerability frames and the HUD heart, death by damage
+  respawning with full health, no damage while driving.
 
 * **Level**: LevelController and objectives, HUD texts in hub and level,
   star pickup and counters, checkpoint moving the respawn point, dying and
@@ -114,6 +123,7 @@ scenes/          Godot scenes
   vehicles/          generic vehicle scene + kart placeholder visual
   levels/            adventure level scenes (level_01_forest_trail.tscn)
   gameplay/          star.tscn, checkpoint.tscn
+  enemies/           generic enemy scene + slime placeholder visual
   world/             island_hub.tscn, test_arena.tscn, props/ (terrain, house, portal, block, tree, cone, rock)
   dev/               movement_gym.tscn (arena + main wiring, used by tests)
   ui/                game_hud.tscn (player HUD), debug_hud.tscn (F3 overlay)
@@ -123,6 +133,7 @@ scripts/         GDScript, mirrors the scene layout
   vehicles/          controller, data definition, components (input, motor, abilities)
   levels/            level definition, level manager, portal, level controller, objectives
   gameplay/          collectible base, star, checkpoint
+  enemies/           enemy definition, generic enemy brain
   camera/            third-person camera
   world/             island terrain, prop scatter, placeholder props, flat material
   ui/                debug overlay
@@ -130,6 +141,7 @@ resources/       data-driven configuration
   characters/        leopard (player), fox and panda (NPCs)
   vehicles/          basic_kart
   levels/            level metadata (level_01_forest_trail.tres)
+  enemies/           slime
 tools/           editor/CI helpers (input map setup, screenshots, tests)
 assets/          art and audio (placeholders for now)
 ```
@@ -145,7 +157,7 @@ time, each verified before the next starts.
 - [x] **Phase 3** — kart: summon, enter/exit, driving, turbo, jump
 - [x] **Phase 4** — portal and level transitions
 - [x] **Phase 5** — first level: objectives, stars, checkpoint, HUD
-- [ ] **Phase 6** — combat: enemy, damage, death, respawn
+- [x] **Phase 6** — combat: melee attack, enemies, damage, death, respawn
 - [ ] **Phase 7** — progression and basic save
 - [ ] **Phase 8** — polish: animation, models, effects, sound, UI
 

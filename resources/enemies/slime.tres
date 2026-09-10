@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="EnemyDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/enemy_definition.gd" id="1_definition"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/visuals/slime_placeholder.tscn" id="2_visual"]
+
+[resource]
+script = ExtResource("1_definition")
+id = &"slime"
+display_name = "Slime"
+visual_scene = ExtResource("2_visual")
+visual_scale = 1.0
+body_radius = 0.5
+body_height = 1.0
+max_health = 2.0
+move_speed = 2.5
+patrol_radius = 3.0
+chase_radius = 7.0
+lose_radius = 11.0
+contact_damage = 1.0
+knockback = 7.0

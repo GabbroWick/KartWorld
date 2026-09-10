@@ -2,7 +2,7 @@ extends CanvasLayer
 ## Developer overlay (F3): control list + live movement state. Hidden by
 ## default; the player-facing HUD is scenes/ui/game_hud.tscn.
 
-const CONTROLS_FOOT := "WASD move   Shift run   Space jump (x2)   K summon kart   E enter kart   Mouse look   Esc cursor   F3 hide"
+const CONTROLS_FOOT := "WASD move   Shift run   Space jump (x2)   J/click attack   K summon kart   E enter kart   Mouse look   Esc cursor   F3 hide"
 const CONTROLS_KART := "W/S gas/brake   A/D steer   Shift turbo   Space jump   E leave kart   Mouse look   Esc cursor   F3 hide"
 
 @onready var controls_label: Label = $Root/Controls

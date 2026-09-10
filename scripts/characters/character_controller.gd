@@ -9,6 +9,7 @@ extends CharacterBody3D
 
 signal respawned
 signal died
+signal hurt(amount: float, source: Node)
 
 @export var definition: CharacterDefinition
 ## Node whose basis defines "forward" for the player (usually the active camera).
@@ -23,10 +24,12 @@ signal died
 @onready var health: HealthComponent = $Health
 @onready var abilities: AbilityComponent = $Abilities
 @onready var driver: DriverComponent = $Driver
+@onready var combat: CharacterCombat = $Combat
 @onready var visual_root: Node3D = $VisualRoot
 @onready var collision: CollisionShape3D = $Collision
 
 var spawn_transform: Transform3D
+var invulnerable_left := 0.0
 var _visual_instance: Node3D
 
 
@@ -53,6 +56,8 @@ func _physics_process(delta: float) -> void:
 	var wish_dir := _get_wish_direction(input.move_axis)
 	motor.move(delta, wish_dir, input.run_held, input.jump_pressed, input.jump_released)
 	_face_direction(wish_dir, delta)
+	combat.tick(delta, input.attack_pressed)
+	_tick_invulnerability(delta)
 
 	if global_position.y < fall_limit and not health.is_dead:
 		health.kill()
@@ -64,6 +69,7 @@ func _apply_definition() -> void:
 	abilities.setup(definition.starting_abilities)
 	health.setup(definition.max_health)
 	motor.setup(self, definition, abilities)
+	combat.setup(self, definition)
 
 	var shape := collision.shape as CapsuleShape3D
 	if shape:
@@ -120,6 +126,39 @@ func _face_direction(wish_dir: Vector3, delta: float) -> void:
 	)
 
 
+## Duck-typed damage entry point (enemies, hazards, projectiles call this).
+## Ignored while invulnerable or driving; shoves the character away from
+## `source` and grants invulnerability frames.
+func take_damage(amount: float, source: Node = null) -> void:
+	if health.is_dead or invulnerable_left > 0.0 or driver.is_driving:
+		return
+	health.take_damage(amount, source)
+	hurt.emit(amount, source)
+	if health.is_dead:
+		return
+	invulnerable_left = definition.hurt_invulnerability
+	if source is Node3D:
+		var away := global_position - (source as Node3D).global_position
+		away.y = 0.0
+		if away.length_squared() > 0.001:
+			away = away.normalized()
+			velocity.x = away.x * definition.hurt_knockback.x
+			velocity.z = away.z * definition.hurt_knockback.x
+			velocity.y = definition.hurt_knockback.y
+
+
+func is_invulnerable() -> bool:
+	return invulnerable_left > 0.0
+
+
+func _tick_invulnerability(delta: float) -> void:
+	if invulnerable_left <= 0.0:
+		return
+	invulnerable_left = maxf(invulnerable_left - delta, 0.0)
+	# Blink while invulnerable, solid again when it ends.
+	visual_root.visible = invulnerable_left <= 0.0 or fmod(invulnerable_left, 0.16) < 0.08
+
+
 func set_spawn_transform(new_transform: Transform3D, teleport: bool = true) -> void:
 	spawn_transform = new_transform
 	if teleport:
@@ -130,6 +169,8 @@ func respawn() -> void:
 	global_transform = spawn_transform
 	motor.reset()
 	health.restore_full()
+	invulnerable_left = 0.0
+	visual_root.visible = true
 	respawned.emit()
 
 

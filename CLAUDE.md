@@ -14,8 +14,8 @@ process. `ARCHITECTURE.md` explains the code; `README.md` is for humans.
 | 3 — kart | done | separate entity, summon, enter/exit, drive, turbo, jump, camera auto-align at the wheel |
 | 4 — portal | done | LevelDefinition + LevelManager + Portal, first level scene, 33 checks |
 | 5 — first level | done | objectives, stars, checkpoint, game HUD, 35 checks |
-| 6 — combat | **next** | enemy, melee attack, damage, death, respawn, defeat objective |
-| 7 — progression | todo | |
+| 6 — combat | done | melee, slime enemy, contact damage, i-frames, death, defeat objective, 33 checks |
+| 7 — progression | **next** | completed levels, stars, first unlockable ability, save/load |
 | 8 — polish | todo | |
 
 Decided: **Compatibility renderer on all platforms** (Web needs it, cartoon
@@ -41,6 +41,7 @@ $G --headless --path . res://tools/tests/test_kart_runner.tscn     # kart suite
 $G --headless --path . res://tools/tests/test_island_runner.tscn   # island suite
 $G --headless --path . res://tools/tests/test_portal_runner.tscn   # portal / level-swap suite
 $G --headless --path . res://tools/tests/test_level_runner.tscn    # objectives / stars / checkpoint / HUD suite
+$G --headless --path . res://tools/tests/test_combat_runner.tscn   # melee / enemies / damage / death suite
 $G --path . res://tools/tests/test_lighting_runner.tscn            # lighting suite (needs a window)
 $G --path . res://tools/capture_screenshot.tscn -- out.png 120     # render a frame to PNG
 $G --path . res://tools/capture_screenshot.tscn -- out.png 120 drive   # ...while driving the kart
@@ -114,18 +115,24 @@ suites exit non-zero on failure.
 * In-level gameplay: `scripts/levels/level_controller.gd` + `objective.gd`
   subclasses (reach, collect); `scripts/gameplay/` collectible, star,
   checkpoint; scenes in `scenes/gameplay/`. HUD: `scripts/ui/game_hud.gd`.
+* Combat: `scripts/characters/components/character_combat.gd` (hitbox under
+  `VisualRoot/Hitbox`), `scripts/enemies/` (Enemy + EnemyDefinition), scene
+  `scenes/enemies/enemy.tscn`, data `resources/enemies/slime.tres`. Damage is
+  duck-typed: anything with `take_damage(amount, source)`.
 * Groups: `terrain`, `player_spawn`, `portal_site`, `portal`, `level_manager`,
-  `level_controller`, `collectible`, `star`, `checkpoint`.
+  `level_controller`, `collectible`, `star`, `checkpoint`, `enemy`.
 * Physics layers: 1 world, 2 player, 3 enemy, 4 interactable, 5 vehicle.
   Player mask = world|vehicle (17); vehicle mask = world (1); portal area on
   layer 4 with mask player|vehicle (18).
 
-## Next step (Phase 6 — combat)
+## Next step (Phase 7 — progression)
 
-`CharacterCombat` component (attack action → short-lived hitbox Area3D in
-front, damage, cooldown), `attack` input action (J / mouse left / RB), a
-placeholder `Enemy` (CharacterBody3D on layer 3 with HealthComponent, simple
-patrol/chase, contact damage with knockback and invulnerability frames on the
-player), enemy death, player death via HealthComponent → respawn at the
-checkpoint + health restore, `DefeatEnemiesObjective`. Put one or two enemies
-on the Forest Trail. Add `tools/tests/test_combat*` before calling it done.
+`ProgressionManager` autoload: completed levels, best stars per level, total
+stars, unlocked abilities; listens to `LevelManager.level_completed`. Save to
+`user://save.json` on every change, load at start, `reset()` for tests. First
+unlockable ability: decide a cheap one (e.g. the kart `turbo` or the
+character `double_jump` locked at start and granted by finishing the Forest
+Trail) — starting abilities come from the definitions minus what progression
+says is locked. HUD: total stars in the hub. Portal `required_abilities` and
+`LevelDefinition.unlocked_by_default` are already there to gate content.
+Add `tools/tests/test_progression*` before calling it done.

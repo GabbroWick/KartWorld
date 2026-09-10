@@ -1,6 +1,6 @@
 # KartWorld — Architecture
 
-Status: Phase 0–5. This document describes what exists today and the
+Status: Phase 0–6. This document describes what exists today and the
 extension points that were deliberately left open. It is updated when the
 architecture materially changes, not on every commit.
 
@@ -208,6 +208,30 @@ Main
   a time; the flag turns green. Respawn after a fall or death already uses
   the spawn transform, so nothing else changes.
 
+## Combat
+
+* **`CharacterCombat`** (component on the character): the `attack` action
+  fires a swing — a hitbox `Area3D` under `VisualRoot` (so it sits in front of
+  wherever the model faces) is live for `melee_active_time`, then a
+  `melee_cooldown`. Anything it overlaps that has `take_damage(amount,
+  source)` gets hit once per swing. Damage, reach, width, timing all come from
+  the `CharacterDefinition`. Ranged attacks will be a sibling component that
+  spawns projectiles calling the same `take_damage`.
+* **Taking damage** is a duck-typed contract: `CharacterController.take_damage`
+  and `Enemy.take_damage` both exist, so hazards, projectiles and kart weapons
+  never need to know what they hit. The character ignores damage while
+  invulnerable or driving, gets shoved away from the source
+  (`hurt_knockback`), blinks for `hurt_invulnerability` seconds, and dies
+  through the same `HealthComponent.died` → `respawn()` path as falling.
+* **`Enemy`** (CharacterBody3D, layer 3, group `enemy`) + **`EnemyDefinition`**
+  (health, speed, patrol/chase/lose radii, contact damage, visual). Brain is
+  idle → patrol → chase, picking the nearest registered player; a contact
+  `Area3D` hurts the player it overlaps. Death = `HealthComponent.died` →
+  squash tween → free. Smarter enemies and bosses override `_think()`.
+* **`DefeatEnemiesObjective`** counts `died` on the level's enemies.
+* Layers: enemy 3 (bit 4). Player hitbox mask = enemy; enemy contact mask =
+  player; enemy body mask = world|player.
+
 ### HUD
 
 `scenes/ui/game_hud.tscn` (`GameHUD`, CanvasLayer 2): hearts, star counter,
@@ -341,6 +365,10 @@ caught immediately.
 * **Node exports in hand-written scenes.** `@export var t: SomeNodeType` set as
   `NodePath(...)` in a `.tscn` written by hand stays null at runtime. Export a
   `NodePath` and resolve it in code instead.
+* **A Node3D under a plain Node is a top-level 3D node.** Its transform is
+  world space, so an `Area3D` hitbox parented to a component `Node` sits at
+  the origin forever. Put 3D helpers under a Node3D and point the component at
+  them with a `NodePath`.
 * **Vertex colours are linear by default.** Set `vertex_color_is_srgb = true`
   on the material when the palette is authored as normal sRGB colours.
 * **`--script` main loops don't see autoloads.** Scripts run with

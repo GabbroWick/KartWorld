@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/props/placeholder_block.tscn" id="1_block"]
 [ext_resource type="PackedScene" path="res://scenes/world/props/placeholder_tree.tscn" id="2_tree"]
@@ -8,6 +8,9 @@
 [ext_resource type="Script" path="res://scripts/levels/level_controller.gd" id="6_controller"]
 [ext_resource type="Script" path="res://scripts/levels/reach_destination_objective.gd" id="7_reach"]
 [ext_resource type="Script" path="res://scripts/levels/collect_objective.gd" id="8_collect"]
+[ext_resource type="Script" path="res://scripts/levels/defeat_enemies_objective.gd" id="9_defeat"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/enemy.tscn" id="10_enemy"]
+[ext_resource type="Resource" path="res://resources/enemies/slime.tres" id="11_slime"]
 
 [sub_resource type="ProceduralSkyMaterial" id="sky_material"]
 sky_top_color = Color(0.25, 0.45, 0.8, 1)
@@ -58,6 +61,20 @@ description = "Collect stars"
 optional = true
 kind = &"star"
 required = 0
+
+[node name="DefeatSlimes" type="Node" parent="LevelController"]
+script = ExtResource("9_defeat")
+description = "Defeat the slimes"
+optional = true
+required = 0
+
+[node name="SlimeTrail" parent="." instance=ExtResource("10_enemy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.2, -28)
+definition = ExtResource("11_slime")
+
+[node name="SlimeClearing" parent="." instance=ExtResource("10_enemy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0.2, -42)
+definition = ExtResource("11_slime")
 
 [node name="Start" parent="." instance=ExtResource("1_block")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)

@@ -54,6 +54,19 @@ extends Resource
 
 @export_group("Vitals")
 @export_range(1.0, 100.0, 1.0) var max_health := 5.0
+## Seconds of invulnerability after taking a hit.
+@export_range(0.0, 5.0, 0.05) var hurt_invulnerability := 1.0
+## Shove received when hurt: horizontal and upward speed.
+@export var hurt_knockback := Vector2(7.0, 4.0)
+
+@export_group("Melee")
+@export_range(0.0, 50.0, 0.5) var melee_damage := 1.0
+## Reach of the swing in front of the character, metres.
+@export_range(0.3, 5.0, 0.1) var melee_range := 1.5
+@export_range(0.3, 5.0, 0.1) var melee_width := 1.4
+## How long the hitbox stays live.
+@export_range(0.05, 1.0, 0.01) var melee_active_time := 0.15
+@export_range(0.05, 5.0, 0.05) var melee_cooldown := 0.45
 
 @export_group("Abilities")
 ## Abilities the character starts with. Others get unlocked by progression.

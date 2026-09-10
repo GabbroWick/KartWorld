@@ -1,0 +1,54 @@
+[gd_scene load_steps=6 format=3]
+
+[sub_resource type="StandardMaterial3D" id="mat_body"]
+albedo_color = Color(0.55, 0.25, 0.75, 1)
+metallic_specular = 0.0
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="mat_eye"]
+albedo_color = Color(0.98, 0.98, 0.98, 1)
+metallic_specular = 0.0
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="mat_pupil"]
+albedo_color = Color(0.08, 0.06, 0.1, 1)
+metallic_specular = 0.0
+roughness = 1.0
+
+[sub_resource type="SphereMesh" id="mesh_body"]
+material = SubResource("mat_body")
+radius = 0.55
+height = 1.1
+radial_segments = 16
+rings = 8
+
+[sub_resource type="SphereMesh" id="mesh_eye"]
+material = SubResource("mat_eye")
+radius = 0.12
+height = 0.24
+radial_segments = 10
+rings = 5
+
+[node name="SlimePlaceholder" type="Node3D"]
+
+[node name="Body" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.1, 0, 0, 0, 0.8, 0, 0, 0, 1.1, 0, 0.45, 0)
+mesh = SubResource("mesh_body")
+
+[node name="EyeLeft" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0.62, -0.45)
+mesh = SubResource("mesh_eye")
+
+[node name="EyeRight" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.62, -0.45)
+mesh = SubResource("mesh_eye")
+
+[node name="PupilLeft" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, -0.2, 0.62, -0.55)
+mesh = SubResource("mesh_eye")
+material_override = SubResource("mat_pupil")
+
+[node name="PupilRight" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0.2, 0.62, -0.55)
+mesh = SubResource("mesh_eye")
+material_override = SubResource("mat_pupil")
