@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/characters/character_definition.gd" id="1_definition"]
+[ext_resource type="PackedScene" path="res://scenes/characters/visuals/panda_placeholder.tscn" id="2_visual"]
+
+[resource]
+script = ExtResource("1_definition")
+id = &"panda"
+display_name = "Panda"
+visual_scene = ExtResource("2_visual")
+capsule_height = 1.7
+capsule_radius = 0.4
+walk_speed = 3.8
+run_speed = 7.0
+jump_height = 1.8
+max_air_jumps = 0
+max_health = 7.0
+starting_abilities = PackedStringArray("run")

@@ -1,0 +1,151 @@
+[gd_scene load_steps=15 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/world/props/island_terrain.tscn" id="1_terrain"]
+[ext_resource type="PackedScene" path="res://scenes/world/props/house.tscn" id="2_house"]
+[ext_resource type="PackedScene" path="res://scenes/world/props/placeholder_tree.tscn" id="3_tree"]
+[ext_resource type="PackedScene" path="res://scenes/world/props/placeholder_rock.tscn" id="4_rock"]
+[ext_resource type="PackedScene" path="res://scenes/world/props/placeholder_block.tscn" id="5_block"]
+[ext_resource type="Script" path="res://scripts/world/prop_scatter.gd" id="6_scatter"]
+[ext_resource type="PackedScene" path="res://scenes/characters/character.tscn" id="7_character"]
+[ext_resource type="Resource" path="res://resources/characters/fox.tres" id="8_fox"]
+[ext_resource type="Resource" path="res://resources/characters/panda.tres" id="9_panda"]
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_material"]
+sky_top_color = Color(0.2, 0.48, 0.86, 1)
+sky_horizon_color = Color(0.7, 0.85, 0.96, 1)
+ground_horizon_color = Color(0.55, 0.72, 0.8, 1)
+ground_bottom_color = Color(0.2, 0.35, 0.5, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_material")
+
+[sub_resource type="Environment" id="environment"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 3
+ambient_light_energy = 0.6
+tonemap_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="water_material"]
+transparency = 1
+albedo_color = Color(0.2, 0.55, 0.8, 0.82)
+roughness = 0.25
+
+[sub_resource type="PlaneMesh" id="water_mesh"]
+material = SubResource("water_material")
+size = Vector2(320, 320)
+
+[node name="IslandHub" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("environment")
+
+[node name="SunLight" type="DirectionalLight3D" parent="."]
+; Keep at the origin: a positioned DirectionalLight3D breaks its shadow frustum (see ARCHITECTURE.md).
+rotation_degrees = Vector3(-52, -38, 0)
+light_energy = 1.1
+shadow_enabled = true
+directional_shadow_max_distance = 110.0
+
+[node name="IslandTerrain" parent="." instance=ExtResource("1_terrain")]
+plateau_radius = 40.0
+shore_radius = 54.0
+beach_height = 0.5
+plateau_height = 3.5
+flat_zones = Array[Vector4]([Vector4(14, 12, 9, 3.5), Vector4(-12, 24, 6, 3.5)])
+mountain_center = Vector2(-22, -20)
+mountain_radius = 22.0
+mountain_height = 13.0
+noise_seed = 7
+noise_amplitude = 1.4
+noise_frequency = 0.035
+cell_size = 1.5
+
+[node name="Water" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+mesh = SubResource("water_mesh")
+
+[node name="PlayerSpawn" type="Marker3D" parent="." groups=["player_spawn"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 4.5, 19)
+
+[node name="House" parent="." instance=ExtResource("2_house")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 3.5, 12)
+
+[node name="PortalSite" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 3.5, 24)
+
+[node name="Plinth" parent="PortalSite" instance=ExtResource("5_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+size = Vector3(5, 0.4, 5)
+color = Color(0.6, 0.58, 0.62, 1)
+
+[node name="PortalMarker" type="Marker3D" parent="PortalSite" groups=["portal_site"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+
+[node name="Forest" type="Node3D" parent="."]
+script = ExtResource("6_scatter")
+prop_scene = ExtResource("3_tree")
+terrain_path = NodePath("../IslandTerrain")
+scatter_seed = 11
+count = 45
+center = Vector2(20, -14)
+radius = 18.0
+exclusion_zones = Array[Vector3]([Vector3(14, 12, 11)])
+max_slope_degrees = 26.0
+min_spacing = 3.5
+
+[node name="ScatteredTrees" type="Node3D" parent="."]
+script = ExtResource("6_scatter")
+prop_scene = ExtResource("3_tree")
+terrain_path = NodePath("../IslandTerrain")
+scatter_seed = 23
+count = 28
+center = Vector2(0, 0)
+radius = 48.0
+exclusion_zones = Array[Vector3]([Vector3(14, 12, 12), Vector3(-12, 24, 8), Vector3(20, -14, 16), Vector3(-22, -20, 20)])
+min_height = 1.6
+max_slope_degrees = 24.0
+min_spacing = 7.0
+
+[node name="MountainRocks" type="Node3D" parent="."]
+script = ExtResource("6_scatter")
+prop_scene = ExtResource("4_rock")
+terrain_path = NodePath("../IslandTerrain")
+scatter_seed = 41
+count = 26
+center = Vector2(-22, -20)
+radius = 24.0
+min_height = 5.0
+max_slope_degrees = 55.0
+min_spacing = 3.0
+scale_min = 0.6
+scale_max = 2.2
+sink = 0.4
+
+[node name="BeachRocks" type="Node3D" parent="."]
+script = ExtResource("6_scatter")
+prop_scene = ExtResource("4_rock")
+terrain_path = NodePath("../IslandTerrain")
+scatter_seed = 5
+count = 14
+center = Vector2(0, 0)
+radius = 53.0
+exclusion_zones = Array[Vector3]([Vector3(0, 0, 44)])
+max_height = 1.4
+max_slope_degrees = 40.0
+min_spacing = 6.0
+scale_min = 0.4
+scale_max = 1.1
+sink = 0.5
+
+[node name="NPCs" type="Node3D" parent="."]
+
+[node name="Fox" parent="NPCs" instance=ExtResource("7_character")]
+transform = Transform3D(0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, 0.7071, 9, 4.5, 16)
+definition = ExtResource("8_fox")
+is_player_controlled = false
+
+[node name="Panda" parent="NPCs" instance=ExtResource("7_character")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 4.5, 22)
+definition = ExtResource("9_panda")
+is_player_controlled = false

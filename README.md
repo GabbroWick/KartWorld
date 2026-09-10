@@ -3,10 +3,12 @@
 3D cartoon adventure game (Godot 4 / GDScript).
 Design spec: [KARTWORLD_GAME_DESIGN.md](KARTWORLD_GAME_DESIGN.md) — development rules: [CLAUDE_CODE_MASTER_PROMPT.md](CLAUDE_CODE_MASTER_PROMPT.md).
 
-**Current state: Phase 0 + Phase 1 — playable character prototype.**
-A generic third-person character (configured as the leopard) that walks, runs,
-jumps and double-jumps around a placeholder test arena. No kart, no combat, no
-levels yet — that is deliberate, see the roadmap below.
+**Current state: Phase 2 — explorable island hub.**
+A generic third-person character (configured as the leopard) walks, runs, jumps
+and double-jumps around a procedurally generated cartoon island: beach, forest,
+mountain, a house, two NPC placeholders (fox, panda) and a marked site for the
+first portal. No kart, no combat, no levels yet — that is deliberate, see the
+roadmap below. Everything is placeholder art on purpose.
 
 ---
 
@@ -20,7 +22,8 @@ No third-party addons or plugins.
 
 ## Running the game
 
-**From the editor:** open the project folder in Godot and press <kbd>F5</kbd>.
+**From the editor:** open the project folder in Godot and press <kbd>F5</kbd>
+(inside the Godot window — F5 in VS Code opens its own debugger picker).
 
 **From the command line:**
 
@@ -48,21 +51,26 @@ names in `scripts/core/input_actions.gd`.
 
 ## Tests
 
-A headless test drives the real main scene with simulated input and checks the
-whole movement contract (walk, run, jump height, short hop, double jump, air
-jump limit, gravity, collision, camera follow, camera-relative movement, fall
-respawn):
+Two headless suites drive real scenes with simulated input; each prints one
+line per check and exits non-zero on failure.
 
 ```bash
-"C:/Godot/Godot_v4.7.2/Godot_v4.7.2-stable_win64_console.exe" --headless --path . res://tools/tests/test_runner.tscn
+G="C:/Godot/Godot_v4.7.2/Godot_v4.7.2-stable_win64_console.exe"
+$G --headless --path . res://tools/tests/test_runner.tscn          # movement (62 checks)
+$G --headless --path . res://tools/tests/test_island_runner.tscn   # island hub (40 checks)
 ```
 
-It prints one line per check and exits non-zero on failure.
+* **Movement**: walk, run, jump height, short hop, double jump, air-jump limit,
+  gravity, collision, camera follow, camera-relative movement, fall respawn.
+  Runs in `scenes/dev/movement_gym.tscn` (the flat test arena).
+* **Island**: terrain generation, winding and collision, spawn pad, NPCs are
+  real non-player characters, scatter rules, solid house, running across the
+  island without falling through, the sea respawning the player.
 
 A screenshot tool renders the game without a human having to launch it:
 
 ```bash
-"C:/Godot/Godot_v4.7.2/Godot_v4.7.2-stable_win64.exe" --path . res://tools/capture_screenshot.tscn -- out.png 90
+"C:/Godot/Godot_v4.7.2/Godot_v4.7.2-stable_win64.exe" --path . res://tools/capture_screenshot.tscn -- out.png 120
 ```
 
 ## Project layout
@@ -70,18 +78,19 @@ A screenshot tool renders the game without a human having to launch it:
 ```text
 scenes/          Godot scenes
   main.tscn          entry point: builds world + player + camera
-  characters/        generic character scene + placeholder visuals
+  characters/        generic character scene + placeholder creature visuals
   camera/            third-person camera rig
-  world/             test arena and reusable placeholder props
+  world/             island_hub.tscn, test_arena.tscn, props/ (terrain, house, block, tree, cone, rock)
+  dev/               movement_gym.tscn (arena + main wiring, used by tests)
   ui/                debug overlay
 scripts/         GDScript, mirrors the scene layout
   core/              autoload, entry point, input action names
-  characters/        controller, data definition, components
+  characters/        controller, data definition, components, creature placeholder
   camera/            third-person camera
-  world/             placeholder prop scripts
+  world/             island terrain, prop scatter, placeholder props
   ui/                debug overlay
 resources/       data-driven configuration
-  characters/        leopard.tres and future characters
+  characters/        leopard (player), fox and panda (NPCs)
 tools/           editor/CI helpers (input map setup, screenshots, tests)
 assets/          art and audio (placeholders for now)
 ```
@@ -93,7 +102,7 @@ time, each verified before the next starts.
 
 - [x] **Phase 0** — project, git, structure, input map
 - [x] **Phase 1** — character, movement, jump, double jump, third-person camera
-- [ ] **Phase 2** — island hub: terrain, forest, house, exploration
+- [x] **Phase 2** — island hub: terrain, forest, mountain, house, NPC placeholders
 - [ ] **Phase 3** — kart: summon, enter/exit, driving, turbo, jump
 - [ ] **Phase 4** — portal and level transitions
 - [ ] **Phase 5** — first level: objective, star, checkpoint
@@ -102,4 +111,5 @@ time, each verified before the next starts.
 - [ ] **Phase 8** — polish: animation, models, effects, sound, UI
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for how the pieces fit together and which
-extension points are already in place.
+extension points are already in place, and [CLAUDE.md](CLAUDE.md) for the
+working notes that let a new AI session pick up where the last one stopped.

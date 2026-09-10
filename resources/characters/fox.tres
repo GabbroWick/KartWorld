@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/characters/character_definition.gd" id="1_definition"]
+[ext_resource type="PackedScene" path="res://scenes/characters/visuals/fox_placeholder.tscn" id="2_visual"]
+
+[resource]
+script = ExtResource("1_definition")
+id = &"fox"
+display_name = "Fox"
+visual_scene = ExtResource("2_visual")
+capsule_height = 1.5
+capsule_radius = 0.33
+walk_speed = 5.0
+run_speed = 9.5
+jump_height = 2.0
+max_air_jumps = 1
+max_health = 4.0
+starting_abilities = PackedStringArray("run", "double_jump")

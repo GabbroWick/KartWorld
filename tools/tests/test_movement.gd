@@ -6,11 +6,11 @@ extends Node
 ## It runs as a scene (not with --script) so the autoloads and the global script
 ## class cache are available exactly like in the real game.
 ##
-## Drives the real main scene with simulated input and asserts the movement
+## Drives the movement gym (main wiring + test arena) with simulated input and asserts the movement
 ## contract: idle, walk, run, gravity, jump height, double jump, air-jump limit,
 ## collision with the ground, and fall respawn.
 
-const MAIN_SCENE := "res://scenes/main.tscn"
+const MAIN_SCENE := "res://scenes/dev/movement_gym.tscn"
 const TICK := 1.0 / 60.0
 ## Frames needed to reach the apex of a full jump, at 60 Hz physics.
 const ASCENT_FRAMES := 26

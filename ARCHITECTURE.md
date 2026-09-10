@@ -1,6 +1,6 @@
 # KartWorld — Architecture
 
-Status: Phase 0–1 only. This document describes what exists today and the
+Status: Phase 0–2. This document describes what exists today and the
 extension points that were deliberately left open. It is updated when the
 architecture materially changes, not on every commit.
 
@@ -12,8 +12,8 @@ architecture materially changes, not on every commit.
    single-responsibility nodes. No `player.gd` that owns everything.
 3. **Only what is needed now**, but no decision that blocks a later phase
    (kart, combat, portals, local co-op, touch input).
-4. **Everything is testable headlessly.** Movement is verified by a script, not
-   by a human pressing keys.
+4. **Everything is testable headlessly.** Movement and the island are verified
+   by scripts, not by a human pressing keys.
 
 ## Runtime graph
 
@@ -21,7 +21,7 @@ architecture materially changes, not on every commit.
 /root
 ├── GameManager                    autoload: mouse capture, player registry
 └── Main (scenes/main.tscn)        entry point, spawns the pieces
-    ├── World (test_arena.tscn)    environment, light, spawn marker
+    ├── World (island_hub.tscn)    terrain, light, props, NPCs, spawn marker
     ├── Character (character.tscn) spawned at the world's PlayerSpawn marker
     │   ├── Collision              CapsuleShape3D, sized from the definition
     │   ├── VisualRoot             holds the instantiated character model
@@ -43,7 +43,8 @@ player and the character scene contains no camera, so both stay reusable.
 All per-character data: body size, walk/run speed, acceleration, jump height,
 air jumps, gravity scale, health, starting abilities and the visual scene.
 A new character (tiger, fox, panda, robot…) is a new `.tres` plus a model — no
-gameplay code changes. `resources/characters/leopard.tres` is the first one.
+gameplay code changes. `resources/characters/` holds the leopard (player) and
+the fox and panda used as island NPCs.
 
 ### `CharacterController` (CharacterBody3D)
 
@@ -55,7 +56,8 @@ Thin orchestrator, ~120 lines. Every frame it:
 4. turns the visual toward the movement direction.
 
 It also applies the definition to the components at `_ready()` and owns
-spawn/respawn.
+spawn/respawn. `is_player_controlled = false` turns the same scene into an NPC:
+no device input, no registration as a player.
 
 ### Components
 
@@ -74,6 +76,46 @@ processing order, so the intent is always fresh for the current physics tick.
 Arcade, not realistic: high gravity (26 m/s²), extra gravity while falling,
 coyote time, jump buffering, and a short hop when the jump button is released
 early. All of it is data on the definition, not constants in the motor.
+Measured with the leopard: single jump 2.3 m, double jump 4.0 m, run 8.5 m/s.
+The island was laid out against those numbers.
+
+### Placeholder visuals
+
+`scenes/characters/visuals/creature_placeholder.tscn` is one primitive creature
+body whose mesh nodes carry role groups (`creature_fur`, `creature_belly`,
+`creature_accent`, `creature_eye`, `creature_spot`). `CreaturePlaceholder`
+paints them from exported colours. Leopard, fox and panda are that scene with
+different colour overrides — geometry is shared, identity is data.
+
+## World
+
+### `IslandTerrain`
+
+Procedural, flat-shaded height field with trimesh collision, regenerated from
+inspector values: plateau/shore radii, beach and plateau heights, one rounded
+mountain, simplex noise, and flat pads for buildings. Other nodes query
+`sample_height()` / `sample_slope_degrees()` instead of raycasting, which also
+works inside the editor. Past the shore the ground drops steeply into the sea,
+so walking off the island ends in the normal fall respawn — no separate kill
+volume. Face colours (sand → grass → rock → snow) come from height and slope.
+
+### `PropScatter`
+
+Forests, rocks and future bushes are placement rules, not hand-placed nodes:
+seed, disc region, exclusion zones, height and slope filters, spacing, scale
+range. Deterministic for a given seed; generated children are not saved into
+the scene. Resolves its terrain by `NodePath`, falling back to the `terrain`
+group.
+
+### Placeholder props
+
+`PlaceholderBlock`, `PlaceholderCone` (roofs, rocks) and `PlaceholderTree` are
+`@tool` StaticBody3D scripts driven by size/colour, so the house and the test
+arena are a handful of instances with overrides. Level design later follows
+the same recipe: reusable mechanic + configuration + layout.
+
+The hub also carries a `PortalSite` node (plinth + `portal_site` marker) so
+Phase 4 has a home without touching the terrain.
 
 ## Input
 
@@ -93,7 +135,8 @@ Adding touch controls later means adding events to the Input Map (or feeding
 `ThirdPersonCamera` is a `Node3D` (yaw) → `PitchPivot` (pitch) → `SpringArm3D`
 (collision-aware distance) → `Camera3D`. It follows a target with a
 frame-rate-independent lerp and runs at a late physics priority so it moves
-after the character has moved.
+after the character has moved. `set_target()` / `set_yaw()` exist so the kart
+and level transitions can re-point it.
 
 The camera is the only place allowed to read a physical device directly (mouse
 motion), because that is its job. The character asks the camera rig for a basis;
@@ -123,9 +166,17 @@ yet, so this choice is still cheap to revisit — see "Open questions".
   `position` in Godot 4.7 breaks the directional shadow frustum and drops the
   entire scene into shadow (it then looks flat and blue, lit only by ambient).
   Only its rotation matters.
+* **Godot front faces wind clockwise.** A CCW triangle is culled from the
+  visible side and its trimesh collision only works from below. Build normals
+  with `Plane(a, b, c)` so they follow the same rule as the renderer.
+* **Node exports in hand-written scenes.** `@export var t: SomeNodeType` set as
+  `NodePath(...)` in a `.tscn` written by hand stays null at runtime. Export a
+  `NodePath` and resolve it in code instead.
+* **Vertex colours are linear by default.** Set `vertex_color_is_srgb = true`
+  on the material when the palette is authored as normal sRGB colours.
 * **`--script` main loops don't see autoloads.** Scripts run with
-  `godot --script` are compiled before autoloads register, so the test suite
-  runs as a *scene* (`tools/tests/test_runner.tscn`) instead.
+  `godot --script` are compiled before autoloads register, so the test suites
+  run as *scenes* (`tools/tests/*_runner.tscn`) instead.
 * **Simulated input needs one physics tick** to reach a character that polls
   `Input`, which the tests account for.
 
@@ -136,5 +187,8 @@ yet, so this choice is still cheap to revisit — see "Open questions".
   depends on Forward+ features, so switching is a one-line change. Worth
   deciding before writing shaders or lighting-heavy art.
 * **Character scale.** The leopard is 1.6 m of collision capsule with a ~1.9 m
-  visual. Fine for a prototype, but level metrics (step height, jump distance,
-  door sizes) should be pinned down before the island is built for real.
+  visual. The island was laid out against the measured movement, so changing
+  the scale later means re-tuning `leopard.tres` and re-running both suites,
+  not rebuilding the hub.
+* **House interior.** The base is solid for now; when customisation/trophies
+  arrive it needs an interior or a separate interior scene.

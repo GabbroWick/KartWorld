@@ -39,6 +39,9 @@ func _ready() -> void:
 	spawn_transform = global_transform
 	health.died.connect(_on_died)
 
+	# NPCs and remote/AI characters share this scene; only a local player
+	# reads the device.
+	input.reads_local_device = is_player_controlled
 	if is_player_controlled:
 		GameManager.register_player(self)
 
