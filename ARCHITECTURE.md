@@ -1,6 +1,6 @@
 # KartWorld — Architecture
 
-Status: Phase 0–2. This document describes what exists today and the
+Status: Phase 0–3. This document describes what exists today and the
 extension points that were deliberately left open. It is updated when the
 architecture materially changes, not on every commit.
 
@@ -87,6 +87,52 @@ body whose mesh nodes carry role groups (`creature_fur`, `creature_belly`,
 paints them from exported colours. Leopard, fox and panda are that scene with
 different colour overrides — geometry is shared, identity is data.
 
+## Vehicle system
+
+The kart is **its own entity in the world**, never a child of the character.
+It is spawned by `Main` next to the player's spawn point and exists whether or
+not anyone is driving it; local co-op later means one vehicle per player.
+
+```text
+Vehicle (vehicle.tscn, CharacterBody3D, layer 5 "vehicle")
+├── Collision          BoxShape3D sized from the definition
+├── VisualRoot         instantiated placeholder model
+├── InputSource        VehicleInput: throttle / steer / turbo / jump / interact
+├── Motor              VehicleMotor: arcade driving physics
+├── Health             HealthComponent (same class as the character's)
+├── Abilities          AbilityComponent (same class as the character's)
+└── AbilityNodes
+    └── Turbo          TurboAbility (VehicleAbility)
+```
+
+* **`VehicleDefinition`** (Resource) holds every number: speeds, acceleration,
+  brake, steering, jump, turbo, health, starting abilities, visual scene.
+  `resources/vehicles/basic_kart.tres` is the first; a hover-bike is a new
+  `.tres` plus a model.
+* **`VehicleController`** is the thin orchestrator: polls input, asks abilities
+  to tick, hands throttle/steer/jump to the motor, and exposes
+  `mount()` / `dismount()` / `place()`.
+* **`VehicleMotor`** is deliberately not a wheel simulation: a signed forward
+  speed, a yaw rate that grows with speed (and shrinks in the air), gravity and
+  a jump. After `move_and_slide()` the speed is re-projected on the forward
+  axis, so a wall simply kills the speed it blocked.
+* **`VehicleAbility`** is the base for abilities that own behaviour. They are
+  independent nodes under `AbilityNodes`; the controller only calls
+  `try_activate()` and `tick()`. Whether an ability is *unlocked* stays in
+  `AbilityComponent`, so progression works the same for characters and
+  vehicles. Turbo is the first; dash, flight, weapons and defensive systems
+  follow the same shape. The kart jump is gated by the `vehicle_jump` ability
+  id but implemented in the motor, like the character's double jump.
+* **`DriverComponent`** lives on the *character* and owns summon / enter /
+  exit. Summon teleports the vehicle 3.5 m ahead on the ground (raycast).
+  While driving, the character is hidden, its physics paused and its position
+  pinned to the vehicle so "where is the player" keeps working. Leaving places
+  the character at the definition's `exit_offset`. If the vehicle falls out of
+  the world, the driver is ejected, respawned, and the kart parked beside the
+  spawn — the player is never stranded.
+* The camera is re-targeted by `Main` through the driver's signals and gets a
+  wider framing (`set_framing`) at the wheel. No second camera.
+
 ## World
 
 ### `IslandTerrain`
@@ -125,7 +171,10 @@ and are generated (and therefore reviewable and reproducible) by
 `tools/setup_input_map.gd`.
 
 Keys are bound as **physical** keycodes so WASD stays in place on AZERTY and
-QWERTZ keyboards. Every action already has a gamepad binding.
+QWERTZ keyboards. Every action already has a gamepad binding. Walking and
+driving are separate action sets (`move_*`/`run` vs `accelerate`/`brake`/
+`turbo`) that happen to share keys; whichever entity is being controlled polls
+its own actions, so remapping one never breaks the other.
 
 Adding touch controls later means adding events to the Input Map (or feeding
 `CharacterInput` directly) — no gameplay code changes.

@@ -3,7 +3,8 @@ extends CanvasLayer
 ## state. Not the real game UI (health / stars / objectives come in a later
 ## phase) — it exists so the prototype can be tested at a glance.
 
-const CONTROLS := "WASD move   Shift run   Space jump (x2)   Mouse look   Esc free cursor   F3 hide"
+const CONTROLS_FOOT := "WASD move   Shift run   Space jump (x2)   K summon kart   E enter kart   Mouse look   Esc cursor   F3 hide"
+const CONTROLS_KART := "W/S gas/brake   A/D steer   Shift turbo   Space jump   E leave kart   Mouse look   Esc cursor   F3 hide"
 
 @onready var controls_label: Label = $Root/Controls
 @onready var state_label: Label = $Root/State
@@ -12,7 +13,7 @@ var _player: CharacterController
 
 
 func _ready() -> void:
-	controls_label.text = CONTROLS
+	controls_label.text = CONTROLS_FOOT
 
 
 func bind_player(player: CharacterController) -> void:
@@ -27,6 +28,23 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(_delta: float) -> void:
 	if not is_instance_valid(_player) or not visible:
 		return
+	if _player.driver.is_driving:
+		var kart := _player.driver.vehicle
+		controls_label.text = CONTROLS_KART
+		var turbo_state := "ready"
+		if kart.turbo:
+			if kart.turbo.is_active:
+				turbo_state = "ON %.1fs" % kart.turbo.time_left
+			elif kart.turbo.cooldown_left > 0.0:
+				turbo_state = "cooldown %.1fs" % kart.turbo.cooldown_left
+		state_label.text = "KART %s | speed %5.1f | turbo %s | fps %d" % [
+			"grounded" if kart.is_on_floor() else "airborne",
+			kart.get_speed(),
+			turbo_state,
+			Engine.get_frames_per_second(),
+		]
+		return
+	controls_label.text = CONTROLS_FOOT
 	var horizontal := Vector2(_player.velocity.x, _player.velocity.z).length()
 	var state := "grounded" if _player.is_on_floor() else "airborne"
 	state_label.text = "%s | speed %5.1f | air jumps %d/%d | fps %d" % [

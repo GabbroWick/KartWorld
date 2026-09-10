@@ -22,6 +22,13 @@ func _initialize() -> void:
 		"run": [_key(KEY_SHIFT), _button(JOY_BUTTON_B)],
 		"interact": [_key(KEY_E), _button(JOY_BUTTON_X)],
 
+		# Kart. Same physical keys as walking where the meaning matches
+		# (W = go, S = stop, Shift = faster); the vehicle reads its own actions.
+		"accelerate": [_key(KEY_W), _axis(JOY_AXIS_TRIGGER_RIGHT, 1.0)],
+		"brake": [_key(KEY_S), _axis(JOY_AXIS_TRIGGER_LEFT, 1.0)],
+		"turbo": [_key(KEY_SHIFT), _button(JOY_BUTTON_B)],
+		"summon_kart": [_key(KEY_K), _button(JOY_BUTTON_Y)],
+
 		"camera_left": [_key(KEY_LEFT), _axis(JOY_AXIS_RIGHT_X, -1.0)],
 		"camera_right": [_key(KEY_RIGHT), _axis(JOY_AXIS_RIGHT_X, 1.0)],
 		"camera_up": [_key(KEY_UP), _axis(JOY_AXIS_RIGHT_Y, -1.0)],

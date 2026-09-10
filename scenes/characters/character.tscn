@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/characters/character_controller.gd" id="1_controller"]
 [ext_resource type="Script" path="res://scripts/characters/components/character_input.gd" id="2_input"]
 [ext_resource type="Script" path="res://scripts/characters/components/character_motor.gd" id="3_motor"]
 [ext_resource type="Script" path="res://scripts/characters/components/health_component.gd" id="4_health"]
 [ext_resource type="Script" path="res://scripts/characters/components/ability_component.gd" id="5_abilities"]
+[ext_resource type="Script" path="res://scripts/characters/components/driver_component.gd" id="6_driver"]
 
 [sub_resource type="CapsuleShape3D" id="shape_body"]
 radius = 0.35
@@ -12,7 +13,7 @@ height = 1.6
 
 [node name="Character" type="CharacterBody3D"]
 collision_layer = 2
-collision_mask = 1
+collision_mask = 17
 floor_snap_length = 0.5
 script = ExtResource("1_controller")
 
@@ -33,3 +34,6 @@ script = ExtResource("4_health")
 
 [node name="Abilities" type="Node" parent="."]
 script = ExtResource("5_abilities")
+
+[node name="Driver" type="Node" parent="."]
+script = ExtResource("6_driver")

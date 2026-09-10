@@ -114,3 +114,11 @@ func set_target(new_target: Node3D, snap: bool = true) -> void:
 	target = new_target
 	if snap and is_instance_valid(target):
 		global_position = _desired_position()
+
+
+## Orbit distance and pivot height, so vehicles can be framed wider than a
+## character without a second camera.
+func set_framing(new_distance: float, new_target_height: float) -> void:
+	distance = new_distance
+	target_height = new_target_height
+	spring_arm.spring_length = distance

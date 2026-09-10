@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="VehicleDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/vehicles/vehicle_definition.gd" id="1_definition"]
+[ext_resource type="PackedScene" path="res://scenes/vehicles/visuals/kart_placeholder.tscn" id="2_visual"]
+
+[resource]
+script = ExtResource("1_definition")
+id = &"basic_kart"
+display_name = "Kart"
+visual_scene = ExtResource("2_visual")
+collision_size = Vector3(1.6, 0.8, 2.6)
+exit_offset = Vector3(2.0, 0.5, 0)
+max_speed = 16.0
+reverse_speed = 5.0
+acceleration = 14.0
+brake_deceleration = 28.0
+coast_deceleration = 6.0
+steer_rate = 2.2
+steer_full_speed = 6.0
+air_steer_factor = 0.35
+jump_height = 1.6
+gravity_scale = 1.0
+terminal_velocity = 40.0
+turbo_speed_multiplier = 1.6
+turbo_acceleration_multiplier = 2.5
+turbo_duration = 1.5
+turbo_cooldown = 3.0
+max_health = 6.0
+starting_abilities = PackedStringArray("turbo", "vehicle_jump")

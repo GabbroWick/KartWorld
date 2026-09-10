@@ -3,12 +3,13 @@
 3D cartoon adventure game (Godot 4 / GDScript).
 Design spec: [KARTWORLD_GAME_DESIGN.md](KARTWORLD_GAME_DESIGN.md) — development rules: [CLAUDE_CODE_MASTER_PROMPT.md](CLAUDE_CODE_MASTER_PROMPT.md).
 
-**Current state: Phase 2 — explorable island hub.**
+**Current state: Phase 3 — island hub with a summonable kart.**
 A generic third-person character (configured as the leopard) walks, runs, jumps
 and double-jumps around a procedurally generated cartoon island: beach, forest,
 mountain, a house, two NPC placeholders (fox, panda) and a marked site for the
-first portal. No kart, no combat, no levels yet — that is deliberate, see the
-roadmap below. Everything is placeholder art on purpose.
+first portal. The player can summon a futuristic kart, get in, drive, turbo,
+jump and get out again. No combat, no portals, no levels yet — that is
+deliberate, see the roadmap below. Everything is placeholder art on purpose.
 
 ---
 
@@ -43,7 +44,12 @@ The main scene is `scenes/main.tscn`.
 | Run | `Shift` (hold) | `B` (hold) |
 | Jump / double jump | `Space` (tap = short hop) | `A` |
 | Look around | Mouse, or arrow keys | Right stick |
-| Interact (reserved) | `E` | `X` |
+| Summon the kart | `K` | `Y` |
+| Enter / leave the kart | `E` | `X` |
+| Kart: accelerate / brake & reverse | `W` / `S` | Right / left trigger |
+| Kart: steer | `A` `D` | Left stick |
+| Kart: turbo | `Shift` | `B` |
+| Kart: jump | `Space` | `A` |
 | Release / recapture cursor | `Esc` / click | `Start` |
 | Show / hide the debug overlay | `F3` | — |
 
@@ -58,21 +64,30 @@ line per check and exits non-zero on failure.
 
 ```bash
 G="C:/Godot/Godot_v4.7.2/Godot_v4.7.2-stable_win64_console.exe"
-$G --headless --path . res://tools/tests/test_runner.tscn          # movement (62 checks)
-$G --headless --path . res://tools/tests/test_island_runner.tscn   # island hub (40 checks)
+$G --headless --path . res://tools/tests/test_runner.tscn          # movement (70 checks)
+$G --headless --path . res://tools/tests/test_kart_runner.tscn     # kart (47 checks)
+$G --headless --path . res://tools/tests/test_island_runner.tscn   # island hub (48 checks)
+$G --path . res://tools/tests/test_lighting_runner.tscn            # lighting (6 checks, needs a window)
 ```
 
 * **Movement**: walk, run, jump height, short hop, double jump, air-jump limit,
   gravity, collision, camera follow, camera-relative movement, fall respawn.
   Runs in `scenes/dev/movement_gym.tscn` (the flat test arena).
+* **Kart**: separate entity, summon in front of the player, enter/exit, camera
+  re-targeting, acceleration, steering, brake and reverse, turbo with cooldown,
+  jump, wall impact, falling off the world returns both to the spawn.
 * **Island**: terrain generation, winding and collision, spawn pad, NPCs are
-  real non-player characters, scatter rules, solid house, running across the
-  island without falling through, the sea respawning the player.
+  real non-player characters, scatter rules, solid house, running and driving
+  across the island without falling through, the sea respawning the player.
+* **Lighting**: a sunlit surface renders exactly the colour written in the
+  scene, on both the Compatibility and Forward+ renderers.
 
-A screenshot tool renders the game without a human having to launch it:
+A screenshot tool renders the game without a human having to launch it; add
+`drive` to shoot the player at the wheel:
 
 ```bash
 "C:/Godot/Godot_v4.7.2/Godot_v4.7.2-stable_win64.exe" --path . res://tools/capture_screenshot.tscn -- out.png 120
+"C:/Godot/Godot_v4.7.2/Godot_v4.7.2-stable_win64.exe" --path . res://tools/capture_screenshot.tscn -- out.png 120 drive
 ```
 
 ## Project layout
@@ -82,17 +97,20 @@ scenes/          Godot scenes
   main.tscn          entry point: builds world + player + camera
   characters/        generic character scene + placeholder creature visuals
   camera/            third-person camera rig
+  vehicles/          generic vehicle scene + kart placeholder visual
   world/             island_hub.tscn, test_arena.tscn, props/ (terrain, house, block, tree, cone, rock)
   dev/               movement_gym.tscn (arena + main wiring, used by tests)
   ui/                debug overlay
 scripts/         GDScript, mirrors the scene layout
   core/              autoload, entry point, input action names
-  characters/        controller, data definition, components, creature placeholder
+  characters/        controller, data definition, components (incl. driver), creature placeholder
+  vehicles/          controller, data definition, components (input, motor, abilities)
   camera/            third-person camera
-  world/             island terrain, prop scatter, placeholder props
+  world/             island terrain, prop scatter, placeholder props, flat material
   ui/                debug overlay
 resources/       data-driven configuration
   characters/        leopard (player), fox and panda (NPCs)
+  vehicles/          basic_kart
 tools/           editor/CI helpers (input map setup, screenshots, tests)
 assets/          art and audio (placeholders for now)
 ```
@@ -105,7 +123,7 @@ time, each verified before the next starts.
 - [x] **Phase 0** — project, git, structure, input map
 - [x] **Phase 1** — character, movement, jump, double jump, third-person camera
 - [x] **Phase 2** — island hub: terrain, forest, mountain, house, NPC placeholders
-- [ ] **Phase 3** — kart: summon, enter/exit, driving, turbo, jump
+- [x] **Phase 3** — kart: summon, enter/exit, driving, turbo, jump
 - [ ] **Phase 4** — portal and level transitions
 - [ ] **Phase 5** — first level: objective, star, checkpoint
 - [ ] **Phase 6** — combat: enemy, damage, death, respawn

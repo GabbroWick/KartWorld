@@ -8,9 +8,16 @@ extends Node3D
 @export var world_scene: PackedScene
 @export var character_scene: PackedScene
 @export var character_definition: CharacterDefinition
+@export var vehicle_scene: PackedScene
+@export var vehicle_definition: VehicleDefinition
+
+## Camera framing on foot and at the wheel: (distance, pivot height).
+const CHARACTER_FRAMING := Vector2(6.0, 1.3)
+const VEHICLE_FRAMING := Vector2(8.5, 1.6)
 
 var world: Node3D
 var player: CharacterController
+var vehicle: VehicleController
 
 @onready var camera_rig: ThirdPersonCamera = $CameraRig
 @onready var hud: CanvasLayer = $HUD
@@ -19,6 +26,7 @@ var player: CharacterController
 func _ready() -> void:
 	_build_world()
 	_spawn_player()
+	_spawn_vehicle()
 
 
 func _build_world() -> void:
@@ -48,6 +56,34 @@ func _spawn_player() -> void:
 	camera_rig.set_target(player)
 	if hud.has_method(&"bind_player"):
 		hud.call(&"bind_player", player)
+
+
+## One vehicle per player, parked beside the spawn until summoned. It is a
+## world entity: the player only holds a reference through DriverComponent.
+func _spawn_vehicle() -> void:
+	if vehicle_scene == null or player == null:
+		return
+	vehicle = vehicle_scene.instantiate() as VehicleController
+	if vehicle_definition:
+		vehicle.definition = vehicle_definition
+	add_child(vehicle)
+	var parked := player.spawn_transform
+	parked.origin += parked.basis.x * 4.0
+	vehicle.place(parked)
+
+	player.driver.set_vehicle(vehicle)
+	player.driver.entered_vehicle.connect(_on_entered_vehicle)
+	player.driver.exited_vehicle.connect(_on_exited_vehicle)
+
+
+func _on_entered_vehicle(driven: VehicleController) -> void:
+	camera_rig.set_framing(VEHICLE_FRAMING.x, VEHICLE_FRAMING.y)
+	camera_rig.set_target(driven, false)
+
+
+func _on_exited_vehicle(_left: VehicleController) -> void:
+	camera_rig.set_framing(CHARACTER_FRAMING.x, CHARACTER_FRAMING.y)
+	camera_rig.set_target(player, false)
 
 
 func _find_spawn_point() -> Node3D:

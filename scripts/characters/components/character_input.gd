@@ -18,6 +18,7 @@ var jump_pressed := false
 var jump_released := false
 var jump_held := false
 var interact_pressed := false
+var summon_pressed := false
 
 
 func _ready() -> void:
@@ -39,6 +40,7 @@ func poll() -> void:
 	jump_released = Input.is_action_just_released(InputActions.JUMP)
 	jump_held = Input.is_action_pressed(InputActions.JUMP)
 	interact_pressed = Input.is_action_just_pressed(InputActions.INTERACT)
+	summon_pressed = Input.is_action_just_pressed(InputActions.SUMMON_KART)
 
 
 func clear() -> void:
@@ -48,3 +50,4 @@ func clear() -> void:
 	jump_released = false
 	jump_held = false
 	interact_pressed = false
+	summon_pressed = false

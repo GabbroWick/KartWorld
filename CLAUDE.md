@@ -10,9 +10,9 @@ process. `ARCHITECTURE.md` explains the code; `README.md` is for humans.
 | --- | --- | --- |
 | 0 — project setup | done | Godot 4.7.2, git, input map, structure |
 | 1 — character | done | walk/run/jump/double jump, camera, 62 headless checks |
-| 2 — island hub | done | procedural island, forest, mountain, house, NPCs, 40 checks |
-| 3 — kart | **next** | summon, enter/exit, drive, turbo, jump |
-| 4 — portal | todo | |
+| 2 — island hub | done | procedural island, forest, mountain, house, NPCs |
+| 3 — kart | done | separate entity, summon, enter/exit, drive, turbo, jump, 47 checks |
+| 4 — portal | **next** | portal on the PortalSite, level scene load, return to hub |
 | 5 — first level | todo | objective, star, checkpoint |
 | 6 — combat | todo | enemy, damage, death, respawn |
 | 7 — progression | todo | |
@@ -35,9 +35,11 @@ Godot binary (this machine): `C:\Godot\Godot_v4.7.2\Godot_v4.7.2-stable_win64_co
 ```bash
 G="/c/Godot/Godot_v4.7.2/Godot_v4.7.2-stable_win64_console.exe"
 $G --headless --path . res://tools/tests/test_runner.tscn          # movement suite
+$G --headless --path . res://tools/tests/test_kart_runner.tscn     # kart suite
 $G --headless --path . res://tools/tests/test_island_runner.tscn   # island suite
 $G --path . res://tools/tests/test_lighting_runner.tscn            # lighting suite (needs a window)
 $G --path . res://tools/capture_screenshot.tscn -- out.png 120     # render a frame to PNG
+$G --path . res://tools/capture_screenshot.tscn -- out.png 120 drive   # ...while driving the kart
 $G --path . --quit-after 400                                       # run the game 400 frames
 $G --headless --path . --editor --quit                             # reimport / refresh class cache
 $G --headless --path . --script res://tools/setup_input_map.gd     # regenerate input map
@@ -97,12 +99,18 @@ suites exit non-zero on failure.
   `scenes/dev/movement_gym.tscn`.
 * Characters: `scripts/characters/`, definitions in `resources/characters/`
   (leopard = player; fox, panda = NPCs), visuals in `scenes/characters/visuals/`.
+* Vehicles: `scripts/vehicles/` (controller, definition, components/), scene
+  `scenes/vehicles/vehicle.tscn`, data `resources/vehicles/basic_kart.tres`.
+  Character side: `scripts/characters/components/driver_component.gd`.
 * Groups: `terrain`, `player_spawn`, `portal_site`.
 * Physics layers: 1 world, 2 player, 3 enemy, 4 interactable, 5 vehicle.
+  Player mask = world|vehicle (17); vehicle mask = world (1).
 
-## Next step (Phase 3 — kart)
+## Next step (Phase 4 — portal)
 
-Separate `VehicleController` entity (not attached to the character), summon
-near the player, enter/exit with `interact`, drive/turbo/jump as abilities,
-camera rig re-targets to the kart. Reuse `HealthComponent` and
-`AbilityComponent`. Add a `tools/tests/test_kart*` suite before calling it done.
+A `Portal` scene placed on the hub's `PortalSite` marker: `interact` (or
+walking in) loads a level scene by metadata (`LevelDefinition` resource: id,
+name, scene, objectives placeholder), a `LevelManager` in `Main` swaps the
+world, moves player + kart to the level's spawn, and a return portal / exit
+brings them back to the hub. Keep the kart summonable inside levels. Add
+`tools/tests/test_portal*` before calling it done.

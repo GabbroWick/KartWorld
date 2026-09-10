@@ -22,6 +22,7 @@ signal died
 @onready var motor: CharacterMotor = $Motor
 @onready var health: HealthComponent = $Health
 @onready var abilities: AbilityComponent = $Abilities
+@onready var driver: DriverComponent = $Driver
 @onready var visual_root: Node3D = $VisualRoot
 @onready var collision: CollisionShape3D = $Collision
 

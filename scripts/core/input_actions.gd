@@ -15,6 +15,11 @@ const JUMP := &"jump"
 const RUN := &"run"
 const INTERACT := &"interact"
 
+const ACCELERATE := &"accelerate"
+const BRAKE := &"brake"
+const TURBO := &"turbo"
+const SUMMON_KART := &"summon_kart"
+
 const CAMERA_LEFT := &"camera_left"
 const CAMERA_RIGHT := &"camera_right"
 const CAMERA_UP := &"camera_up"
@@ -27,6 +32,7 @@ const DEBUG_TOGGLE_HUD := &"debug_toggle_hud"
 const ALL: Array[StringName] = [
 	MOVE_FORWARD, MOVE_BACKWARD, MOVE_LEFT, MOVE_RIGHT,
 	JUMP, RUN, INTERACT,
+	ACCELERATE, BRAKE, TURBO, SUMMON_KART,
 	CAMERA_LEFT, CAMERA_RIGHT, CAMERA_UP, CAMERA_DOWN,
 	TOGGLE_MOUSE_CAPTURE, DEBUG_TOGGLE_HUD,
 ]

@@ -1,0 +1,125 @@
+[gd_scene load_steps=13 format=3]
+
+[sub_resource type="StandardMaterial3D" id="mat_body"]
+albedo_color = Color(0.2, 0.55, 0.95, 1)
+metallic_specular = 0.0
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="mat_trim"]
+albedo_color = Color(0.95, 0.95, 0.97, 1)
+metallic_specular = 0.0
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="mat_dark"]
+albedo_color = Color(0.12, 0.12, 0.14, 1)
+metallic_specular = 0.0
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="mat_glow"]
+albedo_color = Color(0.3, 0.95, 1, 1)
+emission_enabled = true
+emission = Color(0.3, 0.95, 1, 1)
+emission_energy_multiplier = 1.5
+metallic_specular = 0.0
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="mesh_body"]
+material = SubResource("mat_body")
+size = Vector3(1.4, 0.42, 2.4)
+
+[sub_resource type="BoxMesh" id="mesh_nose"]
+material = SubResource("mat_trim")
+size = Vector3(0.9, 0.24, 0.7)
+
+[sub_resource type="BoxMesh" id="mesh_seat"]
+material = SubResource("mat_dark")
+size = Vector3(0.7, 0.45, 0.7)
+
+[sub_resource type="BoxMesh" id="mesh_spoiler"]
+material = SubResource("mat_trim")
+size = Vector3(1.5, 0.08, 0.4)
+
+[sub_resource type="BoxMesh" id="mesh_strut"]
+material = SubResource("mat_dark")
+size = Vector3(0.08, 0.5, 0.08)
+
+[sub_resource type="CylinderMesh" id="mesh_wheel"]
+material = SubResource("mat_dark")
+top_radius = 0.3
+bottom_radius = 0.3
+height = 0.28
+radial_segments = 14
+rings = 1
+
+[sub_resource type="CylinderMesh" id="mesh_thruster"]
+material = SubResource("mat_glow")
+top_radius = 0.16
+bottom_radius = 0.2
+height = 0.3
+radial_segments = 10
+rings = 1
+
+[sub_resource type="SphereMesh" id="mesh_light"]
+material = SubResource("mat_glow")
+radius = 0.09
+height = 0.18
+radial_segments = 8
+rings = 4
+
+[node name="KartPlaceholder" type="Node3D"]
+
+[node name="Body" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("mesh_body")
+
+[node name="Nose" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, -1.35)
+mesh = SubResource("mesh_nose")
+
+[node name="Seat" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.92, 0.25)
+mesh = SubResource("mesh_seat")
+
+[node name="Spoiler" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.15, 1.1)
+mesh = SubResource("mesh_spoiler")
+
+[node name="StrutLeft" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0.9, 1.1)
+mesh = SubResource("mesh_strut")
+
+[node name="StrutRight" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.9, 1.1)
+mesh = SubResource("mesh_strut")
+
+[node name="WheelFL" type="MeshInstance3D" parent="."]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, -0.78, 0.3, -0.8)
+mesh = SubResource("mesh_wheel")
+
+[node name="WheelFR" type="MeshInstance3D" parent="."]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.78, 0.3, -0.8)
+mesh = SubResource("mesh_wheel")
+
+[node name="WheelRL" type="MeshInstance3D" parent="."]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, -0.78, 0.3, 0.8)
+mesh = SubResource("mesh_wheel")
+
+[node name="WheelRR" type="MeshInstance3D" parent="."]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.78, 0.3, 0.8)
+mesh = SubResource("mesh_wheel")
+
+[node name="ThrusterLeft" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -0.4, 0.5, 1.3)
+mesh = SubResource("mesh_thruster")
+
+[node name="ThrusterRight" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0.4, 0.5, 1.3)
+mesh = SubResource("mesh_thruster")
+
+[node name="HeadlightLeft" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3, 0.6, -1.7)
+mesh = SubResource("mesh_light")
+
+[node name="HeadlightRight" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 0.6, -1.7)
+mesh = SubResource("mesh_light")

@@ -49,8 +49,58 @@ func _run() -> void:
 	_test_scatter(world)
 	await _test_walk()
 	await _test_house()
+	await _test_kart_on_terrain()
 	await _test_sea()
 	_finish()
+
+
+func _test_kart_on_terrain() -> void:
+	# The kart suite runs on flat ground; here it has to cope with the island's
+	# slopes and trimesh collision: drive from the house pad down to the beach.
+	var start_point := Vector3(14.0, 4.5, 24.0)
+	var heading := _clear_heading(start_point, 32.0)
+	_check(heading != Vector3.ZERO, "found a tree-free corridor to drive along")
+	_player.global_position = start_point
+	_player.motor.reset()
+	_player.visual_root.global_rotation.y = atan2(-heading.x, -heading.z)
+	await _steps(20)
+	Input.action_press(InputActions.SUMMON_KART)
+	await _steps(3)
+	Input.action_release(InputActions.SUMMON_KART)
+	await _steps(15)
+	var kart := _player.driver.vehicle
+	_check(kart != null and kart.is_on_floor(), "summoned kart sits on the island terrain")
+	_check(kart.global_position.y < _player.global_position.y + 1.0,
+		"summoned kart is at ground level, not on something (y %.2f vs player %.2f)"
+		% [kart.global_position.y, _player.global_position.y])
+	Input.action_press(InputActions.INTERACT)
+	await _steps(3)
+	Input.action_release(InputActions.INTERACT)
+	await _steps(3)
+	_check(_player.driver.is_driving, "entered the kart on the island")
+
+	var start := kart.global_position
+	var airborne := 0
+	var top_speed := 0.0
+	Input.action_press(InputActions.ACCELERATE)
+	for i in 180:
+		await _steps(1)
+		if not kart.is_on_floor():
+			airborne += 1
+		top_speed = maxf(top_speed, kart.get_speed())
+	Input.action_release(InputActions.ACCELERATE)
+	var travelled := Vector2(kart.global_position.x - start.x, kart.global_position.z - start.z).length()
+	_check(travelled > 15.0, "kart drove down the slope (%.1fm, top speed %.1f, from %s to %s, facing %s)"
+		% [travelled, top_speed, start, kart.global_position, -kart.global_basis.z])
+	_check(airborne < 90, "kart mostly kept contact with the terrain (%d airborne frames)" % airborne)
+	_check(kart.global_position.y > 0.0, "kart did not fall through the terrain (y %.2f)" % kart.global_position.y)
+
+	Input.action_press(InputActions.INTERACT)
+	await _steps(3)
+	Input.action_release(InputActions.INTERACT)
+	await _steps(30)
+	_check(not _player.driver.is_driving and _player.is_on_floor(),
+		"left the kart and landed on the terrain")
 
 
 func _test_terrain() -> void:
@@ -210,6 +260,34 @@ func _test_sea() -> void:
 			respawned = true
 			break
 	_check(respawned, "walking into the sea respawns the player")
+
+
+## A horizontal unit vector from `from` along which a `length` metre corridor
+## (4 m wide) stays on land and contains no scattered prop. ZERO if none.
+func _clear_heading(from: Vector3, length: float) -> Vector3:
+	var props: PackedVector3Array = []
+	for scatter: PropScatter in _scene.get("world").find_children("*", "PropScatter", true, false):
+		props.append_array(scatter.placed_positions)
+	for i in 24:
+		var angle := TAU * i / 24.0
+		var dir := Vector3(sin(angle), 0.0, cos(angle))
+		var side := dir.cross(Vector3.UP)
+		var blocked := false
+		for step in range(0, int(length) + 1, 2):
+			var p := from + dir * step
+			if not _terrain.is_on_land(p.x, p.z) or _terrain.sample_height(p.x, p.z) < 1.0:
+				blocked = true
+				break
+			for prop in props:
+				var d := Vector3(prop.x - p.x, 0.0, prop.z - p.z)
+				if absf(d.dot(side)) < 2.5 and absf(d.dot(dir)) < 2.5:
+					blocked = true
+					break
+			if blocked:
+				break
+		if not blocked:
+			return dir
+	return Vector3.ZERO
 
 
 func _steps(count: int) -> void:
