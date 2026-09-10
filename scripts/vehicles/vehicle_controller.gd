@@ -26,6 +26,7 @@ signal fell_out_of_world
 var driver: Node = null
 var turbo: TurboAbility
 var _visual_instance: Node3D
+var _camera_reversed := false
 
 
 func _ready() -> void:
@@ -93,6 +94,7 @@ func get_exit_position() -> Vector3:
 func place(at: Transform3D) -> void:
 	global_transform = at
 	motor.reset()
+	_camera_reversed = false
 	if turbo:
 		turbo.reset()
 
@@ -101,9 +103,16 @@ func get_speed() -> float:
 	return motor.speed
 
 
-## Yaw the camera should sit behind. Reversing keeps the camera behind too.
+## Yaw the camera should settle on: behind the kart when going forward, in
+## front of it (looking at the tail) when reversing. Hysteresis so the view
+## does not flip back and forth around a standstill.
 func get_heading_yaw() -> float:
-	return global_rotation.y
+	# Front view only while actually reversing; at a standstill go back behind.
+	if _camera_reversed and motor.speed > -0.3:
+		_camera_reversed = false
+	elif not _camera_reversed and motor.speed < -1.0:
+		_camera_reversed = true
+	return global_rotation.y + (PI if _camera_reversed else 0.0)
 
 
 func _apply_definition() -> void:

@@ -127,6 +127,21 @@ func _test_camera_align() -> void:
 	var gap_look := absf(wrapf(_camera_rig.get_yaw() - kart_yaw, -PI, PI))
 	_check(gap_look > 0.4, "manual look still moves the camera off the heading (%.2f rad)" % gap_look)
 
+	# Reversing: the camera must swing round to the front and look at the tail.
+	_kart.place(Transform3D(Basis.IDENTITY, Vector3(0.0, 0.3, 12.0)))
+	_camera_rig.set_yaw(0.0)
+	await _steps(5)
+	Input.action_press(InputActions.BRAKE)
+	await _steps(110)
+	var reverse_gap := absf(wrapf(_camera_rig.get_yaw() - (_kart.global_rotation.y + PI), -PI, PI))
+	_check(_kart.get_speed() < -1.0, "kart is reversing (%.1f m/s)" % _kart.get_speed())
+	_check(reverse_gap < 0.2, "camera settles in front while reversing (%.2f rad off)" % reverse_gap)
+	Input.action_release(InputActions.BRAKE)
+	await _hold(InputActions.ACCELERATE, 40)
+	await _steps(80)
+	var forward_gap := absf(wrapf(_camera_rig.get_yaw() - _kart.global_rotation.y, -PI, PI))
+	_check(forward_gap < 0.2, "camera swings back behind once driving forward (%.2f rad off)" % forward_gap)
+
 
 func _test_brake_and_reverse() -> void:
 	_check(_kart.get_speed() > 2.0, "kart is still rolling before braking (%.1f)" % _kart.get_speed())
