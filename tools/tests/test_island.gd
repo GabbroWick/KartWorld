@@ -220,8 +220,9 @@ func _test_walk() -> void:
 	Input.action_press(InputActions.RUN)
 	var airborne_frames := 0
 	var lowest := 1000.0
+	# 2 s at run speed reaches the beach but stays short of the shore drop.
 	Input.action_press(&"move_forward")
-	for i in 200:
+	for i in 120:
 		await _steps(1)
 		if not _player.is_on_floor():
 			airborne_frames += 1

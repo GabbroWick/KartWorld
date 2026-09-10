@@ -9,7 +9,7 @@ script = ExtResource("1_camera")
 
 [node name="SpringArm3D" type="SpringArm3D" parent="PitchPivot"]
 collision_mask = 1
-spring_length = 6.0
+spring_length = 5.5
 margin = 0.3
 
 [node name="Camera3D" type="Camera3D" parent="PitchPivot/SpringArm3D"]

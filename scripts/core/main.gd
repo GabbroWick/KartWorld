@@ -12,7 +12,7 @@ extends Node3D
 @export var vehicle_definition: VehicleDefinition
 
 ## Camera framing on foot and at the wheel: (distance, pivot height).
-const CHARACTER_FRAMING := Vector2(6.0, 1.3)
+const CHARACTER_FRAMING := Vector2(5.5, 1.15)
 const VEHICLE_FRAMING := Vector2(8.5, 1.6)
 
 var world: Node3D

@@ -76,8 +76,10 @@ processing order, so the intent is always fresh for the current physics tick.
 Arcade, not realistic: high gravity (26 m/s²), extra gravity while falling,
 coyote time, jump buffering, and a short hop when the jump button is released
 early. All of it is data on the definition, not constants in the motor.
-Measured with the leopard: single jump 2.3 m, double jump 4.0 m, run 8.5 m/s.
-The island was laid out against those numbers.
+Locked after playtesting: leopard capsule 1.35 m (model at `visual_scale`
+0.8), walk 5 m/s, run 10 m/s, single jump 2.7 m, double jump ~4.7 m. Levels
+are laid out against these numbers: a 2.2 m door is ~1.6 leopards tall, a
+single jump clears ~2 leopards, a double jump ~3.5.
 
 ### Placeholder visuals
 
@@ -279,9 +281,5 @@ caught immediately.
 
 ## Open questions (for the human developer)
 
-* **Character scale.** The leopard is 1.6 m of collision capsule with a ~1.9 m
-  visual. The island was laid out against the measured movement, so changing
-  the scale later means re-tuning `leopard.tres` and re-running both suites,
-  not rebuilding the hub.
 * **House interior.** The base is solid for now; when customisation/trophies
   arrive it needs an interior or a separate interior scene.

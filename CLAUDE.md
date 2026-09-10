@@ -19,8 +19,10 @@ process. `ARCHITECTURE.md` explains the code; `README.md` is for humans.
 | 8 — polish | todo | |
 
 Decided: **Compatibility renderer on all platforms** (Web needs it, cartoon
-style does not need Forward+). Still open for the human: final character scale
-(cheap to change; see ARCHITECTURE.md).
+style does not need Forward+). **Character scale locked** after playtesting
+(2026-09-10): leopard capsule 1.35 m, visual_scale 0.8, walk 5 / run 10 m/s,
+jump 2.7 m (double ~4.7 m). Level metrics from here on are built against
+these numbers; door 2.2 m ≈ 1.6 leopards, like a Mario-style world.
 
 ## Loop
 

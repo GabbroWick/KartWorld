@@ -9,8 +9,8 @@ extends Node3D
 
 @export var target: Node3D
 ## Vertical offset of the orbit pivot, roughly the character's head height.
-@export var target_height := 1.3
-@export_range(1.0, 20.0, 0.1) var distance := 6.0
+@export var target_height := 1.15
+@export_range(1.0, 20.0, 0.1) var distance := 5.5
 ## Higher = snappier follow. Frame-rate independent.
 @export_range(1.0, 40.0, 0.5) var follow_speed := 14.0
 

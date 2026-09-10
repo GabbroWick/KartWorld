@@ -12,15 +12,18 @@ extends Resource
 @export_group("Visuals")
 ## Placeholder or final model, instantiated under the character's VisualRoot.
 @export var visual_scene: PackedScene
+## Uniform scale applied to the model, so one placeholder body serves
+## characters of different sizes.
+@export_range(0.2, 3.0, 0.01) var visual_scale := 1.0
 
 @export_group("Body")
 ## Collision capsule, so characters can have different sizes.
-@export_range(0.5, 4.0, 0.05) var capsule_height := 1.6
-@export_range(0.1, 1.5, 0.01) var capsule_radius := 0.35
+@export_range(0.5, 4.0, 0.05) var capsule_height := 1.35
+@export_range(0.1, 1.5, 0.01) var capsule_radius := 0.3
 
 @export_group("Movement")
-@export_range(0.5, 20.0, 0.1) var walk_speed := 4.5
-@export_range(0.5, 30.0, 0.1) var run_speed := 8.5
+@export_range(0.5, 20.0, 0.1) var walk_speed := 5.0
+@export_range(0.5, 30.0, 0.1) var run_speed := 10.0
 @export_range(1.0, 200.0, 1.0) var ground_acceleration := 60.0
 @export_range(1.0, 200.0, 1.0) var ground_friction := 70.0
 @export_range(1.0, 200.0, 1.0) var air_acceleration := 25.0
@@ -30,7 +33,7 @@ extends Resource
 
 @export_group("Jump")
 ## Peak height in metres of a full ground jump.
-@export_range(0.2, 10.0, 0.1) var jump_height := 2.2
+@export_range(0.2, 10.0, 0.1) var jump_height := 2.7
 ## Extra air jumps once the `double_jump` ability is unlocked.
 @export_range(0, 4, 1) var max_air_jumps := 1
 ## Air jump strength relative to the ground jump.

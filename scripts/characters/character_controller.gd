@@ -84,6 +84,7 @@ func _spawn_visual() -> void:
 	if definition.visual_scene == null:
 		return
 	_visual_instance = definition.visual_scene.instantiate() as Node3D
+	_visual_instance.scale = Vector3.ONE * definition.visual_scale
 	visual_root.add_child(_visual_instance)
 
 

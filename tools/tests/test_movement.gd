@@ -12,8 +12,9 @@ extends Node
 
 const MAIN_SCENE := "res://scenes/dev/movement_gym.tscn"
 const TICK := 1.0 / 60.0
-## Frames needed to reach the apex of a full jump, at 60 Hz physics.
-const ASCENT_FRAMES := 26
+## Frames to hold the button: a little past the apex of a full jump at 60 Hz
+## (2.7 m under 26 m/s^2 gravity = 0.46 s = 27 frames).
+const ASCENT_FRAMES := 30
 
 var _failures: Array[String] = []
 var _checks := 0
