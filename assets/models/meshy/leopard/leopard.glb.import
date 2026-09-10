@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dhtiiugqqtrd8"
-path="res://.godot/imported/leopard.glb-240e6de102fa9c2beb6fc7575fddd3b2.scn"
+uid="uid://wm6ja2u1c4g"
+path="res://.godot/imported/leopard.glb-4914a07c21723937e9eebeea5243edd9.scn"
 
 [deps]
 
-source_file="res://assets/models/meshy/leopard.glb"
-dest_files=["res://.godot/imported/leopard.glb-240e6de102fa9c2beb6fc7575fddd3b2.scn"]
+source_file="res://assets/models/meshy/leopard/leopard.glb"
+dest_files=["res://.godot/imported/leopard.glb-4914a07c21723937e9eebeea5243edd9.scn"]
 
 [params]
 

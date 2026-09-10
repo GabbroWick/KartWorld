@@ -61,18 +61,47 @@ func _physics_process(delta: float) -> void:
 		fell_out_of_world.emit()
 
 
-## The physics body stays upright; the model leans with the terrain so the
-## kart reads as driving on the hill instead of hovering through it.
+## The physics body stays an upright box; the model is a visual suspension:
+## four rays at the wheel corners find the ground, pitch and roll come from
+## the height differences and the model is lowered onto the average contact
+## height, so the wheels sit on the terrain even where the box rests on an
+## edge (crests, slope changes).
 func _tilt_to_ground(delta: float) -> void:
-	var normal := get_floor_normal() if is_on_floor() else Vector3.UP
-	var forward := -global_basis.z
-	forward = (forward - normal * forward.dot(normal)).normalized()
-	if forward.length_squared() < 0.001:
-		return
-	var right := forward.cross(normal).normalized()
-	var target := Basis(right, normal, -forward)
-	var local_target := global_basis.inverse() * target
-	visual_root.basis = visual_root.basis.slerp(local_target, minf(definition.tilt_speed * delta, 1.0))
+	var size := definition.collision_size
+	var half_w := size.x * 0.45
+	var half_l := size.z * 0.42
+	var corners: Array[Vector3] = [
+		Vector3(-half_w, 0.0, -half_l), Vector3(half_w, 0.0, -half_l),
+		Vector3(-half_w, 0.0, half_l), Vector3(half_w, 0.0, half_l),
+	]
+	var space := get_world_3d().direct_space_state
+	var heights: Array[float] = []
+	for corner: Vector3 in corners:
+		var origin := global_transform * (corner + Vector3.UP * size.y)
+		var query := PhysicsRayQueryParameters3D.create(origin, origin + Vector3.DOWN * (size.y + 2.5), 1)
+		query.exclude = [get_rid()]
+		var hit := space.intersect_ray(query)
+		if hit.is_empty():
+			heights.append(NAN)
+		else:
+			heights.append((hit.position as Vector3).y - global_position.y)
+
+	var target_basis := Basis.IDENTITY
+	var target_y := 0.0
+	var grounded := heights.all(func(h: float) -> bool: return not is_nan(h))
+	if grounded and is_on_floor():
+		var front := (heights[0] + heights[1]) * 0.5
+		var back := (heights[2] + heights[3]) * 0.5
+		var left := (heights[0] + heights[2]) * 0.5
+		var right := (heights[1] + heights[3]) * 0.5
+		var pitch := atan2(front - back, half_l * 2.0)
+		var roll := atan2(left - right, half_w * 2.0)
+		target_basis = Basis.from_euler(Vector3(pitch, 0.0, roll))
+		var mean := (heights[0] + heights[1] + heights[2] + heights[3]) * 0.25
+		target_y = clampf(mean, -0.6, 0.4)
+	var weight := minf(definition.tilt_speed * delta, 1.0)
+	visual_root.basis = visual_root.basis.slerp(target_basis, weight)
+	visual_root.position.y = lerpf(visual_root.position.y, target_y, weight)
 
 
 func is_driven() -> bool:

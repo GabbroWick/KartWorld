@@ -2,20 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d0dfbcjxx1lfn"
-path.s3tc="res://.godot/imported/leopard_1.jpg-02464a538d8ab2cfb532bb3d5f745135.s3tc.ctex"
+uid="uid://ckfebijne35p6"
+path.s3tc="res://.godot/imported/leopard_rig_0.png-2d292439cf992327d63e719835d78462.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "9c88dd619a95af77661540354e91d0ff"
+"md5": "c1c089f53b77d176337e2aacb7177f84"
 }
 
 [deps]
 
-source_file="res://assets/models/meshy/leopard_1.jpg"
-dest_files=["res://.godot/imported/leopard_1.jpg-02464a538d8ab2cfb532bb3d5f745135.s3tc.ctex"]
+source_file="res://assets/models/meshy/leopard/leopard_rig_0.png"
+dest_files=["res://.godot/imported/leopard_rig_0.png-2d292439cf992327d63e719835d78462.s3tc.ctex"]
 
 [params]
 

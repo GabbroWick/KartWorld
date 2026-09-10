@@ -15,6 +15,9 @@ extends Node3D
 ## renderer, which has no reflections to make metal read as anything but dark.
 
 @export var model: PackedScene
+## Applied before measuring. Mixamo re-exports come back in centimetres
+## (100x too small in Godot); Meshy GLBs are already in metres.
+@export_range(0.01, 200.0, 0.01) var model_scale := 1.0
 ## Meshy models face +Z; our characters face -Z.
 @export var flip_forward := true
 ## Metallic 0 / roughness 1 / no normal map: matches the flat Kenney props.
@@ -36,6 +39,7 @@ func _ready() -> void:
 	add_child(_pivot)
 	_instance = model.instantiate() as Node3D
 	_pivot.add_child(_instance)
+	_instance.scale = Vector3.ONE * model_scale
 	if flip_forward:
 		_instance.rotation.y = PI
 	var bounds := _measure(_instance, _instance.transform)

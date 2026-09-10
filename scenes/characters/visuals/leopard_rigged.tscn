@@ -1,0 +1,25 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/characters/rigged_character_visual.gd" id="1_visual"]
+[ext_resource type="PackedScene" path="res://assets/models/meshy/leopard/leopard_rig.fbx" id="2_rig"]
+[ext_resource type="PackedScene" path="res://assets/models/meshy/leopard/anim_walk.fbx" id="3_walk"]
+[ext_resource type="PackedScene" path="res://assets/models/meshy/leopard/anim_run.fbx" id="4_run"]
+[ext_resource type="PackedScene" path="res://assets/models/meshy/leopard/anim_jump.fbx" id="5_jump"]
+[ext_resource type="PackedScene" path="res://assets/models/meshy/leopard/anim_fall.fbx" id="6_fall"]
+
+[node name="LeopardRigged" type="Node3D"]
+script = ExtResource("1_visual")
+model = ExtResource("2_rig")
+model_scale = 100.0
+flip_forward = true
+flatten_materials = true
+motion = 0.35
+walk_clip = ExtResource("3_walk")
+run_clip = ExtResource("4_run")
+jump_clip = ExtResource("5_jump")
+fall_clip = ExtResource("6_fall")
+reference_speed = 10.0
+walk_clip_speed = 1.0
+run_clip_speed = 3.3
+run_threshold = 0.6
+max_speed_scale = 2.2
