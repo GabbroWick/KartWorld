@@ -18,7 +18,11 @@ var _mouse_captured := false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	set_mouse_captured(true)
+	# Browsers only allow pointer lock from a user gesture: on the Web the
+	# first click captures the mouse (see _unhandled_input), on desktop we
+	# capture right away.
+	if not OS.has_feature("web"):
+		set_mouse_captured(true)
 
 
 func _unhandled_input(event: InputEvent) -> void:

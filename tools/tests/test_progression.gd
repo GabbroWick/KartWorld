@@ -73,7 +73,7 @@ func _test_first_completion() -> void:
 	_check(_player.abilities.has(&"enhanced_jump"), "player's AbilityComponent received it live")
 	_check(_player.motor.get_max_air_jumps() == 2, "two air jumps now")
 	_check(_manager.is_in_hub(), "party is back in the hub")
-	_check(_hud.stars_label.text == "★ 1", "hub HUD shows the total stars (%s)" % _hud.stars_label.text)
+	_check(_hud.stars_label.text == "1", "hub HUD shows the total stars (%s)" % _hud.stars_label.text)
 	_check(_hud.notice_label.text.contains("jump"), "HUD announces the new ability (%s)" % _hud.notice_label.text)
 	_check(FileAccess.file_exists(SCRATCH_SAVE), "save file written")
 
@@ -114,7 +114,7 @@ func _test_best_stars() -> void:
 	_manager.complete_level(0)
 	await _steps(10)
 	_check(ProgressionManager.get_best_stars(&"forest_trail") == 2, "a worse run does not lower the best")
-	_check(_hud.stars_label.text == "★ 2", "hub HUD shows 2 stars (%s)" % _hud.stars_label.text)
+	_check(_hud.stars_label.text == "2", "hub HUD shows 2 stars (%s)" % _hud.stars_label.text)
 
 
 func _test_save_roundtrip() -> void:

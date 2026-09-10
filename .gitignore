@@ -4,8 +4,8 @@
 /builds/
 *.translation
 
-# Export artefacts (keep export_presets.cfg out: contains local paths/keys)
-export_presets.cfg
+# Export artefacts. export_presets.cfg is tracked: the Web preset holds no
+# secrets, and a reproducible export is worth more than hiding it.
 
 # OS / editor noise
 Thumbs.db

@@ -50,7 +50,15 @@ $G --path . res://tools/capture_screenshot.tscn -- out.png 120 drive   # ...whil
 $G --path . --quit-after 400                                       # run the game 400 frames
 $G --headless --path . --editor --quit                             # reimport / refresh class cache
 $G --headless --path . --script res://tools/setup_input_map.gd     # regenerate input map
+$G --headless --path . --export-release "Web" builds/web/index.html   # web export (templates installed)
+python tools/serve_web.py                                          # serve builds/web on :8060
+"/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe" --headless=new --use-angle=swiftshader --enable-unsafe-swiftshader --virtual-time-budget=90000 --enable-logging=stderr --screenshot=out.png http://localhost:8060/index.html   # headless browser check
 ```
+
+Web export templates 4.7.2 are installed in
+`%APPDATA%/Godot/export_templates/4.7.2.stable/` (web_* zips only). Web
+gotchas: no pointer lock without a click; the default font has no ♥/★ glyphs
+(HUD draws them as polygons: `scripts/ui/heart_bar.gd`, `star_icon.gd`).
 
 Run the two suites and a screenshot after every change; read the PNG. Both
 suites exit non-zero on failure.

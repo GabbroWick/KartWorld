@@ -49,7 +49,7 @@ func _run() -> void:
 
 
 func _test_hud_in_hub() -> void:
-	_check(_hud.health_label.text == "♥♥♥♥♥", "HUD shows five hearts in the hub (%s)" % _hud.health_label.text)
+	_check(_hud.hearts.current == 5 and _hud.hearts.maximum == 5, "HUD shows five hearts in the hub (%d/%d)" % [_hud.hearts.current, _hud.hearts.maximum])
 	_check(_hud.objective_label.text.begins_with("Explore"), "HUD shows the hub hint")
 	_check(_hud.stars_label.text == "", "no star counter in the hub")
 
@@ -69,7 +69,7 @@ func _test_load() -> void:
 	_check(_level.stars_total == 2, "level counts its two stars (%d)" % _level.stars_total)
 	_check(_hud.objective_label.text == "Reach the far clearing",
 		"HUD shows the objective (%s)" % _hud.objective_label.text)
-	_check(_hud.stars_label.text == "★ 0/2", "HUD shows 0/2 stars (%s)" % _hud.stars_label.text)
+	_check(_hud.stars_label.text == "0/2", "HUD shows 0/2 stars (%s)" % _hud.stars_label.text)
 	var stars := get_tree().get_nodes_in_group(&"star")
 	_check(stars.size() == 2, "two Star nodes in the scene")
 
@@ -86,7 +86,7 @@ func _test_star() -> void:
 	await _steps(5)
 	_check(got[0], "walking into a star collects it")
 	_check(_level.stars_collected == 1, "controller counts 1 star")
-	_check(_hud.stars_label.text == "★ 1/2", "HUD shows 1/2 stars (%s)" % _hud.stars_label.text)
+	_check(_hud.stars_label.text == "1/2", "HUD shows 1/2 stars (%s)" % _hud.stars_label.text)
 	_check(not is_instance_valid(star) or star.is_queued_for_deletion(), "collected star disappears")
 	var collect: CollectObjective = _level.objectives[1]
 	_check(collect.get_status_text() == "Collect stars 1/2", "collect objective reports progress (%s)" % collect.get_status_text())
@@ -124,10 +124,10 @@ func _test_death_respawn() -> void:
 func _test_health_hud() -> void:
 	_player.health.take_damage(2.0)
 	await _steps(2)
-	_check(_hud.health_label.text == "♥♥♥♡♡", "HUD reflects damage (%s)" % _hud.health_label.text)
+	_check(_hud.hearts.current == 3, "HUD reflects damage (%d hearts)" % _hud.hearts.current)
 	_player.health.heal(2.0)
 	await _steps(2)
-	_check(_hud.health_label.text == "♥♥♥♥♥", "HUD reflects healing")
+	_check(_hud.hearts.current == 5, "HUD reflects healing")
 
 
 func _test_goal() -> void:
@@ -157,7 +157,7 @@ func _test_goal() -> void:
 	_check(_hud.objective_label.text.begins_with("Explore"), "HUD shows the hub hint again")
 	_check(_player.health.current_health == _player.health.max_health,
 		"hearts are refilled when the level ends (%.0f)" % _player.health.current_health)
-	_check(_hud.stars_label.text == "★ 1", "hub shows the total stars earned (%s)" % _hud.stars_label.text)
+	_check(_hud.stars_label.text == "1", "hub shows the total stars earned (%s)" % _hud.stars_label.text)
 	await _steps(20)
 	_check(_player.is_on_floor(), "character stands on the island")
 	ProgressionManager.reset()

@@ -7,8 +7,9 @@ extends CanvasLayer
 
 const HUB_OBJECTIVE := "Explore the island. Find a portal!"
 
-@onready var health_label: Label = $Root/TopLeft/Health
-@onready var stars_label: Label = $Root/TopRight/Stars
+@onready var hearts: HeartBar = $Root/TopLeft/Hearts
+@onready var star_row: HBoxContainer = $Root/TopRight/StarRow
+@onready var stars_label: Label = $Root/TopRight/StarRow/Stars
 @onready var objective_label: Label = $Root/TopCenter/Objective
 @onready var prompt_label: Label = $Root/Bottom/Prompt
 @onready var notice_label: Label = $Root/Notice/Text
@@ -74,13 +75,17 @@ func _refresh_hub_stars() -> void:
 	if _manager == null or not _manager.is_in_hub():
 		return
 	var total := ProgressionManager.get_total_stars()
-	stars_label.text = "★ %d" % total if total > 0 else ""
+	_set_stars_text(str(total) if total > 0 else "")
 
 
 func _on_health_changed(current: float, maximum: float) -> void:
-	var full := int(round(current))
-	var empty := int(round(maximum)) - full
-	health_label.text = "♥".repeat(maxi(full, 0)) + "♡".repeat(maxi(empty, 0))
+	hearts.set_hearts(current, maximum)
+
+
+## Star counter text; hides the whole row when empty.
+func _set_stars_text(text: String) -> void:
+	stars_label.text = text
+	star_row.visible = text != ""
 
 
 func _on_hub_loaded() -> void:
@@ -93,7 +98,7 @@ func _on_level_loaded(_definition: LevelDefinition) -> void:
 	_level = get_tree().get_first_node_in_group(LevelController.GROUP) as LevelController
 	if _level == null:
 		objective_label.text = ""
-		stars_label.text = ""
+		_set_stars_text("")
 		return
 	_level.objectives_changed.connect(_refresh_objective)
 	_level.stars_changed.connect(_on_stars_changed)
@@ -112,7 +117,7 @@ func _refresh_objective() -> void:
 
 
 func _on_stars_changed(collected: int, total: int) -> void:
-	stars_label.text = "★ %d/%d" % [collected, total]
+	_set_stars_text("%d/%d" % [collected, total])
 
 
 func _prompt_text() -> String:

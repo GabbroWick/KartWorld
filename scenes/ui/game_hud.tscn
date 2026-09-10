@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/game_hud.gd" id="1_hud"]
+[ext_resource type="Script" path="res://scripts/ui/heart_bar.gd" id="2_hearts"]
+[ext_resource type="Script" path="res://scripts/ui/star_icon.gd" id="3_star"]
 
 [node name="GameHUD" type="CanvasLayer"]
 layer = 2
@@ -21,12 +23,10 @@ offset_bottom = 60.0
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 16
 
-[node name="Health" type="Label" parent="Root/TopLeft"]
-theme_override_colors/font_color = Color(1, 0.35, 0.4, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 30
-text = "♥♥♥♥♥"
+[node name="Hearts" type="Control" parent="Root/TopLeft"]
+script = ExtResource("2_hearts")
+current = 5
+maximum = 5
 
 [node name="TopRight" type="MarginContainer" parent="Root"]
 anchors_preset = 1
@@ -38,12 +38,21 @@ grow_horizontal = 0
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_top = 16
 
-[node name="Stars" type="Label" parent="Root/TopRight"]
+[node name="StarRow" type="HBoxContainer" parent="Root/TopRight"]
+alignment = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="Control" parent="Root/TopRight/StarRow"]
+custom_minimum_size = Vector2(28, 28)
+size_flags_vertical = 4
+script = ExtResource("3_star")
+star_size = 28.0
+
+[node name="Stars" type="Label" parent="Root/TopRight/StarRow"]
 theme_override_colors/font_color = Color(1, 0.85, 0.25, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
 theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 30
-horizontal_alignment = 2
 text = ""
 
 [node name="TopCenter" type="MarginContainer" parent="Root"]

@@ -132,7 +132,7 @@ func _test_contact_damage() -> void:
 	_check(_player.health.current_health == start_health - 1.0,
 		"contact costs exactly 1 heart (%.0f -> %.0f)" % [start_health, _player.health.current_health])
 	_check(_player.is_invulnerable(), "player is invulnerable right after the hit")
-	_check(_hud.health_label.text == "♥♥♥♥♡", "HUD shows the lost heart (%s)" % _hud.health_label.text)
+	_check(_hud.hearts.current == 4, "HUD shows the lost heart (%d)" % _hud.hearts.current)
 	# The slime is still touching us; nothing may land until the i-frames end.
 	var hurt_after_first: int = hurt[0]
 	var frames_left := int(_player.invulnerable_left * 60.0) - 6
@@ -164,7 +164,7 @@ func _test_death_by_damage() -> void:
 	_check(died[0], "running out of hearts kills the character")
 	_check(_player.health.current_health == _player.health.max_health, "respawn restores full health")
 	_check(_player.global_position.distance_to(spawn) < 1.0, "character respawns at the spawn point")
-	_check(_hud.health_label.text == "♥♥♥♥♥", "HUD shows full hearts again")
+	_check(_hud.hearts.current == 5, "HUD shows full hearts again")
 	_check(not _manager.is_in_hub(), "dying keeps the party in the level")
 
 

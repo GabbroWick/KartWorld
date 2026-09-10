@@ -43,6 +43,23 @@ Windows, Web, Android and iOS with one look.
 
 The main scene is `scenes/main.tscn`.
 
+## Web build
+
+The project exports to the browser (Compatibility renderer, single-threaded,
+so no special hosting headers are required). Export templates for 4.7.2 must
+be installed once (`%APPDATA%\Godot\export_templates\4.7.2.stable\`; only the
+`web_*` zips are needed).
+
+```bash
+G="C:/Godot/Godot_v4.7.2/Godot_v4.7.2-stable_win64_console.exe"
+$G --headless --path . --export-release "Web" builds/web/index.html
+python tools/serve_web.py          # then open http://localhost:8060
+```
+
+`builds/` is git-ignored. On the Web the mouse is captured on the first click
+(browsers require a gesture), and the HUD draws hearts and stars as vector
+shapes because the default web font has no such glyphs.
+
 ## Controls
 
 | Action | Keyboard / mouse | Gamepad |

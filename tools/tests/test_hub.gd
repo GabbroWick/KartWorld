@@ -67,7 +67,7 @@ func _test_persistent_star() -> void:
 	await _steps(5)
 	_check(ProgressionManager.is_collected(id), "touching a hub star records it (%s)" % id)
 	_check(ProgressionManager.get_total_stars() == 1, "hub star counts toward total stars")
-	_check(_hud.stars_label.text == "★ 1", "HUD shows the hub star (%s)" % _hud.stars_label.text)
+	_check(_hud.stars_label.text == "1", "HUD shows the hub star (%s)" % _hud.stars_label.text)
 	_check(FileAccess.get_file_as_string(SCRATCH_SAVE).contains(String(id)), "hub star is saved to disk")
 	# Leave and come back: the star must not be there any more.
 	_manager.load_level(load("res://resources/levels/level_01_forest_trail.tres"))
@@ -75,7 +75,7 @@ func _test_persistent_star() -> void:
 	_manager.return_to_hub()
 	await _steps(5)
 	_check(_hub_stars().size() == 2, "collected hub star does not respawn (%d left)" % _hub_stars().size())
-	_check(_hud.stars_label.text == "★ 1", "HUD still shows 1 star back in the hub (%s)" % _hud.stars_label.text)
+	_check(_hud.stars_label.text == "1", "HUD still shows 1 star back in the hub (%s)" % _hud.stars_label.text)
 
 
 func _test_locked_portal() -> void:
