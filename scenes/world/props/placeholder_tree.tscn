@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/placeholder_tree.gd" id="1_tree"]
+
+[node name="Tree" type="StaticBody3D"]
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("1_tree")
+
+[node name="Trunk" type="MeshInstance3D" parent="."]
+
+[node name="Canopy" type="MeshInstance3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]

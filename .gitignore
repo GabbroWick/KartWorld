@@ -1,0 +1,15 @@
+# Godot 4 generated files
+.godot/
+/android/
+/builds/
+*.translation
+
+# Export artefacts (keep export_presets.cfg out: contains local paths/keys)
+export_presets.cfg
+
+# OS / editor noise
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/

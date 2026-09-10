@@ -1,0 +1,18 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/main.gd" id="1_main"]
+[ext_resource type="PackedScene" path="res://scenes/world/test_arena.tscn" id="2_world"]
+[ext_resource type="PackedScene" path="res://scenes/characters/character.tscn" id="3_character"]
+[ext_resource type="Resource" path="res://resources/characters/leopard.tres" id="4_leopard"]
+[ext_resource type="PackedScene" path="res://scenes/camera/third_person_camera.tscn" id="5_camera"]
+[ext_resource type="PackedScene" path="res://scenes/ui/debug_hud.tscn" id="6_hud"]
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_main")
+world_scene = ExtResource("2_world")
+character_scene = ExtResource("3_character")
+character_definition = ExtResource("4_leopard")
+
+[node name="CameraRig" parent="." instance=ExtResource("5_camera")]
+
+[node name="HUD" parent="." instance=ExtResource("6_hud")]

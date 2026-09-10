@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="CharacterDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/characters/character_definition.gd" id="1_definition"]
+[ext_resource type="PackedScene" path="res://scenes/characters/visuals/leopard_placeholder.tscn" id="2_visual"]
+
+[resource]
+script = ExtResource("1_definition")
+id = &"leopard"
+display_name = "Leopard"
+visual_scene = ExtResource("2_visual")
+capsule_height = 1.6
+capsule_radius = 0.35
+walk_speed = 4.5
+run_speed = 8.5
+ground_acceleration = 60.0
+ground_friction = 70.0
+air_acceleration = 25.0
+air_friction = 6.0
+turn_speed = 14.0
+jump_height = 2.2
+max_air_jumps = 1
+air_jump_scale = 0.9
+gravity_scale = 1.0
+fall_gravity_multiplier = 1.5
+short_hop_damping = 0.6
+terminal_velocity = 40.0
+coyote_time = 0.12
+jump_buffer_time = 0.12
+max_health = 5.0
+starting_abilities = PackedStringArray("run", "double_jump")

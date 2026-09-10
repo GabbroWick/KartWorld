@@ -1,0 +1,59 @@
+extends Node
+## Autoload: global game services.
+##
+## Kept deliberately small. It owns things that are genuinely global (mouse
+## capture, the list of active players) and nothing that belongs to a character,
+## a camera or a level. Player state stays on the player, so local co-op /
+## multiplayer stay possible later (see CLAUDE_CODE_MASTER_PROMPT.md section 29).
+
+signal player_registered(player: Node)
+signal player_unregistered(player: Node)
+
+## Active player characters, in join order. Index 0 is player one.
+var players: Array[Node] = []
+
+var _mouse_captured := false
+
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	set_mouse_captured(true)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(InputActions.TOGGLE_MOUSE_CAPTURE):
+		set_mouse_captured(not _mouse_captured)
+		get_viewport().set_input_as_handled()
+	elif event is InputEventMouseButton and event.pressed and not _mouse_captured:
+		set_mouse_captured(true)
+
+
+func set_mouse_captured(captured: bool) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	_mouse_captured = captured
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if captured else Input.MOUSE_MODE_VISIBLE
+
+
+func is_mouse_captured() -> bool:
+	return _mouse_captured
+
+
+func register_player(player: Node) -> int:
+	if player in players:
+		return players.find(player)
+	players.append(player)
+	if not player.tree_exiting.is_connected(unregister_player):
+		player.tree_exiting.connect(unregister_player.bind(player))
+	player_registered.emit(player)
+	return players.size() - 1
+
+
+func unregister_player(player: Node) -> void:
+	if player in players:
+		players.erase(player)
+		player_unregistered.emit(player)
+
+
+func get_player(index: int = 0) -> Node:
+	return players[index] if index < players.size() else null
