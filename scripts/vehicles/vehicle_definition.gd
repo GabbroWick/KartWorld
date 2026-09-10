@@ -13,6 +13,8 @@ extends Resource
 
 @export_group("Body")
 @export var collision_size := Vector3(1.6, 0.8, 2.6)
+## Tallest kerb the vehicle rolls over without jumping.
+@export_range(0.0, 1.5, 0.05) var max_step_height := 0.5
 ## Where the driver reappears when leaving, relative to the vehicle.
 @export var exit_offset := Vector3(2.0, 0.5, 0.0)
 

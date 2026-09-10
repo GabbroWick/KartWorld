@@ -3,13 +3,14 @@
 3D cartoon adventure game (Godot 4 / GDScript).
 Design spec: [KARTWORLD_GAME_DESIGN.md](KARTWORLD_GAME_DESIGN.md) — development rules: [CLAUDE_CODE_MASTER_PROMPT.md](CLAUDE_CODE_MASTER_PROMPT.md).
 
-**Current state: Phase 3 — island hub with a summonable kart.**
+**Current state: Phase 4 — island hub, kart and the first portal.**
 A generic third-person character (configured as the leopard) walks, runs, jumps
 and double-jumps around a procedurally generated cartoon island: beach, forest,
-mountain, a house, two NPC placeholders (fox, panda) and a marked site for the
-first portal. The player can summon a futuristic kart, get in, drive, turbo,
-jump and get out again. No combat, no portals, no levels yet — that is
-deliberate, see the roadmap below. Everything is placeholder art on purpose.
+mountain, a house, two NPC placeholders (fox, panda). The player can summon a
+futuristic kart, get in, drive, turbo, jump and get out again, and walk (or
+drive) into a portal that loads the first level and come back through its
+return portal. No objectives, stars, combat or saving yet — that is deliberate,
+see the roadmap below. Everything is placeholder art on purpose.
 
 ---
 
@@ -64,11 +65,16 @@ line per check and exits non-zero on failure.
 
 ```bash
 G="C:/Godot/Godot_v4.7.2/Godot_v4.7.2-stable_win64_console.exe"
-$G --headless --path . res://tools/tests/test_runner.tscn          # movement (70 checks)
-$G --headless --path . res://tools/tests/test_kart_runner.tscn     # kart (55 checks)
+$G --headless --path . res://tools/tests/test_runner.tscn          # movement (71 checks)
+$G --headless --path . res://tools/tests/test_kart_runner.tscn     # kart (56 checks)
 $G --headless --path . res://tools/tests/test_island_runner.tscn   # island hub (48 checks)
+$G --headless --path . res://tools/tests/test_portal_runner.tscn   # portals and levels (33 checks)
 $G --path . res://tools/tests/test_lighting_runner.tscn            # lighting (6 checks, needs a window)
 ```
+
+* **Portals**: hub portal metadata, grace period after a load, walking and
+  driving into a portal, level scene replacing the hub, player and kart at
+  the level spawn, return portal bringing the island back.
 
 * **Movement**: walk, run, jump height, short hop, double jump, air-jump limit,
   gravity, collision, camera follow, camera-relative movement, fall respawn.
@@ -98,19 +104,22 @@ scenes/          Godot scenes
   characters/        generic character scene + placeholder creature visuals
   camera/            third-person camera rig
   vehicles/          generic vehicle scene + kart placeholder visual
-  world/             island_hub.tscn, test_arena.tscn, props/ (terrain, house, block, tree, cone, rock)
+  levels/            adventure level scenes (level_01_forest_trail.tscn)
+  world/             island_hub.tscn, test_arena.tscn, props/ (terrain, house, portal, block, tree, cone, rock)
   dev/               movement_gym.tscn (arena + main wiring, used by tests)
   ui/                debug overlay
 scripts/         GDScript, mirrors the scene layout
   core/              autoload, entry point, input action names
   characters/        controller, data definition, components (incl. driver), creature placeholder
   vehicles/          controller, data definition, components (input, motor, abilities)
+  levels/            level definition, level manager, portal
   camera/            third-person camera
   world/             island terrain, prop scatter, placeholder props, flat material
   ui/                debug overlay
 resources/       data-driven configuration
   characters/        leopard (player), fox and panda (NPCs)
   vehicles/          basic_kart
+  levels/            level metadata (level_01_forest_trail.tres)
 tools/           editor/CI helpers (input map setup, screenshots, tests)
 assets/          art and audio (placeholders for now)
 ```
@@ -124,7 +133,7 @@ time, each verified before the next starts.
 - [x] **Phase 1** — character, movement, jump, double jump, third-person camera
 - [x] **Phase 2** — island hub: terrain, forest, mountain, house, NPC placeholders
 - [x] **Phase 3** — kart: summon, enter/exit, driving, turbo, jump
-- [ ] **Phase 4** — portal and level transitions
+- [x] **Phase 4** — portal and level transitions
 - [ ] **Phase 5** — first level: objective, star, checkpoint
 - [ ] **Phase 6** — combat: enemy, damage, death, respawn
 - [ ] **Phase 7** — progression and basic save

@@ -1,6 +1,6 @@
 # KartWorld — Architecture
 
-Status: Phase 0–3. This document describes what exists today and the
+Status: Phase 0–4. This document describes what exists today and the
 extension points that were deliberately left open. It is updated when the
 architecture materially changes, not on every commit.
 
@@ -71,6 +71,15 @@ no device input, no registration as a player.
 The controller polls `CharacterInput` explicitly instead of relying on node
 processing order, so the intent is always fresh for the current physics tick.
 
+### Steps and kerbs
+
+`move_and_slide` only climbs what a shape's rounded bottom slides over, so a
+capsule of radius 0.3 stops dead at a 0.4 m plinth. `StepUp.try_step()`
+(`scripts/core/step_up.gd`) probes ahead / up / ahead / down with `test_move`
+and lifts the body onto ledges up to the definition's `max_step_height`
+(character 0.45 m, kart 0.5 m). Both motors call it before `move_and_slide`
+whenever the body is on the floor and not rising.
+
 ### Movement feel
 
 Arcade, not realistic: high gravity (26 m/s²), extra gravity while falling,
@@ -134,6 +143,37 @@ Vehicle (vehicle.tscn, CharacterBody3D, layer 5 "vehicle")
   spawn — the player is never stranded.
 * The camera is re-targeted by `Main` through the driver's signals and gets a
   wider framing (`set_framing`) at the wheel. No second camera.
+
+## Level system
+
+```text
+Main
+├── LevelManager        swaps the world; knows hub scene + current LevelDefinition
+├── <World>             hub (island_hub.tscn) or a level scene, always first child
+├── Character
+├── Vehicle
+└── CameraRig
+```
+
+* **`LevelDefinition`** (Resource): id, name, world theme, description, the
+  scene, required abilities, star count, boss flag, unlocked-by-default.
+  Thirty or forty of these must be possible without level-specific code, so
+  nothing in the manager or the portal knows a level by name.
+* **`LevelManager`** (node in Main): `load_level(def)`, `return_to_hub()`,
+  `complete_level(stars)`. Swapping frees the current world node, instantiates
+  the new scene as Main's first child (camera still updates last), then
+  relocates the party: driver ejected if at the wheel, character teleported to
+  the scene's `player_spawn` marker facing its way, kart parked 4 m beside it,
+  camera snapped behind. Emits `level_loaded`, `hub_loaded` and
+  `level_completed(def, stars)` for the progression system to record later.
+* **`Portal`** (Area3D on layer 4, mask player|vehicle): walking or driving in
+  travels — outbound portals carry a `LevelDefinition`, return portals set
+  `returns_to_hub`. Required abilities are checked on the traveller. Portals
+  are inert for a grace period after any load, so arriving beside one never
+  bounces the player back. The manager call is deferred because the world is
+  freed from inside a physics callback.
+* Every scene that can host the party — hub or level — needs a `Marker3D` in
+  group `player_spawn`; that is the whole contract.
 
 ## World
 

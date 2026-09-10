@@ -54,6 +54,7 @@ func _run() -> void:
 	await _test_short_hop()
 	await _test_double_jump()
 	await _test_camera()
+	await _test_step_up()
 	await _test_collision()
 	await _test_fall_respawn()
 	_finish()
@@ -188,6 +189,19 @@ func _test_camera() -> void:
 		_check(moved.normalized().dot(camera_forward.normalized()) > 0.9,
 			"forward input follows the camera direction (dot %.2f)"
 			% moved.normalized().dot(camera_forward.normalized()))
+	await _steps(20)
+
+
+func _test_step_up() -> void:
+	# A 0.4 m kerb (top at y=0.4) at z=22; walk onto it from z=26 without jumping.
+	_camera_rig.set_yaw(0.0)
+	_player.global_position = Vector3(0.0, 0.2, 26.0)
+	_player.motor.reset()
+	await _steps(20)
+	await _hold(&"move_forward", 60)
+	_check(_player.global_position.z < 22.5 and _player.global_position.y > 0.35,
+		"walks up a 0.4 m kerb without jumping (z %.1f, y %.2f)"
+		% [_player.global_position.z, _player.global_position.y])
 	await _steps(20)
 
 

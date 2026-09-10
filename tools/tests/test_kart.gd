@@ -45,6 +45,7 @@ func _run() -> void:
 	await _test_turbo()
 	await _test_jump()
 	await _test_wall()
+	await _test_kerb()
 	await _test_exit()
 	await _test_fall_out()
 	_finish()
@@ -128,7 +129,7 @@ func _test_camera_align() -> void:
 	_check(gap_look > 0.4, "manual look still moves the camera off the heading (%.2f rad)" % gap_look)
 
 	# Reversing: the camera must swing round to the front and look at the tail.
-	_kart.place(Transform3D(Basis.IDENTITY, Vector3(0.0, 0.3, 12.0)))
+	_kart.place(Transform3D(Basis.IDENTITY, Vector3(-20.0, 0.3, 8.0)))
 	_camera_rig.set_yaw(0.0)
 	await _steps(5)
 	Input.action_press(InputActions.BRAKE)
@@ -202,6 +203,16 @@ func _test_wall() -> void:
 		"wall stops the kart (z %.2f, wall face at -7.7)" % _kart.global_position.z)
 	_check(_kart.get_speed() < 1.0, "speed is killed by the impact (%.1f)" % _kart.get_speed())
 	await _steps(10)
+
+
+func _test_kerb() -> void:
+	# Kerb at z=22, top y=0.4. Drive onto it from z=28 heading -Z.
+	_kart.place(Transform3D(Basis.IDENTITY, Vector3(0.0, 0.3, 28.0)))
+	await _steps(10)
+	await _hold(InputActions.ACCELERATE, 60)
+	_check(_kart.global_position.z < 22.0 and _kart.global_position.y > 0.25,
+		"kart rolls over a 0.4 m kerb (z %.1f, y %.2f)" % [_kart.global_position.z, _kart.global_position.y])
+	await _steps(30)
 
 
 func _test_exit() -> void:

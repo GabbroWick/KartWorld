@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/props/island_terrain.tscn" id="1_terrain"]
 [ext_resource type="PackedScene" path="res://scenes/world/props/house.tscn" id="2_house"]
@@ -9,6 +9,8 @@
 [ext_resource type="PackedScene" path="res://scenes/characters/character.tscn" id="7_character"]
 [ext_resource type="Resource" path="res://resources/characters/fox.tres" id="8_fox"]
 [ext_resource type="Resource" path="res://resources/characters/panda.tres" id="9_panda"]
+[ext_resource type="PackedScene" path="res://scenes/world/props/portal.tscn" id="10_portal"]
+[ext_resource type="Resource" path="res://resources/levels/level_01_forest_trail.tres" id="11_level"]
 
 [sub_resource type="ProceduralSkyMaterial" id="sky_material"]
 sky_top_color = Color(0.2, 0.48, 0.86, 1)
@@ -82,6 +84,10 @@ color = Color(0.6, 0.58, 0.62, 1)
 
 [node name="PortalMarker" type="Marker3D" parent="PortalSite" groups=["portal_site"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+
+[node name="Portal" parent="PortalSite" instance=ExtResource("10_portal")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+level = ExtResource("11_level")
 
 [node name="Forest" type="Node3D" parent="."]
 script = ExtResource("6_scatter")

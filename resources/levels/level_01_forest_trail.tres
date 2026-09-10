@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="LevelDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/level_definition.gd" id="1_definition"]
+[ext_resource type="PackedScene" path="res://scenes/levels/level_01_forest_trail.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_definition")
+id = &"forest_trail"
+display_name = "Forest Trail"
+world = &"forest"
+description = "Follow the trail through the woods to the far clearing."
+scene = ExtResource("2_scene")
+required_abilities = PackedStringArray()
+star_count = 1
+has_boss = false
+unlocked_by_default = true

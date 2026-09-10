@@ -96,6 +96,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.9, -8)
 size = Vector3(10, 1.8, 0.6)
 color = Color(0.62, 0.62, 0.66, 1)
 
+[node name="Kerb" parent="." instance=ExtResource("1_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 22)
+size = Vector3(6, 0.4, 3)
+color = Color(0.7, 0.68, 0.6, 1)
+
 [node name="CrateA" parent="." instance=ExtResource("1_block")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.5, 2)
 size = Vector3(1, 1, 1)

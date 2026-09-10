@@ -41,6 +41,9 @@ func drive(delta: float, throttle: float, steer: float, jump_requested: bool,
 	var forward := -body.global_basis.z
 	body.velocity.x = forward.x * speed
 	body.velocity.z = forward.z * speed
+	if body.velocity.y <= 0.0:
+		StepUp.try_step(body, Vector3(body.velocity.x, 0.0, body.velocity.z) * delta,
+			definition.max_step_height)
 	body.move_and_slide()
 
 	# Whatever a wall or a bump took away is gone; this is what stops the kart

@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/core/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/world/island_hub.tscn" id="2_world"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/debug_hud.tscn" id="6_hud"]
 [ext_resource type="PackedScene" path="res://scenes/vehicles/vehicle.tscn" id="7_vehicle"]
 [ext_resource type="Resource" path="res://resources/vehicles/basic_kart.tres" id="8_kart"]
+[ext_resource type="Script" path="res://scripts/levels/level_manager.gd" id="9_levels"]
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_main")
@@ -16,6 +17,9 @@ character_scene = ExtResource("3_character")
 character_definition = ExtResource("4_leopard")
 vehicle_scene = ExtResource("7_vehicle")
 vehicle_definition = ExtResource("8_kart")
+
+[node name="LevelManager" type="Node" parent="."]
+script = ExtResource("9_levels")
 
 [node name="CameraRig" parent="." instance=ExtResource("5_camera")]
 

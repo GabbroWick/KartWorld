@@ -45,6 +45,9 @@ func move(delta: float, wish_dir: Vector3, want_run: bool, jump_requested: bool,
 	_try_jump()
 	_apply_horizontal(delta, wish_dir, want_run)
 
+	if body.velocity.y <= 0.0:
+		StepUp.try_step(body, Vector3(body.velocity.x, 0.0, body.velocity.z) * delta,
+			definition.max_step_height)
 	body.move_and_slide()
 
 	if not was_on_floor and body.is_on_floor():

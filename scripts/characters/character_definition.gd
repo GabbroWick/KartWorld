@@ -30,6 +30,8 @@ extends Resource
 @export_range(0.0, 200.0, 1.0) var air_friction := 6.0
 ## How fast the model turns to face the movement direction (rad/s-ish).
 @export_range(1.0, 40.0, 0.5) var turn_speed := 14.0
+## Tallest ledge walked over without jumping (kerbs, plinths, stairs).
+@export_range(0.0, 1.5, 0.05) var max_step_height := 0.45
 
 @export_group("Jump")
 ## Peak height in metres of a full ground jump.

@@ -1,9 +1,10 @@
 extends Node3D
-## Entry point scene. Builds the runtime graph: world + player + camera.
+## Entry point scene. Builds the runtime graph: world + player + kart + camera.
 ##
 ## The player is spawned here rather than being hard-placed in the world scene,
 ## so levels stay character-agnostic and a different character (or a second
-## local player) is a spawn call, not a scene edit.
+## local player) is a spawn call, not a scene edit. `world_scene` is the hub;
+## the LevelManager swaps it for adventure levels and back.
 
 @export var world_scene: PackedScene
 @export var character_scene: PackedScene
@@ -21,22 +22,23 @@ var vehicle: VehicleController
 
 @onready var camera_rig: ThirdPersonCamera = $CameraRig
 @onready var hud: CanvasLayer = $HUD
+@onready var level_manager: LevelManager = $LevelManager
 
 
 func _ready() -> void:
 	_build_world()
 	_spawn_player()
 	_spawn_vehicle()
+	level_manager.setup(self, world_scene, player, vehicle, camera_rig)
 
 
 func _build_world() -> void:
 	if world_scene == null:
 		push_error("Main: no world_scene assigned.")
 		return
-	world = world_scene.instantiate() as Node3D
-	add_child(world)
-	# Keep the world first in the tree so the camera still updates last.
-	move_child(world, 0)
+	level_manager.hub_scene = world_scene
+	level_manager.world_parent = self
+	world = level_manager.build_hub()
 
 
 func _spawn_player() -> void:
@@ -89,10 +91,4 @@ func _on_exited_vehicle(_left: VehicleController) -> void:
 
 
 func _find_spawn_point() -> Node3D:
-	if world == null:
-		return null
-	var candidates := world.find_children("*", "Marker3D", true, false)
-	for node in candidates:
-		if node.is_in_group(&"player_spawn"):
-			return node as Node3D
-	return candidates[0] as Node3D if not candidates.is_empty() else null
+	return level_manager.find_spawn_point()
