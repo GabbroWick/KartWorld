@@ -26,8 +26,11 @@ func setup(vehicle_body: CharacterBody3D, vehicle_definition: VehicleDefinition,
 	definition = vehicle_definition
 	abilities = ability_component
 	_base_gravity = float(ProjectSettings.get_setting("physics/3d/default_gravity", 26.0))
-	body.floor_snap_length = 0.6
+	body.floor_snap_length = 0.8
 	body.floor_stop_on_slope = true
+	body.floor_max_angle = deg_to_rad(definition.max_slope_degrees)
+	# Keep the same ground speed up and down hills (arcade, not physics).
+	body.floor_constant_speed = true
 
 
 func drive(delta: float, throttle: float, steer: float, jump_requested: bool,

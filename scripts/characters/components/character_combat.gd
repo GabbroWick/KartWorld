@@ -32,6 +32,37 @@ func _ready() -> void:
 	hitbox.monitoring = false
 	swipe.visible = false
 	hitbox.body_entered.connect(_on_hitbox_body_entered)
+	swipe.mesh = _build_swipe_mesh()
+	swipe.position = Vector3.ZERO
+
+
+## A translucent claw arc in front of the character: a fan of quads between
+## an inner and an outer radius, flat, built once.
+func _build_swipe_mesh() -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var segments := 10
+	var span := deg_to_rad(120.0)
+	var inner := 0.35
+	var outer := 0.85
+	for i in segments:
+		var a0 := -span * 0.5 + span * i / segments
+		var a1 := -span * 0.5 + span * (i + 1) / segments
+		var p0 := Vector3(sin(a0) * inner, 0.0, cos(a0) * inner)
+		var p1 := Vector3(sin(a0) * outer, 0.0, cos(a0) * outer)
+		var p2 := Vector3(sin(a1) * outer, 0.0, cos(a1) * outer)
+		var p3 := Vector3(sin(a1) * inner, 0.0, cos(a1) * inner)
+		for v in [p0, p1, p2, p0, p2, p3, p0, p2, p1, p0, p3, p2]:
+			st.set_normal(Vector3.UP)
+			st.add_vertex(v)
+	var mesh := st.commit()
+	var material := StandardMaterial3D.new()
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.albedo_color = Color(1.0, 0.95, 0.6, 0.7)
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mesh.surface_set_material(0, material)
+	return mesh
 
 
 func setup(owner_character: CharacterController, character_definition: CharacterDefinition) -> void:
@@ -52,6 +83,10 @@ func tick(delta: float, attack_requested: bool) -> void:
 	if is_attacking:
 		_active_left -= delta
 		_sweep_overlaps()
+		# Arc sweeps out and fades over the active window.
+		var progress := 1.0 - clampf(_active_left / definition.melee_active_time, 0.0, 1.0)
+		swipe.scale = Vector3.ONE * lerpf(0.5, 1.6, progress)
+		swipe.rotation.y = lerpf(0.8, -0.8, progress)
 		if _active_left <= 0.0:
 			_end_swing()
 	elif attack_requested:

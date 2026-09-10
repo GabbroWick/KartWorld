@@ -113,6 +113,10 @@ func _relocate_party() -> void:
 		_player.driver.exit_vehicle()
 	_player.set_spawn_transform(at, true)
 	_player.motor.reset()
+	# A fresh start every time the world changes: full hearts, no i-frames.
+	_player.health.restore_full()
+	_player.invulnerable_left = 0.0
+	_player.visual_root.visible = true
 	_player.visual_root.global_rotation.y = at.basis.get_euler().y
 	if _vehicle:
 		var parked := at

@@ -25,6 +25,7 @@ signal hurt(amount: float, source: Node)
 @onready var abilities: AbilityComponent = $Abilities
 @onready var driver: DriverComponent = $Driver
 @onready var combat: CharacterCombat = $Combat
+@onready var interaction: InteractionComponent = $Interaction
 @onready var visual_root: Node3D = $VisualRoot
 @onready var collision: CollisionShape3D = $Collision
 
@@ -53,11 +54,13 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	input.poll()
 
-	var wish_dir := _get_wish_direction(input.move_axis)
+	var wish_dir := input.world_direction.limit_length(1.0) if input.uses_world_direction \
+		else _get_wish_direction(input.move_axis)
 	motor.move(delta, wish_dir, input.run_held, input.jump_pressed, input.jump_released)
 	_face_direction(wish_dir, delta)
 	combat.tick(delta, input.attack_pressed)
 	_tick_invulnerability(delta)
+	_animate_visual(delta)
 
 	if global_position.y < fall_limit and not health.is_dead:
 		health.kill()
@@ -92,6 +95,14 @@ func _spawn_visual() -> void:
 	_visual_instance = definition.visual_scene.instantiate() as Node3D
 	_visual_instance.scale = Vector3.ONE * definition.visual_scale
 	visual_root.add_child(_visual_instance)
+
+
+func _animate_visual(delta: float) -> void:
+	if _visual_instance == null or not _visual_instance.has_method(&"animate"):
+		return
+	var horizontal := Vector2(velocity.x, velocity.z).length()
+	var ratio := clampf(horizontal / maxf(definition.run_speed, 0.1), 0.0, 1.0)
+	_visual_instance.call(&"animate", delta, ratio, is_on_floor())
 
 
 func _get_wish_direction(axis: Vector2) -> Vector3:

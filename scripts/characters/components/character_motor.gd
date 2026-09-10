@@ -30,6 +30,8 @@ func setup(character_body: CharacterBody3D, character_definition: CharacterDefin
 	_base_gravity = float(ProjectSettings.get_setting("physics/3d/default_gravity", 26.0))
 	body.floor_snap_length = 0.5
 	body.floor_stop_on_slope = true
+	body.floor_max_angle = deg_to_rad(52.0)
+	body.floor_constant_speed = true
 
 
 ## `wish_dir` is a world-space, y-less direction with length 0..1.

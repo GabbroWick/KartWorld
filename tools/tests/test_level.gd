@@ -137,6 +137,9 @@ func _test_goal() -> void:
 	_manager.level_completed.connect(func(d: LevelDefinition, stars: int) -> void:
 		result[0] = d
 		result[1] = stars)
+	# Arrive hurt: finishing the level must send us home with full hearts.
+	_player.take_damage(2.0, null)
+	_player.invulnerable_left = 0.0
 	# Walk onto the goal marker from the clearing's near edge (past the gap).
 	_player.global_position = Vector3(20.0, 0.3, -38.5)
 	_player.motor.reset()
@@ -152,6 +155,8 @@ func _test_goal() -> void:
 	_check(result[0] != null and result[0].id == &"forest_trail" and result[1] == 1,
 		"LevelManager reported forest_trail completed with 1 star")
 	_check(_hud.objective_label.text.begins_with("Explore"), "HUD shows the hub hint again")
+	_check(_player.health.current_health == _player.health.max_health,
+		"hearts are refilled when the level ends (%.0f)" % _player.health.current_health)
 	_check(_hud.stars_label.text == "★ 1", "hub shows the total stars earned (%s)" % _hud.stars_label.text)
 	await _steps(20)
 	_check(_player.is_on_floor(), "character stands on the island")

@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=20 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/props/island_terrain.tscn" id="1_terrain"]
 [ext_resource type="PackedScene" path="res://scenes/world/props/house.tscn" id="2_house"]
@@ -11,6 +11,9 @@
 [ext_resource type="Resource" path="res://resources/characters/panda.tres" id="9_panda"]
 [ext_resource type="PackedScene" path="res://scenes/world/props/portal.tscn" id="10_portal"]
 [ext_resource type="Resource" path="res://resources/levels/level_01_forest_trail.tres" id="11_level"]
+[ext_resource type="Script" path="res://scripts/characters/components/npc_behaviour.gd" id="12_npc"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/star.tscn" id="13_star"]
+[ext_resource type="Resource" path="res://resources/levels/level_02_cliff_steps.tres" id="14_level2"]
 
 [sub_resource type="ProceduralSkyMaterial" id="sky_material"]
 sky_top_color = Color(0.2, 0.48, 0.86, 1)
@@ -55,7 +58,7 @@ plateau_radius = 40.0
 shore_radius = 54.0
 beach_height = 0.5
 plateau_height = 3.5
-flat_zones = Array[Vector4]([Vector4(14, 12, 9, 3.5), Vector4(-12, 24, 6, 3.5)])
+flat_zones = Array[Vector4]([Vector4(14, 12, 9, 3.5), Vector4(-12, 24, 6, 3.5), Vector4(-30, 8, 6, 3.5)])
 mountain_center = Vector2(-22, -20)
 mountain_radius = 22.0
 mountain_height = 13.0
@@ -89,6 +92,32 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
 level = ExtResource("11_level")
 
+[node name="PortalSite2" type="Node3D" parent="."]
+transform = Transform3D(0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, 0.7071, -30, 3.5, 8)
+
+[node name="Plinth" parent="PortalSite2" instance=ExtResource("5_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+size = Vector3(5, 0.4, 5)
+color = Color(0.6, 0.58, 0.62, 1)
+
+[node name="Portal" parent="PortalSite2" instance=ExtResource("10_portal")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+level = ExtResource("14_level2")
+
+[node name="HubStars" type="Node3D" parent="."]
+
+[node name="StarPeak" parent="HubStars" instance=ExtResource("13_star")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 17.2, -20)
+persistent_id = &"hub_star_peak"
+
+[node name="StarRoof" parent="HubStars" instance=ExtResource("13_star")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 9.9, 12)
+persistent_id = &"hub_star_roof"
+
+[node name="StarBeach" parent="HubStars" instance=ExtResource("13_star")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 1.0, 32)
+persistent_id = &"hub_star_beach"
+
 [node name="Forest" type="Node3D" parent="."]
 script = ExtResource("6_scatter")
 prop_scene = ExtResource("3_tree")
@@ -109,7 +138,7 @@ scatter_seed = 23
 count = 28
 center = Vector2(0, 0)
 radius = 48.0
-exclusion_zones = Array[Vector3]([Vector3(14, 12, 12), Vector3(-12, 24, 8), Vector3(20, -14, 16), Vector3(-22, -20, 20)])
+exclusion_zones = Array[Vector3]([Vector3(14, 12, 12), Vector3(-12, 24, 8), Vector3(20, -14, 16), Vector3(-22, -20, 20), Vector3(-30, 8, 8)])
 min_height = 1.6
 max_slope_degrees = 24.0
 min_spacing = 7.0
@@ -148,11 +177,21 @@ sink = 0.5
 [node name="NPCs" type="Node3D" parent="."]
 
 [node name="Fox" parent="NPCs" instance=ExtResource("7_character")]
-transform = Transform3D(0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, 0.7071, 9, 4.5, 16)
+transform = Transform3D(0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, 0.7071, 5, 4.5, 21)
 definition = ExtResource("8_fox")
 is_player_controlled = false
+
+[node name="Behaviour" type="Node" parent="NPCs/Fox"]
+script = ExtResource("12_npc")
+wander_radius = 4.0
+dialogue_lines = PackedStringArray("Hi! The portal is over by the beach.", "Press K to call your kart. It goes anywhere!", "I saw a star up on the mountain...")
 
 [node name="Panda" parent="NPCs" instance=ExtResource("7_character")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 4.5, 22)
 definition = ExtResource("9_panda")
 is_player_controlled = false
+
+[node name="Behaviour" type="Node" parent="NPCs/Panda"]
+script = ExtResource("12_npc")
+wander_radius = 3.0
+dialogue_lines = PackedStringArray("Slimes hate a good whack. Press J!", "Some portals only open when you learn new tricks.", "Zzz... oh! Hello.")

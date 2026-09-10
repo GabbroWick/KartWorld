@@ -12,6 +12,10 @@ const HUB_OBJECTIVE := "Explore the island. Find a portal!"
 @onready var objective_label: Label = $Root/TopCenter/Objective
 @onready var prompt_label: Label = $Root/Bottom/Prompt
 @onready var notice_label: Label = $Root/Notice/Text
+@onready var controls_label: Label = $Root/BottomRight/Controls
+
+const CONTROLS_FOOT := "WASD move · Shift run · Space jump · J attack · E use · K kart"
+const CONTROLS_KART := "W/S gas/brake · A/D steer · Shift turbo · Space jump · E leave"
 
 ## Friendly names for ability ids, for the unlock notice.
 const ABILITY_NAMES := {
@@ -49,6 +53,8 @@ func bind_level_manager(manager: LevelManager) -> void:
 
 func _process(delta: float) -> void:
 	prompt_label.text = _prompt_text()
+	if is_instance_valid(_player):
+		controls_label.text = CONTROLS_KART if _player.driver.is_driving else CONTROLS_FOOT
 	if _notice_left > 0.0:
 		_notice_left -= delta
 		if _notice_left <= 0.0:
@@ -115,6 +121,9 @@ func _prompt_text() -> String:
 	var driver := _player.driver
 	if driver.is_driving:
 		return "E  leave kart"
+	var interaction := _player.interaction.get_prompt()
+	if interaction != "":
+		return interaction
 	if driver.is_vehicle_in_reach():
 		return "E  enter kart"
 	if driver.vehicle != null:

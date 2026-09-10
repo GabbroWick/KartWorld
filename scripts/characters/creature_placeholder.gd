@@ -39,8 +39,54 @@ const GROUP_SPOT := &"creature_spot"
 		_apply()
 
 
+var _phase := 0.0
+var _rest: Dictionary = {}
+
+@onready var _leg_left: Node3D = get_node_or_null("LegLeft")
+@onready var _leg_right: Node3D = get_node_or_null("LegRight")
+@onready var _arm_left: Node3D = get_node_or_null("ArmLeft")
+@onready var _arm_right: Node3D = get_node_or_null("ArmRight")
+@onready var _tail: Node3D = get_node_or_null("Tail")
+@onready var _body: Node3D = get_node_or_null("Body")
+@onready var _head: Node3D = get_node_or_null("Head")
+
+
 func _ready() -> void:
 	_apply()
+	for part in [_leg_left, _leg_right, _arm_left, _arm_right, _tail, _body, _head]:
+		if part:
+			_rest[part] = part.transform
+
+
+## Procedural locomotion: called every physics tick by whoever owns the model.
+## `speed_ratio` 0..1 (0 = standing), `grounded` false while in the air.
+func animate(delta: float, speed_ratio: float, grounded: bool) -> void:
+	if Engine.is_editor_hint() or _rest.is_empty():
+		return
+	_phase += delta * (4.0 + 10.0 * speed_ratio)
+	var swing := sin(_phase) * 0.7 * speed_ratio
+	var bob := absf(sin(_phase)) * 0.06 * speed_ratio
+	if grounded:
+		_pose(_leg_left, Vector3(swing, 0, 0), Vector3(0, -absf(swing) * 0.05, 0))
+		_pose(_leg_right, Vector3(-swing, 0, 0), Vector3(0, -absf(swing) * 0.05, 0))
+		_pose(_arm_left, Vector3(-swing * 0.8, 0, 0), Vector3.ZERO)
+		_pose(_arm_right, Vector3(swing * 0.8, 0, 0), Vector3.ZERO)
+	else:
+		# Tucked legs, arms up: a happy little jump pose.
+		_pose(_leg_left, Vector3(0.5, 0, 0), Vector3(0, 0.08, 0))
+		_pose(_leg_right, Vector3(0.5, 0, 0), Vector3(0, 0.08, 0))
+		_pose(_arm_left, Vector3(-2.2, 0, 0), Vector3.ZERO)
+		_pose(_arm_right, Vector3(-2.2, 0, 0), Vector3.ZERO)
+	_pose(_body, Vector3(0.12 * speed_ratio, 0, 0), Vector3(0, bob, 0))
+	_pose(_head, Vector3(0, 0, sin(_phase * 0.5) * 0.05 * speed_ratio), Vector3(0, bob, 0))
+	_pose(_tail, Vector3(0, sin(_phase * 0.7) * 0.5 * (0.4 + speed_ratio), 0), Vector3.ZERO)
+
+
+func _pose(part: Node3D, euler: Vector3, offset: Vector3) -> void:
+	if part == null or not _rest.has(part):
+		return
+	var rest: Transform3D = _rest[part]
+	part.transform = Transform3D(rest.basis * Basis.from_euler(euler), rest.origin + offset)
 
 
 func _apply() -> void:

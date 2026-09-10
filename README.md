@@ -53,7 +53,7 @@ The main scene is `scenes/main.tscn`.
 | Attack | `J` or left mouse button | `RB` |
 | Look around | Mouse, or arrow keys | Right stick |
 | Summon the kart | `K` | `Y` |
-| Enter / leave the kart | `E` | `X` |
+| Talk / enter / leave the kart | `E` | `X` |
 | Kart: accelerate / brake & reverse | `W` / `S` | Right / left trigger |
 | Kart: steer | `A` `D` | Left stick |
 | Kart: turbo | `Shift` | `B` |
@@ -79,8 +79,16 @@ $G --headless --path . res://tools/tests/test_portal_runner.tscn   # portals and
 $G --headless --path . res://tools/tests/test_level_runner.tscn    # objectives, stars, checkpoint, HUD (35 checks)
 $G --headless --path . res://tools/tests/test_combat_runner.tscn   # melee, enemies, damage, death (33 checks)
 $G --headless --path . res://tools/tests/test_progression_runner.tscn  # unlocks, best stars, save/load (29 checks)
+$G --headless --path . res://tools/tests/test_hub_runner.tscn      # hub stars, gated portal, Cliff Steps (23 checks)
 $G --path . res://tools/tests/test_lighting_runner.tscn            # lighting (6 checks, needs a window)
 ```
+
+* **Hub**: three persistent island stars that never respawn once found, the
+  Cliff Steps portal locked until the triple jump is earned (label says what
+  it needs), unlocking it by beating the Forest Trail, the triple jump
+  reaching the cliff, completing Cliff Steps.
+* **Island** also covers the kart climbing the mountain while leaning with
+  the slope, and NPCs wandering, noticing the player and talking.
 
 Tests that complete levels point `ProgressionManager.save_path` at a scratch
 file, so running them never touches your real save
@@ -132,7 +140,7 @@ scenes/          Godot scenes
   characters/        generic character scene + placeholder creature visuals
   camera/            third-person camera rig
   vehicles/          generic vehicle scene + kart placeholder visual
-  levels/            adventure level scenes (level_01_forest_trail.tscn)
+  levels/            adventure level scenes (level_01_forest_trail, level_02_cliff_steps)
   gameplay/          star.tscn, checkpoint.tscn
   enemies/           generic enemy scene + slime placeholder visual
   world/             island_hub.tscn, test_arena.tscn, props/ (terrain, house, portal, block, tree, cone, rock)
@@ -140,7 +148,7 @@ scenes/          Godot scenes
   ui/                game_hud.tscn (player HUD), debug_hud.tscn (F3 overlay)
 scripts/         GDScript, mirrors the scene layout
   core/              autoloads (GameManager, ProgressionManager), entry point, input actions, step-up
-  characters/        controller, data definition, components (incl. driver), creature placeholder
+  characters/        controller, data definition, components (driver, combat, interaction, NPC behaviour), animated creature placeholder
   vehicles/          controller, data definition, components (input, motor, abilities)
   levels/            level definition, level manager, portal, level controller, objectives
   gameplay/          collectible base, star, checkpoint
@@ -151,7 +159,7 @@ scripts/         GDScript, mirrors the scene layout
 resources/       data-driven configuration
   characters/        leopard (player), fox and panda (NPCs)
   vehicles/          basic_kart
-  levels/            level metadata (level_01_forest_trail.tres)
+  levels/            level metadata (forest_trail, cliff_steps)
   enemies/           slime
 tools/           editor/CI helpers (input map setup, screenshots, tests)
 assets/          art and audio (placeholders for now)
@@ -170,7 +178,7 @@ time, each verified before the next starts.
 - [x] **Phase 5** — first level: objectives, stars, checkpoint, HUD
 - [x] **Phase 6** — combat: melee attack, enemies, damage, death, respawn
 - [x] **Phase 7** — progression: level results, first unlockable ability, save/load
-- [ ] **Phase 8** — polish: animation, models, effects, sound, UI
+- [ ] **Phase 8** — polish (in progress): procedural animation, swipe arc, kart on slopes, NPCs that wander and talk, hub stars, gated second level done; real models, effects and sound next
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for how the pieces fit together and which
 extension points are already in place, and [CLAUDE.md](CLAUDE.md) for the

@@ -19,10 +19,57 @@ signal activated(by: CharacterController)
 var _used := false
 
 
+const ABILITY_NAMES := {
+	&"enhanced_jump": "Triple jump",
+	&"double_jump": "Double jump",
+	&"turbo": "Kart turbo",
+	&"vehicle_jump": "Kart jump",
+}
+
+var _locked_notice_left := 0.0
+
+
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
-	if label:
-		label.text = "Home" if returns_to_hub else (level.display_name if level else "?")
+	_refresh_label()
+	ProgressionManager.changed.connect(_refresh_label)
+
+
+## Abilities the level needs that the given (or any registered) player lacks.
+func get_missing_abilities(traveller: CharacterController = null) -> PackedStringArray:
+	var missing := PackedStringArray()
+	if returns_to_hub or level == null:
+		return missing
+	var who := traveller if traveller else (GameManager.get_player(0) as CharacterController)
+	for ability in level.required_abilities:
+		var has := who != null and who.abilities.has(StringName(ability))
+		if not has and ProgressionManager.has_ability(StringName(ability)):
+			has = true
+		if not has:
+			missing.append(ability)
+	return missing
+
+
+func is_locked() -> bool:
+	return not get_missing_abilities().is_empty()
+
+
+func _refresh_label() -> void:
+	if label == null:
+		return
+	if returns_to_hub:
+		label.text = "Home"
+		return
+	if level == null:
+		label.text = "?"
+		return
+	var missing := get_missing_abilities()
+	if missing.is_empty():
+		label.text = level.display_name
+		label.modulate = Color.WHITE
+	else:
+		label.text = "%s\nNeeds: %s" % [level.display_name, ABILITY_NAMES.get(StringName(missing[0]), missing[0])]
+		label.modulate = Color(1.0, 0.6, 0.5)
 
 
 func _process(delta: float) -> void:
@@ -39,10 +86,9 @@ func _on_body_entered(body: Node3D) -> void:
 	var manager := get_tree().get_first_node_in_group(LevelManager.GROUP) as LevelManager
 	if manager == null or not manager.portals_armed():
 		return
-	if not returns_to_hub and level != null:
-		for ability in level.required_abilities:
-			if not traveller.abilities.has(StringName(ability)):
-				return
+	if not get_missing_abilities(traveller).is_empty():
+		_refresh_label()
+		return
 	_used = true
 	activated.emit(traveller)
 	# Deferred: we are inside a physics callback and about to free the world.

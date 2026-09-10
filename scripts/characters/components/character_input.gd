@@ -21,6 +21,10 @@ var interact_pressed := false
 var summon_pressed := false
 var attack_pressed := false
 
+## AI/NPC drivers set a world-space direction instead of a stick axis.
+var uses_world_direction := false
+var world_direction := Vector3.ZERO
+
 
 func _ready() -> void:
 	# The controller polls us explicitly so the snapshot is always fresh for the

@@ -24,6 +24,9 @@ func _ready() -> void:
 
 
 func _run() -> void:
+	# Never let the player's real progress (triple jump!) leak into a suite.
+	ProgressionManager.save_path = "user://test_scratch_save.json"
+	ProgressionManager.reset()
 	await get_tree().process_frame
 	_scene = (load(MAIN_SCENE) as PackedScene).instantiate() as Node3D
 	get_tree().root.add_child(_scene)
@@ -50,8 +53,79 @@ func _run() -> void:
 	await _test_walk()
 	await _test_house()
 	await _test_kart_on_terrain()
+	await _test_kart_climbs_mountain()
+	await _test_npcs_alive()
 	await _test_sea()
 	_finish()
+
+
+func _test_kart_climbs_mountain() -> void:
+	# From the foot of the mountain straight at the peak: the kart must gain
+	# real height and lean with the slope while doing it.
+	var kart := _player.driver.vehicle
+	var peak := Vector3(_terrain.mountain_center.x, 0.0, _terrain.mountain_center.y)
+	var foot := peak + Vector3(0.0, 0.0, 20.0)
+	foot.y = _terrain.sample_height(foot.x, foot.z) + 0.3
+	var heading := (peak - foot)
+	heading.y = 0.0
+	kart.place(Transform3D(Basis.looking_at(heading.normalized(), Vector3.UP), foot))
+	_player.global_position = foot + Vector3(2.0, 0.5, 0.0)
+	_player.motor.reset()
+	await _steps(10)
+	await _hold(InputActions.INTERACT, 3)
+	await _steps(3)
+	_check(_player.driver.is_driving, "in the kart at the mountain foot")
+	var start_y := kart.global_position.y
+	var max_tilt := 0.0
+	Input.action_press(InputActions.ACCELERATE)
+	for i in 180:
+		await _steps(1)
+		max_tilt = maxf(max_tilt, rad_to_deg(acos(clampf(kart.visual_root.global_basis.y.dot(Vector3.UP), -1.0, 1.0))))
+	Input.action_release(InputActions.ACCELERATE)
+	var climbed := kart.global_position.y - start_y
+	_check(climbed > 5.0, "kart climbs the mountain (%.1f m up in 3 s, slope max %.0f deg)"
+		% [climbed, max_tilt])
+	_check(max_tilt > 12.0, "kart model leans with the slope (max %.0f deg)" % max_tilt)
+	_check(kart.is_on_floor(), "kart still on the ground on the hillside")
+	await _hold(InputActions.INTERACT, 3)
+	await _steps(20)
+
+
+func _test_npcs_alive() -> void:
+	var fox: CharacterController = null
+	for npc in _scene.get("world").find_children("*", "CharacterController", true, false):
+		if (npc as CharacterController).definition.id == &"fox":
+			fox = npc
+	_check(fox != null, "fox NPC found")
+	if fox == null:
+		return
+	var behaviour := fox.get_node_or_null("Behaviour") as NpcBehaviour
+	_check(behaviour != null, "fox has an NpcBehaviour")
+	# Stand far away so it wanders instead of staring at us.
+	_player.global_position = Vector3(14.0, 4.5, 30.0)
+	_player.motor.reset()
+	var start := fox.global_position
+	var moved := 0.0
+	for i in 300:
+		await _steps(1)
+		moved = maxf(moved, fox.global_position.distance_to(start))
+	_check(moved > 0.8, "fox wanders around on its own (%.1f m)" % moved)
+	_check(fox.global_position.distance_to(behaviour.home) < behaviour.wander_radius + 1.5,
+		"fox stays near its home (%.1f m)" % fox.global_position.distance_to(behaviour.home))
+
+	# Walk up: prompt says talk, E shows a speech bubble.
+	_player.global_position = fox.global_position + Vector3(0.0, 0.3, 1.8)
+	_player.motor.reset()
+	await _steps(20)
+	var prompt: String = _player.interaction.get_prompt()
+	_check(prompt.begins_with("E  talk"), "prompt offers to talk (%s)" % prompt)
+	var said := [""]
+	behaviour.spoke.connect(func(line: String) -> void: said[0] = line)
+	await _hold(InputActions.INTERACT, 3)
+	await _steps(3)
+	_check(said[0] != "", "pressing E makes the fox talk (%s)" % said[0])
+	_check(behaviour._bubble != null and behaviour._bubble.visible, "speech bubble is visible")
+	_check(not _player.driver.is_driving, "talking did not put the player in the kart")
 
 
 func _test_kart_on_terrain() -> void:

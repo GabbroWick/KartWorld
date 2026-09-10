@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/characters/character_controller.gd" id="1_controller"]
 [ext_resource type="Script" path="res://scripts/characters/components/character_input.gd" id="2_input"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/characters/components/ability_component.gd" id="5_abilities"]
 [ext_resource type="Script" path="res://scripts/characters/components/driver_component.gd" id="6_driver"]
 [ext_resource type="Script" path="res://scripts/characters/components/character_combat.gd" id="7_combat"]
+[ext_resource type="Script" path="res://scripts/characters/components/interaction_component.gd" id="8_interaction"]
 
 [sub_resource type="CapsuleShape3D" id="shape_body"]
 radius = 0.35
@@ -15,15 +16,6 @@ height = 1.6
 [sub_resource type="BoxShape3D" id="shape_hitbox"]
 size = Vector3(1.4, 1.2, 1.5)
 
-[sub_resource type="StandardMaterial3D" id="mat_swipe"]
-transparency = 1
-albedo_color = Color(1, 1, 1, 0.45)
-metallic_specular = 0.0
-roughness = 1.0
-
-[sub_resource type="BoxMesh" id="mesh_swipe"]
-material = SubResource("mat_swipe")
-size = Vector3(1.2, 0.25, 1.2)
 
 [node name="Character" type="CharacterBody3D"]
 collision_layer = 2
@@ -55,6 +47,9 @@ script = ExtResource("6_driver")
 [node name="Combat" type="Node" parent="."]
 script = ExtResource("7_combat")
 
+[node name="Interaction" type="Node" parent="."]
+script = ExtResource("8_interaction")
+
 [node name="Hitbox" type="Area3D" parent="VisualRoot"]
 collision_layer = 0
 collision_mask = 4
@@ -65,4 +60,3 @@ shape = SubResource("shape_hitbox")
 
 [node name="Swipe" type="MeshInstance3D" parent="VisualRoot/Hitbox"]
 visible = false
-mesh = SubResource("mesh_swipe")

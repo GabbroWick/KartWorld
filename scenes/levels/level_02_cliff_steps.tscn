@@ -1,0 +1,141 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/world/props/placeholder_block.tscn" id="1_block"]
+[ext_resource type="PackedScene" path="res://scenes/world/props/placeholder_cone.tscn" id="2_cone"]
+[ext_resource type="PackedScene" path="res://scenes/world/props/portal.tscn" id="3_portal"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/star.tscn" id="4_star"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/checkpoint.tscn" id="5_checkpoint"]
+[ext_resource type="Script" path="res://scripts/levels/level_controller.gd" id="6_controller"]
+[ext_resource type="Script" path="res://scripts/levels/reach_destination_objective.gd" id="7_reach"]
+[ext_resource type="Script" path="res://scripts/levels/collect_objective.gd" id="8_collect"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/enemy.tscn" id="9_enemy"]
+[ext_resource type="Resource" path="res://resources/enemies/slime.tres" id="10_slime"]
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_material"]
+sky_top_color = Color(0.18, 0.35, 0.75, 1)
+sky_horizon_color = Color(0.8, 0.82, 0.9, 1)
+ground_horizon_color = Color(0.45, 0.5, 0.55, 1)
+ground_bottom_color = Color(0.2, 0.22, 0.25, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_material")
+
+[sub_resource type="Environment" id="environment"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 1
+reflected_light_source = 1
+tonemap_mode = 0
+
+[sub_resource type="BoxShape3D" id="shape_goal"]
+size = Vector3(8, 4, 8)
+
+[node name="CliffSteps" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("environment")
+
+[node name="SunLight" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-50, -60, 0)
+light_energy = 1.25
+shadow_enabled = true
+shadow_opacity = 0.7
+directional_shadow_max_distance = 100.0
+
+[node name="PlayerSpawn" type="Marker3D" parent="." groups=["player_spawn"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+
+[node name="LevelController" type="Node" parent="." groups=["level_controller"]]
+script = ExtResource("6_controller")
+completion_delay = 1.5
+
+[node name="ReachTop" type="Node" parent="LevelController"]
+script = ExtResource("7_reach")
+description = "Climb to the top of the cliff"
+goal_zone = NodePath("../../GoalZone")
+
+[node name="CollectStars" type="Node" parent="LevelController"]
+script = ExtResource("8_collect")
+description = "Collect stars"
+optional = true
+kind = &"star"
+required = 0
+
+[node name="Base" parent="." instance=ExtResource("1_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+size = Vector3(18, 1, 18)
+color = Color(0.5, 0.5, 0.48, 1)
+
+[node name="Step1" parent="." instance=ExtResource("1_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -12)
+size = Vector3(6, 3, 6)
+color = Color(0.55, 0.55, 0.52, 1)
+
+[node name="Step2" parent="." instance=ExtResource("1_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 3.5, -18)
+size = Vector3(6, 7, 6)
+color = Color(0.58, 0.57, 0.53, 1)
+
+[node name="Step3" parent="." instance=ExtResource("1_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 5.5, -27)
+size = Vector3(6, 11, 6)
+color = Color(0.6, 0.58, 0.54, 1)
+
+[node name="Checkpoint" parent="." instance=ExtResource("5_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 11, -27)
+
+[node name="Step4" parent="." instance=ExtResource("1_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 7.5, -33)
+size = Vector3(5, 15, 5)
+color = Color(0.62, 0.6, 0.55, 1)
+
+[node name="Step5" parent="." instance=ExtResource("1_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 9.5, -42)
+size = Vector3(5, 19, 5)
+color = Color(0.64, 0.62, 0.56, 1)
+
+[node name="Summit" parent="." instance=ExtResource("1_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 11, -50)
+size = Vector3(14, 22, 12)
+color = Color(0.42, 0.66, 0.34, 1)
+
+[node name="Peak" parent="." instance=ExtResource("2_cone")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 22, -53)
+radius = 2.5
+height = 4.0
+sides = 6
+color = Color(0.9, 0.9, 0.95, 1)
+
+[node name="StarStep2" parent="." instance=ExtResource("4_star")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 7, -18)
+
+[node name="StarStep4" parent="." instance=ExtResource("4_star")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 15, -33)
+
+[node name="StarPeak" parent="." instance=ExtResource("4_star")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 26, -53)
+
+[node name="SlimeStep1" parent="." instance=ExtResource("9_enemy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, -12)
+definition = ExtResource("10_slime")
+
+[node name="SlimeSummit" parent="." instance=ExtResource("9_enemy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 22.2, -49)
+definition = ExtResource("10_slime")
+
+[node name="GoalZone" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 24, -50)
+collision_layer = 8
+collision_mask = 18
+
+[node name="Shape" type="CollisionShape3D" parent="GoalZone"]
+shape = SubResource("shape_goal")
+
+[node name="GoalMarker" parent="." instance=ExtResource("1_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 22.05, -50)
+size = Vector3(6, 0.1, 6)
+color = Color(1, 0.85, 0.3, 1)
+
+[node name="ReturnPortal" parent="." instance=ExtResource("3_portal")]
+transform = Transform3D(0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, 0.7071, -6, 0, 6)
+returns_to_hub = true

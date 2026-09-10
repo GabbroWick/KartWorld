@@ -22,6 +22,9 @@ func _ready() -> void:
 
 
 func _run() -> void:
+	# Never let the player's real progress (triple jump!) leak into a suite.
+	ProgressionManager.save_path = "user://test_scratch_save.json"
+	ProgressionManager.reset()
 	await get_tree().process_frame
 	var scene := (load(SCENE) as PackedScene).instantiate() as Node3D
 	get_tree().root.add_child(scene)

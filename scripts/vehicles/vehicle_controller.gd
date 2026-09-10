@@ -53,9 +53,24 @@ func _physics_process(delta: float) -> void:
 
 	motor.drive(delta, input.throttle, input.steer, input.jump_pressed,
 		speed_multiplier, acceleration_multiplier)
+	_tilt_to_ground(delta)
 
 	if global_position.y < fall_limit:
 		fell_out_of_world.emit()
+
+
+## The physics body stays upright; the model leans with the terrain so the
+## kart reads as driving on the hill instead of hovering through it.
+func _tilt_to_ground(delta: float) -> void:
+	var normal := get_floor_normal() if is_on_floor() else Vector3.UP
+	var forward := -global_basis.z
+	forward = (forward - normal * forward.dot(normal)).normalized()
+	if forward.length_squared() < 0.001:
+		return
+	var right := forward.cross(normal).normalized()
+	var target := Basis(right, normal, -forward)
+	var local_target := global_basis.inverse() * target
+	visual_root.basis = visual_root.basis.slerp(local_target, minf(definition.tilt_speed * delta, 1.0))
 
 
 func is_driven() -> bool:

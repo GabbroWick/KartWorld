@@ -20,6 +20,8 @@ var save_path := "user://save.json"
 var best_stars: Dictionary = {}
 ## Ability ids granted by progression (on top of the definitions' starters).
 var unlocked_abilities: Array[StringName] = []
+## Persistent collectibles picked up, id -> {"kind": String, "amount": int}.
+var collected: Dictionary = {}
 
 
 func _ready() -> void:
@@ -27,12 +29,27 @@ func _ready() -> void:
 	load_from_disk()
 
 
-## Sum of best stars over all levels.
+## Best stars over all levels plus every persistent star found in the world.
 func get_total_stars() -> int:
 	var total := 0
 	for stars in best_stars.values():
 		total += int(stars)
+	for entry in collected.values():
+		if entry.get("kind", "") == "star":
+			total += int(entry.get("amount", 1))
 	return total
+
+
+func is_collected(id: StringName) -> bool:
+	return collected.has(String(id))
+
+
+func record_collected(id: StringName, kind: StringName, amount: int) -> void:
+	if is_collected(id):
+		return
+	collected[String(id)] = {"kind": String(kind), "amount": amount}
+	changed.emit()
+	save_to_disk()
 
 
 func is_level_completed(level_id: StringName) -> bool:
@@ -82,6 +99,7 @@ func apply_to(abilities: AbilityComponent) -> void:
 func reset() -> void:
 	best_stars.clear()
 	unlocked_abilities.clear()
+	collected.clear()
 	if FileAccess.file_exists(save_path):
 		DirAccess.remove_absolute(save_path)
 	changed.emit()
@@ -92,6 +110,7 @@ func save_to_disk() -> void:
 		"version": SAVE_VERSION,
 		"best_stars": best_stars,
 		"unlocked_abilities": Array(unlocked_abilities).map(func(id: StringName) -> String: return String(id)),
+		"collected": collected,
 	}
 	var file := FileAccess.open(save_path, FileAccess.WRITE)
 	if file == null:
@@ -104,6 +123,7 @@ func save_to_disk() -> void:
 func load_from_disk() -> void:
 	best_stars.clear()
 	unlocked_abilities.clear()
+	collected.clear()
 	if not FileAccess.file_exists(save_path):
 		return
 	var file := FileAccess.open(save_path, FileAccess.READ)
@@ -120,4 +140,7 @@ func load_from_disk() -> void:
 		best_stars[String(key)] = int(data["best_stars"][key])
 	for id in data.get("unlocked_abilities", []):
 		unlocked_abilities.append(StringName(String(id)))
+	for id in data.get("collected", {}):
+		var entry: Dictionary = data["collected"][id]
+		collected[String(id)] = {"kind": String(entry.get("kind", "item")), "amount": int(entry.get("amount", 1))}
 	changed.emit()

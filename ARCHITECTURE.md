@@ -99,6 +99,25 @@ body whose mesh nodes carry role groups (`creature_fur`, `creature_belly`,
 paints them from exported colours. Leopard, fox and panda are that scene with
 different colour overrides — geometry is shared, identity is data.
 
+It also animates procedurally: the controller calls `animate(delta,
+speed_ratio, grounded)` every tick and the placeholder swings legs and arms,
+bobs, wags the tail and tucks up in the air. A real rigged model replaces this
+by implementing the same `animate()` (driving an AnimationTree instead), so
+the controller never changes.
+
+### NPCs and interaction
+
+`NpcBehaviour` is a child node of an NPC `character.tscn` instance: wander
+near home (goals checked with a raycast so nobody walks into walls), stop and
+face a player within `notice_radius`, and speak `dialogue_lines` in a Label3D
+bubble. It drives the character through `CharacterInput.world_direction`, so
+NPCs obey exactly the same physics as the player.
+
+`InteractionComponent` on the character resolves `interact` against anything
+in group `interactable` implementing `can_interact / interact / get_prompt`;
+it runs before `DriverComponent` and consumes the press, so an NPC standing
+by the kart wins over "enter kart". The HUD prompt asks it first.
+
 ## Vehicle system
 
 The kart is **its own entity in the world**, never a child of the character.
@@ -127,7 +146,11 @@ Vehicle (vehicle.tscn, CharacterBody3D, layer 5 "vehicle")
 * **`VehicleMotor`** is deliberately not a wheel simulation: a signed forward
   speed, a yaw rate that grows with speed (and shrinks in the air), gravity and
   a jump. After `move_and_slide()` the speed is re-projected on the forward
-  axis, so a wall simply kills the speed it blocked.
+  axis, so a wall simply kills the speed it blocked. `floor_max_angle` comes
+  from the definition (`max_slope_degrees`, 60° for the kart) and
+  `floor_constant_speed` keeps the same pace up and down hills. The physics
+  body stays upright; `VehicleController._tilt_to_ground()` leans the model
+  onto the floor normal so the kart reads as driving on the hill.
 * **`VehicleAbility`** is the base for abilities that own behaviour. They are
   independent nodes under `AbilityNodes`; the controller only calls
   `try_activate()` and `tick()`. Whether an ability is *unlocked* stays in
@@ -169,7 +192,9 @@ Main
   `level_completed(def, stars)` for the progression system to record later.
 * **`Portal`** (Area3D on layer 4, mask player|vehicle): walking or driving in
   travels — outbound portals carry a `LevelDefinition`, return portals set
-  `returns_to_hub`. Required abilities are checked on the traveller. Portals
+  `returns_to_hub`. Required abilities are checked on the traveller (and on
+  progression); a locked portal shows "Needs: Triple jump" in red and refuses,
+  and relabels itself the moment the ability is earned. Portals
   are inert for a grace period after any load, so arriving beside one never
   bounces the player back. The manager call is deferred because the world is
   freed from inside a physics callback.
@@ -225,6 +250,9 @@ Main
   manager never knows what an ability does — `CharacterMotor` reads
   `enhanced_jump` as one more air jump, a future `ranged_attack` component
   will read its own id.
+* `collected`: persistent collectibles (`Collectible.persistent_id`), e.g.
+  the island's hub stars — they never respawn and count toward total stars.
+  Level collectibles leave the id empty and reset every run.
 * Saved as JSON to `save_path` (`user://save.json`) after every change,
   loaded in `_ready()`. Tests point `save_path` at a scratch file and call
   `reset()`. The file carries a `version` for future migrations.

@@ -16,7 +16,7 @@ process. `ARCHITECTURE.md` explains the code; `README.md` is for humans.
 | 5 — first level | done | objectives, stars, checkpoint, game HUD, 35 checks |
 | 6 — combat | done | melee, slime enemy, contact damage, i-frames, death, defeat objective, 33 checks |
 | 7 — progression | done | ProgressionManager autoload, reward abilities, triple jump unlock, JSON save, 29 checks |
-| 8 — polish | **next** | animation, models, effects, sound, UI feedback |
+| 8 — polish | in progress | done: procedural animation, swipe arc, kart slopes+tilt, controls hint, health refill, NPC wander/talk, hub stars, gated Cliff Steps level. next: real models, VFX, audio |
 
 Decided: **Compatibility renderer on all platforms** (Web needs it, cartoon
 style does not need Forward+). **Character scale locked** after playtesting
@@ -43,6 +43,7 @@ $G --headless --path . res://tools/tests/test_portal_runner.tscn   # portal / le
 $G --headless --path . res://tools/tests/test_level_runner.tscn    # objectives / stars / checkpoint / HUD suite
 $G --headless --path . res://tools/tests/test_combat_runner.tscn   # melee / enemies / damage / death suite
 $G --headless --path . res://tools/tests/test_progression_runner.tscn  # unlocks / best stars / save suite
+$G --headless --path . res://tools/tests/test_hub_runner.tscn      # hub stars / gated portal / Cliff Steps suite
 $G --path . res://tools/tests/test_lighting_runner.tscn            # lighting suite (needs a window)
 $G --path . res://tools/capture_screenshot.tscn -- out.png 120     # render a frame to PNG
 $G --path . res://tools/capture_screenshot.tscn -- out.png 120 drive   # ...while driving the kart
@@ -81,6 +82,10 @@ suites exit non-zero on failure.
 * `Input.action_press()` reaches a polling character one physics tick later.
 * Hand-written `Transform3D(...)` in `.tscn` lists basis columns X, Y, Z then
   origin; prefer `rotation_degrees` for readability.
+* A Node3D under a plain `Node` is top-level (world origin): put 3D helpers
+  (hitboxes) under a Node3D and reach them by NodePath.
+* Children `_ready` before parents: a component that touches the character's
+  `@onready` fields must defer its setup one frame.
 * Lighting recipe (palette renders as authored on every renderer, shadows on):
   `tonemap_mode = 0`, `ambient_light_source = 1` (Disabled),
   `reflected_light_source = 1`, one sun `light_energy = 1.25`,
@@ -125,8 +130,15 @@ suites exit non-zero on failure.
   implements them (`enhanced_jump` → `CharacterMotor.get_max_air_jumps`).
   Tests that complete levels set `ProgressionManager.save_path` to a scratch
   file and call `reset()` — never let a test write the real `user://save.json`.
+* NPCs: `scripts/characters/components/npc_behaviour.gd` (child of a
+  character instance; wander + talk). Player-side `interaction_component.gd`
+  resolves `E` against group `interactable` before the kart.
+* Every test suite starts with `ProgressionManager.save_path = scratch` +
+  `reset()`; the user's real save (`%APPDATA%/Godot/app_userdata/KartWorld/
+  save.json`) already has enhanced_jump and would change jump behaviour.
 * Groups: `terrain`, `player_spawn`, `portal_site`, `portal`, `level_manager`,
-  `level_controller`, `collectible`, `star`, `checkpoint`, `enemy`.
+  `level_controller`, `collectible`, `star`, `checkpoint`, `enemy`,
+  `interactable`.
 * Physics layers: 1 world, 2 player, 3 enemy, 4 interactable, 5 vehicle.
   Player mask = world|vehicle (17); vehicle mask = world (1); portal area on
   layer 4 with mask player|vehicle (18).
