@@ -20,8 +20,13 @@ static func try_step(body: CharacterBody3D, horizontal_motion: Vector3, max_heig
 	if horizontal_motion.length_squared() < 0.000001:
 		return false
 	var transform := body.global_transform
+	var ahead := KinematicCollision3D.new()
 	# Nothing in the way: no step needed.
-	if not body.test_move(transform, horizontal_motion):
+	if not body.test_move(transform, horizontal_motion, ahead):
+		return false
+	# A walkable slope, not a ledge: move_and_slide climbs it. Treating it as a
+	# step made the kart hop up and forward every frame on uneven ground.
+	if ahead.get_normal().y >= WALKABLE_NORMAL_Y:
 		return false
 	var up := Vector3.UP * max_height
 	# No headroom.

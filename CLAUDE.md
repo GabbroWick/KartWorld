@@ -167,7 +167,9 @@ suites exit non-zero on failure.
   scenes in `scenes/levels/`, metadata in `resources/levels/`, portal prop
   `scenes/world/props/portal.tscn`. Every hostable scene has a `player_spawn`
   Marker3D. LevelManager is found via group `level_manager`.
-* Steps/kerbs: `scripts/core/step_up.gd`, called by both motors.
+* Steps/kerbs: `scripts/core/step_up.gd`, called by both motors. It ignores
+  hits on walkable normals (slopes): treating them as steps made the kart hop
+  up+forward every frame on uneven ground ("va a scatti anche in piano").
 * In-level gameplay: `scripts/levels/level_controller.gd` + `objective.gd`
   subclasses (reach, collect); `scripts/gameplay/` collectible, star,
   checkpoint; scenes in `scenes/gameplay/`. HUD: `scripts/ui/game_hud.gd`.
