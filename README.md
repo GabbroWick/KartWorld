@@ -39,9 +39,10 @@ Windows, Web, Android and iOS with one look.
 3D props (trees, rocks, flowers, the kart, stars, flags) are CC0 models by
 [Kenney](https://www.kenney.nl) — Nature Kit, Car Kit, Platformer Kit, Mini
 Forest, Modular Buildings — under `assets/models/kenney/` (see its README and
-LICENSE.txt). The leopard is an AI-generated model (Meshy) rigged and
-animated with Mixamo under `assets/models/meshy/leopard/`; NPCs, enemies and
-buildings are still primitives.
+LICENSE.txt). The leopard is an AI-generated model made with
+[Meshy](https://www.meshy.ai) (free plan, CC BY 4.0 — attribution required),
+rigged and animated with Mixamo, under `assets/models/meshy/leopard/`; NPCs,
+enemies and buildings are still primitives.
 
 The game text is **Italian** (`translations/text.csv` also carries English;
 the locale is forced in `GameManager`).
