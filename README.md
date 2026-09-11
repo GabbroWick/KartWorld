@@ -23,7 +23,7 @@ Everything is placeholder art on purpose.
 ## Requirements
 
 * Godot **4.7.2** (standard build, no C#/.NET needed)
-  On this machine: `C:\Godot\Godot_v4.7.2\Godot_v4.7.2-stable_win64.exe`
+  Example install path: `C:\Godot\Godot_v4.7.2\Godot_v4.7.2-stable_win64.exe`
 * Git
 
 No third-party addons or plugins. The project uses the **Compatibility**

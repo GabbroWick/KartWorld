@@ -33,6 +33,7 @@ verify before moving on, stop and report at the end of a phase.
 
 Godot binary (this machine): `C:\Godot\Godot_v4.7.2\Godot_v4.7.2-stable_win64_console.exe`
 (`_console` prints to the terminal; the non-console exe is the same engine).
+Adjust the path below to wherever Godot is installed on your machine.
 
 ```bash
 G="/c/Godot/Godot_v4.7.2/Godot_v4.7.2-stable_win64_console.exe"
