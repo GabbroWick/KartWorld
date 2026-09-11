@@ -168,6 +168,28 @@ tools/blender/blender.cmd -b --python tools/blender/import_ai3d.py -- \
   glTF +Z). In Godot il personaggio guarda -Z, quindi la visual scene usa
   `flip_forward = true` (come per i modelli Meshy).
 
+## 3b. Rig e animazioni (Mixamo, gratuito)
+
+Le clip Mixamo già nel progetto (`assets/models/meshy/leopard/anim_*.fbx`)
+usano lo scheletro standard `mixamorig_*`: riggando il nuovo modello su
+Mixamo si riusano identiche. Alternative locali (UniRig) sono CUDA-only;
+Rigify dà lo scheletro ma non le animazioni.
+
+```bash
+tools/blender/blender.cmd -b --python tools/blender/export_for_mixamo.py --     --input assets/characters/_final/leopard/leopard.glb     --outdir assets/characters/_processed/leopard/mixamo
+```
+
+Poi a mano su mixamo.com: Upload character → `leopard_untextured.fbx`
+(quello con texture fa fallire l'auto-rigger) → marker (mento, polsi,
+gomiti, ginocchia, inguine) → skeleton Standard → download **With Skin**,
+FBX Binary, 30 fps, con la clip "Breathing Idle" → salva come
+`assets/models/ai/<nome>/<nome>_rig.fbx`. Le clip "without skin" già
+presenti si copiano/riusano; `RiggedCharacterVisual` con `model_scale = 100`
+(Mixamo legge i metri come centimetri) e `auto_ground = false`.
+Il mesh risultante ha la texture? No: Mixamo restituisce il rig senza
+materiali; la visual scene riapplica l'albedo cotto
+(`_processed/<nome>/<nome>_baked_albedo.png`) sul mesh riggato.
+
 ## 4. Dove finiscono i file
 
 Vedi "Struttura". Il GLB finale si copia a mano (o con lo script di
