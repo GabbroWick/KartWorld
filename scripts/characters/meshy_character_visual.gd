@@ -25,6 +25,9 @@ extends Node3D
 @export var auto_ground := true
 ## Metallic 0 / roughness 1 / no normal map: matches the flat Kenney props.
 @export var flatten_materials := true
+## Replaces every surface's albedo texture (a baked map for a Mixamo rig,
+## which comes back without materials). Needs flatten_materials.
+@export var albedo_override: Texture2D
 ## Procedural motion strength (0 = static model).
 @export_range(0.0, 2.0, 0.05) var motion := 1.0
 
@@ -99,8 +102,13 @@ func _flatten(node: Node) -> void:
 		for i in mesh_instance.mesh.get_surface_count():
 			var material := mesh_instance.mesh.surface_get_material(i) as StandardMaterial3D
 			if material == null:
-				continue
+				if albedo_override == null:
+					continue
+				material = StandardMaterial3D.new()
 			var flat := material.duplicate() as StandardMaterial3D
+			if albedo_override:
+				flat.albedo_texture = albedo_override
+				flat.albedo_color = Color.WHITE
 			flat.metallic = 0.0
 			flat.metallic_texture = null
 			flat.roughness = 1.0
