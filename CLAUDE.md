@@ -214,6 +214,26 @@ suites exit non-zero on failure.
   Player mask = world|vehicle (17); vehicle mask = world (1); portal area on
   layer 4 with mask player|vehicle (18).
 
+## Local AI 3D pipeline (in progress, 2026-09-11)
+
+Human's decision: replace Meshy with a free local pipeline. Details, commands
+and the running diary live in `tools/README_3D.md` — read it before touching
+`tools/ai3d/` or `tools/blender/`. State:
+
+* Backend: PyTorch 2.12 + ROCm 7.14.1 official Windows wheels, `gfx1200`
+  (RX 9060 XT), venv `tools/ai3d/.venv` (uv). `check_gpu.py` passes.
+* TripoSR smoke test passes (24 s, 3 GB VRAM) → `_generated/leopard_front_triposr`.
+* `tools/blender/import_ai3d.py` verified (orient/scale/decimate/preview).
+* Hunyuan3D 2.1 **shape only** via `generate_shape.py` (fork
+  VladimirTalyzin/hunyuan3d-2.1-mac-rocm + upstream, pure-torch, no CUDA
+  ext). Paint/PBR NOT installed yet: human wants shape verified first.
+* Rules from the human: no TDR registry change without explicit approval
+  (key, current value, new value, risk, rollback explained first); announce
+  size + disk before every large download; keep _source/_generated/
+  _processed/_final separate; never overwrite finals without backup.
+* Folders `tools/ai3d`, `tools/blender`, `assets/characters/_source|
+  _generated|_processed` carry `.gdignore`; only `_final` is imported.
+
 ## Next step (Phase 8 — polish, continued)
 
 Decided with the human (2026-09-10): real models from **Kenney** (done for

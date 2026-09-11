@@ -107,4 +107,9 @@ func _flatten(node: Node) -> void:
 			flat.roughness_texture = null
 			flat.normal_enabled = false
 			flat.metallic_specular = 0.0
+			# Vertex-coloured meshes (TripoSR, untextured AI output): use the
+			# colours; the importer does not always set this flag.
+			var arrays := mesh_instance.mesh.surface_get_arrays(i)
+			if arrays.size() > Mesh.ARRAY_COLOR and arrays[Mesh.ARRAY_COLOR] != null:
+				flat.vertex_color_use_as_albedo = true
 			mesh_instance.set_surface_override_material(i, FlatMaterial.with_fill(flat))

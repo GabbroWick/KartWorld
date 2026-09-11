@@ -17,3 +17,17 @@ desktop.ini
 # Raw asset downloads (zips); curated copies live in assets/models/
 art/
 screenshot.png
+
+# AI 3D pipeline (tools/ai3d): venv, weights, cloned repos, temp outputs
+tools/ai3d/.venv/
+tools/ai3d/models/
+tools/ai3d/TripoSR/
+tools/ai3d/Hunyuan3D*/
+tools/ai3d/hunyuan3d*/
+tools/ai3d/tmp/
+assets/characters/_generated/**/*.obj
+assets/characters/_generated/**/model_raw_*.glb
+assets/characters/_processed/**/*.blend
+assets/characters/_processed/**/*.blend1
+__pycache__/
+*.pyc
