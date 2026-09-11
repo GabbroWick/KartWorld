@@ -272,7 +272,8 @@ Nuovi pesi si scaricano da soli alla prima esecuzione; i vecchi restano in
   utile per personaggi senza modello di riferimento. Backup delle versioni
   precedenti in `_processed/leopard/leopard_hunyuan_paint_backup.glb` e
   `leopard_untextured_backup.glb`. Paint a 512 px: con flash attention
-  sperimentale → `hipErrorInvalidValue` in DINOv2; con solo chunking: in prova.
+  sperimentale → `hipErrorInvalidValue` in DINOv2; con solo chunking
+  (`HY3D_ATTN_LIMIT_GIB=100`, preset `low`) non finisce in 60 min: abbandonato.
   Non ancora fatto: rig, automazione `generate_character`, backup
   `_processed/leopard/leopard_untextured_backup.glb` della versione senza texture.
   Pesi: DiT+VAE 7,6 GB in `tools/ai3d/models/hy3dgen` (download HF ~2 MB/s,
