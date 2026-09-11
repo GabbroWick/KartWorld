@@ -124,6 +124,23 @@ Copy-Item "$d\*.pyd" tools\ai3d\hunyuan3d\Hunyuan3D-2.1\hy3dpaint\Differentiable
 Il rasterizer GPU nativo non si può compilare (le ruote rocm-sdk non
 hanno header HIP né compilatore): si usa `torch_rasterizer.py`.
 
+### 2c. Texture per trasferimento (bake da un modello già texturizzato)
+
+Quando esiste già un modello con una buona texture (il leopardo Meshy),
+la si "cuoce" sulla mesh AI, che ha UV proprie (xatlas del Paint):
+
+```bash
+tools/blender/blender.cmd -b --python tools/blender/bake_transfer.py --     --source assets/models/meshy/leopard/leopard.glb     --target assets/characters/_processed/leopard/leopard_textured.glb     --output assets/characters/_processed/leopard/leopard_baked.glb     --cage 0.15 --ray 0.8 --preview assets/characters/_processed/leopard/preview_baked.png
+```
+
+Cycles CPU, bake DIFFUSE solo colore, "Selected to Active". Entrambi i
+modelli vengono normalizzati (piedi a 0, altezza uguale) per sovrapporli.
+`--cage`/`--ray` alti evitano i buchi neri dove le due superfici distano
+(pancia); i texel rimasti neri vengono riempiti per dilatazione. ~2 min.
+Risultato molto migliore del Paint a 256 px: è la strada per il leopardo.
+Per personaggi senza modello di partenza: Paint, Dream Textures o pittura a
+mano in Blender (vedi Diario).
+
 ## 3. Elaborare in Blender
 
 ```bash
@@ -228,6 +245,12 @@ Nuovi pesi si scaricano da soli alla prima esecuzione; i vecchi restano in
   `TdrDelay = 60` texturing riuscito (338 s). GLB del fork con V invertita:
   si usa l'OBJ. `_final/leopard/leopard.glb` ora è **texturizzato** (12k
   tri, albedo 2048², occhi e pancia corretti; retro con artefatti).
+  Texture finale: **bake della texture Meshy sulla mesh AI**
+  (`bake_transfer.py`), nettamente meglio del Paint 256 px; il Paint resta
+  utile per personaggi senza modello di riferimento. Backup delle versioni
+  precedenti in `_processed/leopard/leopard_hunyuan_paint_backup.glb` e
+  `leopard_untextured_backup.glb`. Paint a 512 px: con flash attention
+  sperimentale → `hipErrorInvalidValue` in DINOv2; con solo chunking: in prova.
   Non ancora fatto: rig, automazione `generate_character`, backup
   `_processed/leopard/leopard_untextured_backup.glb` della versione senza texture.
   Pesi: DiT+VAE 7,6 GB in `tools/ai3d/models/hy3dgen` (download HF ~2 MB/s,

@@ -2,24 +2,23 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://maensys0lxqw"
-path.s3tc="res://.godot/imported/leopard_model_raw_textured_metallic-model_raw_textured_roughness.png-59581cd80d29ce5741dec7c310828c55.s3tc.ctex"
+uid="uid://d26reem81aqqw"
+path="res://.godot/imported/leopard_leopard_baked_albedo.png-966ff5726c52ef4fbd5b620c7da27200.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
-"md5": "4a06e8e0efacbf9539e4e323f48c26fb"
+"md5": "c065669a7ee57d4db5ab16d3ba05ee24"
 }
 
 [deps]
 
-source_file="res://assets/characters/_final/leopard/leopard_model_raw_textured_metallic-model_raw_textured_roughness.png"
-dest_files=["res://.godot/imported/leopard_model_raw_textured_metallic-model_raw_textured_roughness.png-59581cd80d29ce5741dec7c310828c55.s3tc.ctex"]
+source_file="res://assets/characters/_final/leopard/leopard_leopard_baked_albedo.png"
+dest_files=["res://.godot/imported/leopard_leopard_baked_albedo.png-966ff5726c52ef4fbd5b620c7da27200.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -41,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

@@ -234,9 +234,12 @@ and the running diary live in `tools/README_3D.md` — read it before touching
   the mesh) → mask holes filled; loose fragments dropped in Blender.
   Paint/PBR (`generate_texture.py`, preset `safe` 6x256) WORKS: 338 s,
   16.9 GB VRAM; needs TdrDelay 60. Feed Blender the Paint **OBJ**, not the
-  fork's GLB (V flipped). `_final/leopard/leopard.glb` is textured now
-  (back side has artefacts: single reference view). Next: rig, then
-  `generate_character` automation.
+  fork's GLB (V flipped). Paint at 256 px looked poor (back
+  hallucinated), so `_final/leopard/leopard.glb` now carries the **Meshy
+  texture baked onto the AI mesh** (`tools/blender/bake_transfer.py`, Cycles
+  CPU, cage 0.15 / ray 0.8, black texels filled). Player visual =
+  `scenes/characters/visuals/leopard_ai.tscn` (procedural animation).
+  Next: rig, then `generate_character` automation.
 * Windows TDR: `TdrDelay = 60` was set by the human on 2026-09-11 (approved,
   with rollback documented in README_3D) because Paint kernels exceeded 2 s.
 * Rules from the human: no further registry change without explicit approval
