@@ -52,7 +52,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 
 [node name="LevelController" type="Node" parent="." groups=["level_controller"]]
 script = ExtResource("6_controller")
-completion_delay = 1.5
+completion_delay = 3.5
 
 [node name="ReachClearing" type="Node" parent="LevelController"]
 script = ExtResource("7_reach")

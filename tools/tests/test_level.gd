@@ -45,7 +45,41 @@ func _run() -> void:
 	await _test_death_respawn()
 	await _test_health_hud()
 	await _test_goal()
+	await _test_pause()
 	_finish()
+
+
+func _test_pause() -> void:
+	var menu: PauseMenu = _scene.get_node("PauseMenu")
+	_check(not menu.root.visible, "pause menu hidden while playing")
+	var before := _player.global_position
+	_press_action(InputActions.PAUSE)
+	await _steps(2)
+	_check(GameManager.is_paused and get_tree().paused, "Esc pauses the game")
+	_check(menu.root.visible, "pause menu is visible while paused")
+	_check(menu.resume_button.text == tr(&"PAUSE_RESUME"), "pause menu is in Italian (%s)" % menu.resume_button.text)
+	_check(not menu.hub_button.visible, "no 'back to the island' button while already in the hub")
+	Input.action_press(&"move_forward")
+	await _steps(20)
+	Input.action_release(&"move_forward")
+	_check(_player.global_position.distance_to(before) < 0.01, "the player does not move while paused")
+	menu.resume_button.pressed.emit()
+	await _steps(2)
+	_check(not GameManager.is_paused and not get_tree().paused, "Resume unpauses")
+	_check(not menu.root.visible, "pause menu hides on resume")
+	get_tree().paused = false
+
+
+## Feeds a press+release through the input system so _unhandled_input sees it.
+func _press_action(action: StringName) -> void:
+	var press := InputEventAction.new()
+	press.action = action
+	press.pressed = true
+	Input.parse_input_event(press)
+	var release := InputEventAction.new()
+	release.action = action
+	release.pressed = false
+	Input.parse_input_event(release)
 
 
 func _test_hud_in_hub() -> void:
@@ -84,9 +118,12 @@ func _test_star() -> void:
 	_player.motor.reset()
 	_camera_rig.set_yaw(0.0)
 	await _steps(5)
+	Sfx.clear_log()
 	await _hold(&"move_forward", 40)
 	await _steps(5)
 	_check(got[0], "walking into a star collects it")
+	_check(Sfx.played.has(&"star"), "star pickup plays its sound")
+	_check(get_tree().get_nodes_in_group(Burst.GROUP).size() >= 1, "star pickup spawns a particle burst")
 	_check(_level.stars_collected == 1, "controller counts 1 star")
 	_check(_hud.stars_label.text == "1/2", "HUD shows 1/2 stars (%s)" % _hud.stars_label.text)
 	_check(not is_instance_valid(star) or star.is_queued_for_deletion(), "collected star disappears")
@@ -147,13 +184,21 @@ func _test_goal() -> void:
 	_player.motor.reset()
 	_camera_rig.set_yaw(0.0)
 	await _steps(5)
+	Sfx.clear_log()
 	await _hold(&"move_forward", 60)
 	await _steps(5)
 	_check(done[0] == 1, "reaching the clearing completes the level with 1 star (got %d)" % done[0])
 	_check(_hud.objective_label.text == tr(&"HUD_LEVEL_COMPLETE"), "HUD announces completion (%s)" % _hud.objective_label.text)
 	_check(not _manager.is_in_hub(), "return home waits for the completion delay")
-	await _steps(120)
+	_check(_hud.card.visible, "level-complete card is shown")
+	_check(_hud.card.level_label.text == tr(&"LEVEL_FOREST_TRAIL_NAME"), "card names the level (%s)" % _hud.card.level_label.text)
+	_check(_hud.card.shown_stars == 1 and _hud.card.shown_total == 2, "card shows 1 of 2 stars (%d/%d)" % [_hud.card.shown_stars, _hud.card.shown_total])
+	_check(_hud.card.reward_label.visible and _hud.card.reward_label.text.contains(tr(&"ABILITY_ENHANCED_JUMP")),
+		"card announces the reward ability (%s)" % _hud.card.reward_label.text)
+	_check(Sfx.played.has(&"fanfare"), "completion plays the fanfare")
+	await _steps(240)
 	_check(_manager.is_in_hub(), "party is back in the hub after the delay")
+	_check(not _hud.card.visible, "card is dismissed back in the hub")
 	_check(result[0] != null and result[0].id == &"forest_trail" and result[1] == 1,
 		"LevelManager reported forest_trail completed with 1 star")
 	_check(_hud.objective_label.text == tr(&"HUD_HUB_HINT"), "HUD shows the hub hint again")

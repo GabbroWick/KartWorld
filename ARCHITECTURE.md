@@ -331,11 +331,54 @@ level always restarts from its spawn).
 ### HUD
 
 `scenes/ui/game_hud.tscn` (`GameHUD`, CanvasLayer 2): hearts, star counter,
-current objective, interaction prompt. Anchored containers, no fixed pixel
-positions. It binds to the character's `HealthComponent` signals and to the
-`LevelManager`'s `level_loaded` / `hub_loaded`, then to the current
-`LevelController`. The F3 developer overlay (`debug_hud.tscn`) stays, hidden
-by default.
+current objective, interaction prompt, and the **level-complete card**
+(`LevelCompleteCard`, a PanelContainer inside the HUD: level name, one
+`StarIcon` per possible star with the missed ones grey, the reward ability
+the first time). Anchored containers, no fixed pixel positions. It binds to
+the character's `HealthComponent` signals and to the `LevelManager`'s
+`level_loaded` / `hub_loaded`, then to the current `LevelController`
+(`completed` shows the card; `hub_loaded` dismisses it — the controller's
+`completion_delay` of 3.5 s is what gives the card its screen time). The F3
+developer overlay (`debug_hud.tscn`) stays, hidden by default.
+
+### Pause
+
+`GameManager.set_paused(bool)` owns the state: `get_tree().paused`, mouse
+release/capture, `pause_changed`. `scenes/ui/pause_menu.tscn` (`PauseMenu`,
+CanvasLayer 5, `PROCESS_MODE_ALWAYS`) is only the buttons: resume, back to
+the island (hidden in the hub), quit (hidden on the Web). The `pause` action
+is Esc / Start; the old cursor toggle moved to F1.
+
+## Feedback: audio and VFX
+
+* **`Sfx`** (autoload, `scripts/audio/sfx.gd`): `Sfx.play(&"star")`,
+  `Sfx.play_music(&"hub")`. A sound is looked up as
+  `assets/audio/sfx/<name>.ogg|wav|mp3`; when no file exists,
+  `SoundBank.build(name)` synthesises a placeholder (sweeps, filtered noise,
+  arpeggios) so every event is audible from day one. Music comes only from
+  files in `assets/audio/music/` (`hub`, `level`) — no synthetic music.
+  Twelve pooled `AudioStreamPlayer`s; `played` logs names for tests.
+  Sound names in use: jump, double_jump, land, attack, hit, hurt, enemy_die,
+  star, checkpoint, unlock, fanfare, portal, turbo, ui, engine.
+* **`EngineSound`** (`AudioStreamPlayer3D` under the vehicle): loops the
+  `engine` stream, pitch and volume follow speed; plays `turbo` on the
+  ability's `activated`.
+* **`HitFlash`** (component, `scripts/vfx/hit_flash.gd`): blinks every mesh
+  under its target white through `material_overlay`, never touching the
+  model's materials. The enemy scene carries one; `Enemy.take_damage` calls
+  `flash()`.
+* **`Burst`** (`scripts/vfx/burst.gd`, a `CPUParticles3D`):
+  `Burst.spawn(world, position, color, count, speed, size)` — one-shot
+  billboard squares that fade and fall, freed on `finished`. Stars and
+  defeated enemies use it. CPU particles so it renders identically on the
+  Web. Gotcha: a `CPUParticles3D` is `emitting` by default, so a one-shot
+  with `explosiveness = 1` fires everything at the origin the moment it
+  enters the tree; `spawn` creates it silent and calls `restart()` after
+  placing it.
+* Who plays what: the player character plays its own jump/land/attack/hurt
+  (only when `is_player_controlled`), the enemy its hit/death, the star and
+  checkpoint their pickup, the HUD the fanfare and unlock, `Main` the portal
+  whoosh and the music switches. Nothing plays sounds from a motor.
 
 ## World
 

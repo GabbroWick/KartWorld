@@ -53,6 +53,7 @@ func activate(player: CharacterController) -> void:
 	is_active = true
 	_set_ring_color(active_color)
 	player.set_spawn_transform(respawn_point.global_transform, false)
+	Sfx.play(&"checkpoint")
 	activated.emit(self, player)
 
 

@@ -16,7 +16,7 @@ process. `ARCHITECTURE.md` explains the code; `README.md` is for humans.
 | 5 — first level | done | objectives, stars, checkpoint, game HUD, 35 checks |
 | 6 — combat | done | melee, slime enemy, contact damage, i-frames, death, defeat objective, 33 checks |
 | 7 — progression | done | ProgressionManager autoload, reward abilities, triple jump unlock, JSON save, 29 checks |
-| 8 — polish | in progress | done: procedural animation, kart slopes + 4-ray visual suspension, controls hint, health refill, NPC wander/talk, hub stars, gated Cliff Steps level, Web export, Kenney models, Meshy+Mixamo rigged leopard (idle/walk/run/jump/fall/attack/hurt), Italian localization. next: fox/panda/slime models, VFX, audio |
+| 8 — polish | in progress | done: procedural animation, kart slopes + 4-ray visual suspension, controls hint, health refill, NPC wander/talk, hub stars, gated Cliff Steps level, Web export, Kenney models, Meshy+Mixamo rigged leopard (idle/walk/run/jump/fall/attack/hurt/emote), Italian localization, hit flash + star/enemy bursts, level-complete card, pause menu, synthesised placeholder SFX + engine hum + music slots. next: fox/panda/slime models, real SFX/music files (ASSET_GUIDE.md), touch controls |
 
 Decided: **Compatibility renderer on all platforms** (Web needs it, cartoon
 style does not need Forward+). **Character scale locked** after playtesting
@@ -131,6 +131,15 @@ suites exit non-zero on failure.
   only lets floor snapping pull a long body back off the lip (kart vs the
   portal plinth).
 * `make web` / `make test` / `make serve` (GNU make from GnuWin32 is on PATH).
+* `CPUParticles3D` starts `emitting = true`: a one-shot burst built in code
+  fires at the origin on entering the tree unless created with
+  `emitting = false` and `restart()`ed after placement (`Burst.spawn`).
+* Running two Godot instances on the project at once (e.g. a Web export in
+  the background plus a test) corrupts the class cache for the second one
+  ("Identifier X not declared"). Run them one after the other.
+* Esc is `pause` now; `toggle_mouse_capture` is F1. Tests feed actions
+  through `Input.parse_input_event(InputEventAction)` to reach
+  `_unhandled_input`.
 * Lighting recipe (palette renders as authored on every renderer, shadows on):
   `tonemap_mode = 0`, `ambient_light_source = 1` (Disabled),
   `reflected_light_source = 1`, ONE sun `light_energy = 0.72`,
@@ -167,6 +176,11 @@ suites exit non-zero on failure.
   scenes in `scenes/levels/`, metadata in `resources/levels/`, portal prop
   `scenes/world/props/portal.tscn`. Every hostable scene has a `player_spawn`
   Marker3D. LevelManager is found via group `level_manager`.
+* Audio: `Sfx` autoload (`scripts/audio/sfx.gd`) — `Sfx.play(&"name")`,
+  `Sfx.play_music(&"hub"|&"level")`. File in `assets/audio/sfx/<name>.ogg`
+  wins, else `SoundBank` synth. Kart hum: `EngineSound` in vehicle.tscn.
+* VFX: `scripts/vfx/hit_flash.gd` (component, enemy scene), `burst.gd`
+  (`Burst.spawn`). UI: `scenes/ui/pause_menu.tscn`, card inside game_hud.
 * Steps/kerbs: `scripts/core/step_up.gd`, called by both motors. It ignores
   hits on walkable normals (slopes): treating them as steps made the kart hop
   up+forward every frame on uneven ground ("va a scatti anche in piano").
@@ -204,9 +218,13 @@ grounded)` contract is what a rigged model must implement (drive an
 AnimationTree). Audio: ElevenLabs SFX / Suno music, synthetic placeholders
 acceptable meanwhile. Web export works and is verified headless.
 
-Candidates next, cheapest first: hit flash on enemies, star pickup burst +
-sound, level-complete card with stars, kart engine hum and turbo whoosh,
-footstep/skid particles, a pause menu, touch controls, Cliff Steps rebuilt
-with Platformer Kit `block-grass-*` pieces, the house from Modular Buildings
-(needs a door and the pad test kept). Keep every effect a component or a
-scene, never a special case in a controller.
+Done in this pass: hit flash, star/enemy bursts, level-complete card, kart
+engine hum + turbo whoosh, pause menu, synthesised placeholder SFX. Waiting
+on the human (instructions in `ASSET_GUIDE.md`): Meshy+Mixamo fox / panda /
+slime, ElevenLabs SFX files, Suno music (`hub.ogg`, `level.ogg`).
+
+Candidates next, cheapest first: footstep/skid particles, squash & stretch
+on land, touch controls, Cliff Steps rebuilt with Platformer Kit
+`block-grass-*` pieces, the house from Modular Buildings (needs a door and
+the pad test kept). Keep every effect a component or a scene, never a
+special case in a controller.

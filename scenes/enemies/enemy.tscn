@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/enemies/enemy.gd" id="1_enemy"]
 [ext_resource type="Script" path="res://scripts/characters/components/health_component.gd" id="2_health"]
+[ext_resource type="Script" path="res://scripts/vfx/hit_flash.gd" id="3_flash"]
 
 [sub_resource type="CapsuleShape3D" id="shape_body"]
 radius = 0.5
@@ -24,6 +25,9 @@ shape = SubResource("shape_body")
 
 [node name="Health" type="Node" parent="."]
 script = ExtResource("2_health")
+
+[node name="HitFlash" type="Node" parent="."]
+script = ExtResource("3_flash")
 
 [node name="ContactArea" type="Area3D" parent="."]
 collision_layer = 0

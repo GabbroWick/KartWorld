@@ -19,6 +19,7 @@ enum State { IDLE, PATROL, CHASE }
 @onready var visual_root: Node3D = $VisualRoot
 @onready var collision: CollisionShape3D = $Collision
 @onready var contact_area: Area3D = $ContactArea
+@onready var hit_flash: HitFlash = $HitFlash
 
 var state := State.IDLE
 var home := Vector3.ZERO
@@ -73,6 +74,8 @@ func take_damage(amount: float, source: Node = null) -> void:
 		return
 	health.take_damage(amount, source)
 	damaged.emit(amount, source)
+	hit_flash.flash()
+	Sfx.play(&"hit", 0.0, _rng.randf_range(0.9, 1.1))
 	if source is Node3D and not health.is_dead:
 		var away := global_position - (source as Node3D).global_position
 		away.y = 0.0
@@ -168,6 +171,8 @@ func _on_died() -> void:
 	collision.set_deferred(&"disabled", true)
 	contact_area.set_deferred(&"monitoring", false)
 	died.emit(self)
+	Sfx.play(&"enemy_die")
+	Burst.spawn(get_parent(), global_position + Vector3.UP * definition.body_height * 0.5, Color(0.5, 0.9, 0.4), 20, 5.0, 0.2)
 	var tween := create_tween()
 	tween.tween_property(visual_root, "scale", Vector3(1.3, 0.05, 1.3), 0.25)
 	tween.tween_callback(queue_free)

@@ -20,6 +20,12 @@ func _ready() -> void:
 	FlatMaterial.apply_fill(visual)
 
 
+func _on_collected(_by: CharacterController) -> void:
+	Burst.spawn(get_parent(), visual.global_position, Color(1.0, 0.85, 0.25), 18, 6.0, 0.22)
+	Sfx.play(&"star")
+	queue_free()
+
+
 func _process(delta: float) -> void:
 	_time += delta
 	visual.rotate_y(spin_speed * delta)

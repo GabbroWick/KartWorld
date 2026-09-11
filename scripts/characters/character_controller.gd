@@ -88,6 +88,9 @@ func _apply_definition() -> void:
 	_spawn_visual()
 	combat.attacked.connect(_on_attacked)
 	hurt.connect(_on_hurt_visual)
+	if is_player_controlled and not motor.jumped.is_connected(_on_jumped_sound):
+		motor.jumped.connect(_on_jumped_sound)
+		motor.landed.connect(_on_landed_sound)
 
 
 func _spawn_visual() -> void:
@@ -105,13 +108,26 @@ func _spawn_visual() -> void:
 
 
 func _on_attacked() -> void:
+	if is_player_controlled:
+		Sfx.play(&"attack", -4.0, randf_range(0.9, 1.1))
 	if _visual_instance and _visual_instance.has_method(&"play_action"):
 		_visual_instance.call(&"play_action", &"attack", 1.4)
 
 
 func _on_hurt_visual(_amount: float, _source: Node) -> void:
+	if is_player_controlled:
+		Sfx.play(&"hurt")
 	if _visual_instance and _visual_instance.has_method(&"play_action"):
 		_visual_instance.call(&"play_action", &"hurt", 1.2)
+
+
+func _on_jumped_sound(air_jump_index: int) -> void:
+	Sfx.play(&"double_jump" if air_jump_index > 0 else &"jump", -6.0, 1.0 + 0.1 * air_jump_index)
+
+
+func _on_landed_sound(impact_speed: float) -> void:
+	if impact_speed > 4.0:
+		Sfx.play(&"land", -10.0)
 
 
 func _animate_visual(delta: float) -> void:

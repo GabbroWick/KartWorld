@@ -13,6 +13,7 @@ extends CanvasLayer
 @onready var prompt_label: Label = $Root/Bottom/Prompt
 @onready var notice_label: Label = $Root/Notice/Text
 @onready var controls_label: Label = $Root/BottomRight/Controls
+@onready var card: LevelCompleteCard = $Root/Card
 
 
 const NOTICE_TIME := 3.0
@@ -58,6 +59,7 @@ func show_notice(text: String) -> void:
 
 
 func _on_ability_unlocked(id: StringName) -> void:
+	Sfx.play(&"unlock")
 	show_notice(tr(&"HUD_NEW_ABILITY") % AbilityComponent.display_name(id))
 
 
@@ -80,6 +82,7 @@ func _set_stars_text(text: String) -> void:
 
 func _on_hub_loaded() -> void:
 	_level = null
+	card.dismiss()
 	objective_label.text = tr(&"HUD_HUB_HINT")
 	_refresh_hub_stars()
 
@@ -92,6 +95,7 @@ func _on_level_loaded(_definition: LevelDefinition) -> void:
 		return
 	_level.objectives_changed.connect(_refresh_objective)
 	_level.stars_changed.connect(_on_stars_changed)
+	_level.completed.connect(_on_level_completed.bind(_definition))
 	_refresh_objective()
 	_on_stars_changed(_level.stars_collected, _level.stars_total)
 
@@ -104,6 +108,13 @@ func _refresh_objective() -> void:
 		return
 	var objective := _level.get_current_objective()
 	objective_label.text = objective.get_status_text() if objective else ""
+
+
+func _on_level_completed(stars: int, definition: LevelDefinition) -> void:
+	var first_time := definition != null and not ProgressionManager.is_level_completed(definition.id)
+	var total := _level.stars_total if is_instance_valid(_level) else stars
+	card.show_result(definition, stars, total, first_time)
+	Sfx.play(&"fanfare")
 
 
 func _on_stars_changed(collected: int, total: int) -> void:

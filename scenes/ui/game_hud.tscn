@@ -1,8 +1,21 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/game_hud.gd" id="1_hud"]
 [ext_resource type="Script" path="res://scripts/ui/heart_bar.gd" id="2_hearts"]
 [ext_resource type="Script" path="res://scripts/ui/star_icon.gd" id="3_star"]
+[ext_resource type="Script" path="res://scripts/ui/level_complete_card.gd" id="4_card"]
+
+[sub_resource type="StyleBoxFlat" id="card_style"]
+bg_color = Color(0.12, 0.14, 0.24, 0.92)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(1, 0.85, 0.25, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
 
 [node name="GameHUD" type="CanvasLayer"]
 layer = 2
@@ -133,5 +146,67 @@ theme_override_colors/font_color = Color(0.95, 0.95, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
 theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 22
+horizontal_alignment = 1
+text = ""
+
+[node name="Card" type="PanelContainer" parent="Root"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -150.0
+offset_right = 260.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("card_style")
+script = ExtResource("4_card")
+
+[node name="Margin" type="MarginContainer" parent="Root/Card"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 22
+
+[node name="Rows" type="VBoxContainer" parent="Root/Card/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Title" type="Label" parent="Root/Card/Margin/Rows"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.92, 0.4, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 38
+horizontal_alignment = 1
+text = "Livello completato!"
+
+[node name="LevelName" type="Label" parent="Root/Card/Margin/Rows"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+text = ""
+
+[node name="Stars" type="HBoxContainer" parent="Root/Card/Margin/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="Reward" type="Label" parent="Root/Card/Margin/Rows"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 1, 0.7, 1)
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 1
+text = ""
+
+[node name="Footer" type="Label" parent="Root/Card/Margin/Rows"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.82, 0.9, 1)
+theme_override_font_sizes/font_size = 16
 horizontal_alignment = 1
 text = ""

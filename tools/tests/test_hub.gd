@@ -141,7 +141,7 @@ func _test_cliff_steps() -> void:
 	_player.global_position = Vector3(7.0, 22.4, -50.0)
 	_player.motor.reset()
 	await _steps(10)
-	await _steps(120)
+	await _steps(240)
 	_check(_manager.is_in_hub(), "reaching the summit completes Cliff Steps and returns home")
 	_check(ProgressionManager.is_level_completed(&"cliff_steps"), "Cliff Steps recorded as completed")
 

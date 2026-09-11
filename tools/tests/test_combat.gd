@@ -88,10 +88,13 @@ func _test_attack_kills() -> void:
 	var died := [false]
 	enemy.died.connect(func(_e: Enemy) -> void: died[0] = true)
 
+	Sfx.clear_log()
 	await _press(InputActions.ATTACK)
 	await _steps(3)
 	_check(swung[0], "attack input starts a swing")
 	_check(hits[0] == 1, "the swing hits the slime once (%d)" % hits[0])
+	_check(enemy.hit_flash.is_flashing, "a hit flashes the slime white")
+	_check(Sfx.played.has(&"attack") and Sfx.played.has(&"hit"), "swing and hit play their sounds (%s)" % str(Sfx.played))
 	_check(enemy.health.current_health == 1.0, "slime lost 1 health (%.0f left)" % enemy.health.current_health)
 	await _press(InputActions.ATTACK)
 	await _steps(3)
@@ -101,6 +104,8 @@ func _test_attack_kills() -> void:
 	await _steps(3)
 	_check(hits[0] == 2, "after the cooldown the next swing hits (%d)" % hits[0])
 	_check(died[0], "second hit kills the slime")
+	_check(Sfx.played.has(&"enemy_die"), "defeat plays the enemy sound")
+	_check(get_tree().get_nodes_in_group(Burst.GROUP).size() >= 1, "defeat spawns a particle burst")
 	_check(defeat.defeated == 1, "defeat objective counts 1/2")
 	_check(defeat.get_status_text() == tr(&"OBJ_DEFEAT_SLIMES") + " 1/2", "objective text shows progress (%s)" % defeat.get_status_text())
 	await _steps(30)

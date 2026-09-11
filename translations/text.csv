@@ -2,8 +2,8 @@ keys,en,it
 HUD_HUB_HINT,Explore the island. Find a portal!,Esplora l'isola. Trova un portale!
 HUD_LEVEL_COMPLETE,Level complete!,Livello completato!
 HUD_NEW_ABILITY,New ability: %s!,Nuova abilità: %s!
-HUD_CONTROLS_FOOT,WASD move · Shift run · Space jump · J attack · E use · K kart · right-click dance,WASD muovi · Shift corri · Spazio salta · J attacca · E usa · K kart · tasto dx balla
-HUD_CONTROLS_KART,W/S gas/brake · A/D steer · Shift turbo · Space jump · E leave,W/S gas/freno · A/D sterza · Shift turbo · Spazio salta · E scendi
+HUD_CONTROLS_FOOT,WASD move · Shift run · Space jump · J attack · E use · K kart · right-click dance · Esc pause,WASD muovi · Shift corri · Spazio salta · J attacca · E usa · K kart · tasto dx balla · Esc pausa
+HUD_CONTROLS_KART,W/S gas/brake · A/D steer · Shift turbo · Space jump · E leave · Esc pause,W/S gas/freno · A/D sterza · Shift turbo · Spazio salta · E scendi · Esc pausa
 PROMPT_LEAVE_KART,E  leave kart,E  scendi dal kart
 PROMPT_ENTER_KART,E  enter kart,E  sali sul kart
 PROMPT_SUMMON_KART,K  summon kart,K  chiama il kart
@@ -34,3 +34,12 @@ NPC_FOX_3,I saw a star up on the mountain...,Ho visto una stella su in montagna.
 NPC_PANDA_1,Slimes hate a good whack. Press J!,Gli slime odiano una bella botta. Premi J!
 NPC_PANDA_2,Some portals only open when you learn new tricks.,Alcuni portali si aprono solo quando impari nuovi trucchi.
 NPC_PANDA_3,Zzz... oh! Hello.,Zzz... oh! Ciao.
+HUD_CONTROLS_PAUSE,Esc pause,Esc pausa
+CARD_LEVEL_COMPLETE,Level complete!,Livello completato!
+CARD_STARS,Stars,Stelle
+CARD_REWARD,New ability: %s,Nuova abilità: %s
+CARD_RETURNING,Back to the island...,Si torna sull'isola...
+PAUSE_TITLE,Pause,Pausa
+PAUSE_RESUME,Resume,Riprendi
+PAUSE_HUB,Back to the island,Torna sull'isola
+PAUSE_QUIT,Quit game,Esci dal gioco

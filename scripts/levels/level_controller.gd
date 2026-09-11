@@ -15,7 +15,7 @@ const GROUP := &"level_controller"
 
 ## Seconds between the last objective completing and the return to the hub,
 ## so the player sees it happen.
-@export_range(0.0, 10.0, 0.1) var completion_delay := 1.5
+@export_range(0.0, 10.0, 0.1) var completion_delay := 3.5
 ## Return home automatically when done. Off for levels with a goal portal.
 @export var auto_return := true
 

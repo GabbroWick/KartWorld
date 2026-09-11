@@ -129,8 +129,10 @@ func _test_jump() -> void:
 func _test_short_hop() -> void:
 	await _steps(10)
 	var ground_y := _player.global_position.y
+	Sfx.clear_log()
 	await _jump(1)
 	var result := await _fall_to_ground(ground_y)
+	_check(Sfx.played.has(&"jump"), "jumping plays the jump sound")
 	_check(result.x < _player.definition.jump_height * 0.75,
 		"tapping jump gives a short hop (%.2fm vs %.2fm)"
 		% [result.x, _player.definition.jump_height])

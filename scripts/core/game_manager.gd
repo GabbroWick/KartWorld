@@ -9,11 +9,13 @@ extends Node
 signal player_registered(player: Node)
 signal player_unregistered(player: Node)
 signal mouse_capture_changed(captured: bool)
+signal pause_changed(paused: bool)
 
 ## Active player characters, in join order. Index 0 is player one.
 var players: Array[Node] = []
 
 var _mouse_captured := false
+var is_paused := false
 
 
 ## The game is Italian regardless of the OS language. Strings live in
@@ -33,11 +35,26 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed(InputActions.TOGGLE_MOUSE_CAPTURE):
+	if event.is_action_pressed(InputActions.PAUSE):
+		set_paused(not is_paused)
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(InputActions.TOGGLE_MOUSE_CAPTURE):
 		set_mouse_captured(not _mouse_captured)
 		get_viewport().set_input_as_handled()
-	elif event is InputEventMouseButton and event.pressed and not _mouse_captured:
+	elif event is InputEventMouseButton and event.pressed and not _mouse_captured and not is_paused:
 		set_mouse_captured(true)
+
+
+## Pauses the whole tree (menus keep running: PROCESS_MODE_ALWAYS) and frees
+## the mouse for them; resuming captures it again.
+func set_paused(paused: bool) -> void:
+	if paused == is_paused:
+		return
+	is_paused = paused
+	get_tree().paused = paused
+	set_mouse_captured(not paused)
+	Sfx.play(&"ui", -6.0)
+	pause_changed.emit(paused)
 
 
 func set_mouse_captured(captured: bool) -> void:
