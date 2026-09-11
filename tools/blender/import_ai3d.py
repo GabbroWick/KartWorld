@@ -44,6 +44,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--preview", default="")
     p.add_argument("--blend", default="")
     p.add_argument("--flat", action="store_true", help="shading flat (low-poly) invece di smooth")
+    p.add_argument("--keep-loose", action="store_true",
+                   help="non rimuovere le parti sciolte piccole (frammenti staccati dall'AI)")
     return p.parse_args(argv)
 
 
@@ -109,6 +111,31 @@ def orient(obj: bpy.types.Object, forward: str, up: str) -> None:
     obj.data.transform((rot_fwd @ rot_up).to_matrix().to_4x4())
     obj.data.update()
     obj.rotation_euler = (0.0, 0.0, 0.0)
+
+
+def drop_loose_parts(obj: bpy.types.Object, min_ratio: float = 0.02) -> int:
+    """Rimuove le isole di mesh con meno di `min_ratio` dei vertici totali
+    (schegge staccate: una punta di coda, un pezzo di orecchio). Ritorna
+    quante ne ha tolte."""
+    total = len(obj.data.vertices)
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.mesh.separate(type="LOOSE")
+    bpy.ops.object.mode_set(mode="OBJECT")
+    parts = [o for o in bpy.context.scene.objects if o.type == "MESH"]
+    parts.sort(key=lambda o: len(o.data.vertices), reverse=True)
+    keep = [parts[0]] + [o for o in parts[1:] if len(o.data.vertices) >= total * min_ratio]
+    removed = 0
+    for o in parts:
+        if o not in keep:
+            bpy.data.objects.remove(o, do_unlink=True)
+            removed += 1
+    for o in keep:
+        o.select_set(True)
+    bpy.context.view_layer.objects.active = keep[0]
+    if len(keep) > 1:
+        bpy.ops.object.join()
+    return removed
 
 
 def normalize(obj: bpy.types.Object, height: float) -> dict:
@@ -256,6 +283,8 @@ def main() -> None:
               "uv": bool(obj.data.uv_layers), "vertex_colors": bool(obj.data.color_attributes),
               "materials": [m.name for m in obj.data.materials if m]}
     orient(obj, args.forward, args.up)
+    loose_removed = 0 if args.keep_loose else drop_loose_parts(obj)
+    obj = bpy.context.view_layer.objects.active
     norm = normalize(obj, args.height)
     decimate(obj, args.faces)
     shading(obj, args.flat)
@@ -272,8 +301,8 @@ def main() -> None:
     after = {"vertices": len(obj.data.vertices),
              "triangles": sum(len(p.vertices) - 2 for p in obj.data.polygons),
              "dimensions": [round(d, 3) for d in obj.dimensions], "material": material}
-    log(input=str(src), output=str(dst), before=before, normalize=norm, after=after,
-        glb_bytes=dst.stat().st_size)
+    log(input=str(src), output=str(dst), before=before, loose_parts_removed=loose_removed,
+        normalize=norm, after=after, glb_bytes=dst.stat().st_size)
 
 
 if __name__ == "__main__":

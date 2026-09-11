@@ -53,7 +53,16 @@ def preprocess(path: Path, remove_bg: bool) -> Image.Image:
     img = Image.open(path).convert("RGBA")
     if remove_bg:
         from rembg import new_session, remove
-        img = remove(img, session=new_session("u2net"))  # u2net: licenza Apache-2
+        from scipy import ndimage
+        cut = remove(img, session=new_session("u2net"))  # u2net: licenza Apache-2
+        # rembg buca le zone chiare interne (la pancia crema del leopardo
+        # diventava un foro passante nella mesh): chiudi i buchi della maschera
+        # e ripristina i pixel originali dentro la silhouette.
+        alpha = np.asarray(cut.split()[-1]) > 127
+        filled = ndimage.binary_fill_holes(alpha)
+        rgba = np.asarray(img).copy()
+        rgba[..., 3] = np.where(filled, 255, 0)
+        img = Image.fromarray(rgba, "RGBA")
     w, h = img.size
     side = max(w, h)
     canvas = Image.new("RGBA", (side, side), (0, 0, 0, 0))

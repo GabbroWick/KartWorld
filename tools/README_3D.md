@@ -105,6 +105,8 @@ tools/blender/blender.cmd -b --python tools/blender/import_ai3d.py -- \
   `resources/characters/leopard.tres`); piedi a y=0, origine sotto i piedi.
 * `--faces`: triangoli massimi (0 = nessuna decimazione). Personaggio
   principale 10–15k, NPC 6–8k, nemici 3–5k.
+* Parti sciolte sotto il 2% dei vertici (schegge staccate dall'AI) vengono
+  tolte; `--keep-loose` le conserva.
 * `--preview`: PNG con 4 viste (fronte, lato, retro, 3/4). Guardalo sempre.
 * Esporta GLB Y-up con il davanti a -Z, la convenzione di Godot.
 
@@ -143,6 +145,7 @@ riferimento, misure a schermo (altezza, larghezza, profondità, min y).
 | Out of memory Hunyuan | `--octree 128` o `--steps 20`; chiudi il browser/GPU apps |
 | Output GPU corrotto o reset schermo | Windows TDR (2 s): NON modificato; se serve, chiedere prima (chiave `HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers\TdrDelay`) |
 | rembg sceglie `bria-rmbg` | licenza non commerciale: gli script forzano `u2net` |
+| Buco passante nella mesh dove il personaggio è chiaro (pancia) | rembg toglie le zone chiare interne; `generate_shape.py` chiude i buchi della maschera alpha (`binary_fill_holes`). Controlla `input_rgba.png` |
 | `No module named 'timm'` | dipendenza non dichiarata da hy3dshape: `uv pip install --python tools/ai3d/.venv timm` |
 | Pesi Hunyuan in `~/.cache/hy3dgen` | l'upstream ignora `HF_HOME`; `generate_shape.py` imposta `HY3DGEN_MODELS=tools/ai3d/models/hy3dgen` |
 
@@ -174,8 +177,11 @@ Nuovi pesi si scaricano da soli alla prima esecuzione; i vecchi restano in
   (`--up=+X --forward=-Y`). Hunyuan3D 2.1 shape sul leopardo: 30 step,
   octree 256 → 300 s, VRAM picco 12,3 GB, RAM 20,7 GB, 260k tri; Blender
   → 12k tri → `_final/leopard/leopard.glb` → Godot preview ok (1,35 m,
-  piedi a 0, fronte -Z). Difetto: la macchia chiara della pancia è
-  diventata un buco passante (mesh non chiusa). Seed 7 / 50 step in prova.
+  piedi a 0, fronte -Z). Buco passante sulla pancia: era rembg che
+  toglieva la zona chiara → fix `binary_fill_holes` sull'alpha, rigenerato
+  (285 s), pancia chiusa. Scheggia staccata della coda → rimozione parti
+  sciolte nello script Blender. `_final/leopard/leopard.glb` = 12k tri,
+  senza texture.
   Non ancora fatto: Paint/PBR (texture), rig, automazione `generate_character`.
   Pesi: DiT+VAE 7,6 GB in `tools/ai3d/models/hy3dgen` (download HF ~2 MB/s,
   ~1 h); TripoSR 1,6 GB in `models/hf`.
