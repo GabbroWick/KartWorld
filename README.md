@@ -18,6 +18,12 @@ health, stars, the current objective, what the interact key does and new
 unlocks. Polish (animation, real models, sound) is the next phase.
 Everything is placeholder art on purpose.
 
+## Screenshots
+
+| Hub island | Driving the kart | Inside a level |
+| --- | --- | --- |
+| ![Hub island](docs/screenshots/hub.png) | ![Driving the kart](docs/screenshots/kart.png) | ![Inside a level](docs/screenshots/level.png) |
+
 ---
 
 ## Requirements
