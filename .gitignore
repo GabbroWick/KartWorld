@@ -31,3 +31,4 @@ assets/characters/_processed/**/*.blend
 assets/characters/_processed/**/*.blend1
 __pycache__/
 *.pyc
+assets/characters/_generated/**/*.glb

@@ -56,7 +56,7 @@ uv pip install --python tools/ai3d/.venv --index-url https://repo.amd.com/rocm/w
     "torch[device-gfx1200]==2.12.0+rocm7.14.1" "torchvision[device-gfx1200]==0.27.0+rocm7.14.1"
 uv pip install --python tools/ai3d/.venv omegaconf einops "transformers>=4.45,<5" trimesh "rembg[cpu]" \
     huggingface-hub imageio scikit-image xatlas onnxruntime psutil pygltflib \
-    "diffusers>=0.30,<0.36" accelerate safetensors pymeshlab opencv-python-headless pyyaml tqdm
+    "diffusers>=0.30,<0.36" accelerate safetensors pymeshlab opencv-python-headless pyyaml tqdm timm
 git clone --depth 1 https://github.com/VAST-AI-Research/TripoSR.git tools/ai3d/TripoSR
 git clone --depth 1 https://github.com/VladimirTalyzin/hunyuan3d-2.1-mac-rocm.git tools/ai3d/hunyuan3d
 git clone --depth 1 https://github.com/Tencent-Hunyuan/Hunyuan3D-2.1.git tools/ai3d/hunyuan3d/Hunyuan3D-2.1
@@ -82,7 +82,8 @@ tools/ai3d/.venv/Scripts/python tools/ai3d/generate_shape.py assets/characters/_
 Parametri Hunyuan: `--steps` 30 (test) … 50 (buono); `--octree` 128 (test),
 256 (default), 384 (massimo dettaglio, più VRAM e tempo); `--seed` per
 ripetere. Primo avvio: scarica DiT fp16 7,0 GB + VAE 0,6 GB in
-`tools/ai3d/models/hf`.
+`tools/ai3d/models/hy3dgen/tencent/Hunyuan3D-2.1/` (~2 MB/s da HF: circa
+un'ora).
 
 ## 3. Elaborare in Blender
 
@@ -98,7 +99,8 @@ tools/blender/blender.cmd -b --python tools/blender/import_ai3d.py -- \
 * `--up` / `--forward`: assi del modello **come appare in Blender dopo
   l'import** (Blender: Z su, -Y avanti). Gli assi negativi vanno scritti con
   `=` (`--forward=-Y`), altrimenti argparse li legge come opzioni.
-  TripoSR grezzo: `--up=+X --forward=-Y`. Hunyuan3D: vedi Diario.
+  TripoSR grezzo: `--up=+X --forward=-Y`. Hunyuan3D 2.1: i default
+  (`--up=+Z --forward=-Y`) sono giusti.
 * `--height`: altezza finale in metri (leopardo 1.35, come la capsula in
   `resources/characters/leopard.tres`); piedi a y=0, origine sotto i piedi.
 * `--faces`: triangoli massimi (0 = nessuna decimazione). Personaggio
@@ -119,7 +121,14 @@ dell'editor (`make import` o `godot --headless --editor --quit`). Poi:
 `scenes/characters/visuals/<nome>_meshy.tscn` con `MeshyCharacterVisual`
 (`model`, `flip_forward` se serve, `flatten_materials = true` per il look
 flat) e `resources/characters/<nome>.tres` → `visual_scene`. Scena di
-anteprima: `scenes/dev/character_preview.tscn` (quando creata).
+anteprima: `scenes/dev/character_preview.tscn`:
+
+```bash
+godot --path . res://scenes/dev/character_preview.tscn -- res://assets/characters/_final/leopard/leopard.glb 1.35 [shot.png]
+```
+
+Giradischi con la stessa luce del gioco, anello rosso all'altezza di
+riferimento, misure a schermo (altezza, larghezza, profondità, min y).
 
 ## 6. Errori comuni
 
@@ -134,6 +143,8 @@ anteprima: `scenes/dev/character_preview.tscn` (quando creata).
 | Out of memory Hunyuan | `--octree 128` o `--steps 20`; chiudi il browser/GPU apps |
 | Output GPU corrotto o reset schermo | Windows TDR (2 s): NON modificato; se serve, chiedere prima (chiave `HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers\TdrDelay`) |
 | rembg sceglie `bria-rmbg` | licenza non commerciale: gli script forzano `u2net` |
+| `No module named 'timm'` | dipendenza non dichiarata da hy3dshape: `uv pip install --python tools/ai3d/.venv timm` |
+| Pesi Hunyuan in `~/.cache/hy3dgen` | l'upstream ignora `HF_HOME`; `generate_shape.py` imposta `HY3DGEN_MODELS=tools/ai3d/models/hy3dgen` |
 
 ## 7. Aggiornare il modello AI
 
@@ -160,5 +171,11 @@ Nuovi pesi si scaricano da soli alla prima esecuzione; i vecchi restano in
 * **2026-09-11** — Fase 1 analisi, Fase 2 struttura, Fase 3 venv + torch
   ROCm (GPU vista, matmul ok), TripoSR smoke test riuscito (inferenza 24 s,
   VRAM 3 GB, 101k tri) → Blender `import_ai3d.py` verificato con anteprima
-  (`--up=+X --forward=-Y`). Hunyuan3D 2.1 shape: script pronto, prima
-  generazione in corso (vedi CLAUDE.md per lo stato).
+  (`--up=+X --forward=-Y`). Hunyuan3D 2.1 shape sul leopardo: 30 step,
+  octree 256 → 300 s, VRAM picco 12,3 GB, RAM 20,7 GB, 260k tri; Blender
+  → 12k tri → `_final/leopard/leopard.glb` → Godot preview ok (1,35 m,
+  piedi a 0, fronte -Z). Difetto: la macchia chiara della pancia è
+  diventata un buco passante (mesh non chiusa). Seed 7 / 50 step in prova.
+  Non ancora fatto: Paint/PBR (texture), rig, automazione `generate_character`.
+  Pesi: DiT+VAE 7,6 GB in `tools/ai3d/models/hy3dgen` (download HF ~2 MB/s,
+  ~1 h); TripoSR 1,6 GB in `models/hf`.

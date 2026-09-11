@@ -226,7 +226,11 @@ and the running diary live in `tools/README_3D.md` — read it before touching
 * `tools/blender/import_ai3d.py` verified (orient/scale/decimate/preview).
 * Hunyuan3D 2.1 **shape only** via `generate_shape.py` (fork
   VladimirTalyzin/hunyuan3d-2.1-mac-rocm + upstream, pure-torch, no CUDA
-  ext). Paint/PBR NOT installed yet: human wants shape verified first.
+  ext) WORKS on the RX 9060 XT: 300 s / 12.3 GB VRAM for 30 steps at
+  octree 256. Leopard shape → Blender → `_final/leopard/leopard.glb` →
+  `scenes/dev/character_preview.tscn` verified. Known defect: light belly
+  patch became a through-hole. Paint/PBR NOT installed yet (next, after
+  the human signs off on the shape); then rig, then automation.
 * Rules from the human: no TDR registry change without explicit approval
   (key, current value, new value, risk, rollback explained first); announce
   size + disk before every large download; keep _source/_generated/

@@ -29,6 +29,7 @@ FORK = ROOT / "hunyuan3d"
 UPSTREAM = FORK / "Hunyuan3D-2.1"
 os.environ.setdefault("HF_HOME", str(ROOT / "models" / "hf"))
 os.environ.setdefault("U2NET_HOME", str(ROOT / "models" / "rembg"))
+os.environ.setdefault("HY3DGEN_MODELS", str(ROOT / "models" / "hy3dgen"))  # upstream ignora HF_HOME
 os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
 os.environ.setdefault("PYTORCH_HIP_ALLOC_CONF", "expandable_segments:True")
 os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
