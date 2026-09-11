@@ -7,9 +7,13 @@ extends Area3D
 
 signal activated(by: CharacterController)
 
-## Level to enter. Ignored when `returns_to_hub` is set.
+## Level to enter. Ignored when `returns_to_hub` or `completes_level` is set.
 @export var level: LevelDefinition
 @export var returns_to_hub := false
+## A level's finish line: entering it completes the level (through a
+## ReachDestinationObjective whose goal_zone is this portal) instead of
+## travelling. The LevelController then shows the card and brings us home.
+@export var completes_level := false
 ## Cosmetic ring spin, radians per second.
 @export var spin_speed := 0.6
 
@@ -28,7 +32,7 @@ func _ready() -> void:
 ## Abilities the level needs that the given (or any registered) player lacks.
 func get_missing_abilities(traveller: CharacterController = null) -> PackedStringArray:
 	var missing := PackedStringArray()
-	if returns_to_hub or level == null:
+	if returns_to_hub or completes_level or level == null:
 		return missing
 	var who := traveller if traveller else (GameManager.get_player(0) as CharacterController)
 	for ability in level.required_abilities:
@@ -46,6 +50,9 @@ func is_locked() -> bool:
 
 func _refresh_label() -> void:
 	if label == null:
+		return
+	if completes_level:
+		label.text = tr(&"PORTAL_GOAL")
 		return
 	if returns_to_hub:
 		label.text = tr(&"PORTAL_HOME")
@@ -81,6 +88,9 @@ func _on_body_entered(body: Node3D) -> void:
 		return
 	_used = true
 	activated.emit(traveller)
+	if completes_level:
+		# The objective listening to body_entered completes the level.
+		return
 	# Deferred: we are inside a physics callback and about to free the world.
 	if returns_to_hub:
 		manager.call_deferred(&"return_to_hub")

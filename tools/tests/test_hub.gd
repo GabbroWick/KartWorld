@@ -137,12 +137,16 @@ func _test_cliff_steps() -> void:
 		peak = maxf(peak, _player.global_position.y)
 	Input.action_release(InputActions.JUMP)
 	_check(peak > 6.0, "triple jump reaches over 6 m (%.1f)" % peak)
-	# Finish it through the goal zone to prove the level completes.
+	# Finish it through the summit portal to prove the level completes.
 	_player.global_position = Vector3(7.0, 22.4, -50.0)
 	_player.motor.reset()
 	await _steps(10)
+	_check(not _manager.is_in_hub(), "standing on the summit plinth does not complete the level")
+	_player.global_position = Vector3(7.0, 22.4, -52.0)
+	_player.motor.reset()
+	await _steps(10)
 	await _steps(240)
-	_check(_manager.is_in_hub(), "reaching the summit completes Cliff Steps and returns home")
+	_check(_manager.is_in_hub(), "entering the summit portal completes Cliff Steps and returns home")
 	_check(ProgressionManager.is_level_completed(&"cliff_steps"), "Cliff Steps recorded as completed")
 
 

@@ -14,6 +14,7 @@ ABILITY_RUN,Run,Corsa
 ABILITY_TURBO,Kart turbo,Turbo del kart
 ABILITY_VEHICLE_JUMP,Kart jump,Salto del kart
 PORTAL_HOME,Home,Casa
+PORTAL_GOAL,Finish,Traguardo
 PORTAL_NEEDS,Needs: %s,Serve: %s
 CHAR_LEOPARD,Leopard,Leopardo
 CHAR_FOX,Fox,Volpe

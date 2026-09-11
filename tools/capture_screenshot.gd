@@ -1,10 +1,12 @@
 extends Node
 ## Loads the main scene, lets it settle, saves a PNG and quits.
 ##
-## Run:  godot --path <project> res://tools/capture_screenshot.tscn -- <out.png> [frames] [drive]
+## Run:  godot --path <project> res://tools/capture_screenshot.tscn -- <out.png> [frames] [drive] [level=<.tres>] [at=x,y,z]
 ##
 ## With the optional "drive" word the player summons the kart, gets in and
 ## holds the accelerator for the given frames, so the shot shows driving.
+## `level=res://resources/levels/x.tres` loads that level first and
+## `at=x,y,z` teleports the player there (camera behind, facing -Z).
 ##
 ## Used to visually verify a build without a human having to launch the game.
 ## Requires a real (non-headless) renderer.
@@ -20,11 +22,34 @@ func _run() -> void:
 	var user_args := OS.get_cmdline_user_args()
 	var out_path := user_args[0] if user_args.size() > 0 else "screenshot.png"
 	var frames := int(user_args[1]) if user_args.size() > 1 else 60
-	var drive := user_args.size() > 2 and user_args[2] == "drive"
+	var drive := user_args.has("drive")
+	var level_path := ""
+	var at := ""
+	for arg in user_args:
+		if arg.begins_with("level="):
+			level_path = arg.trim_prefix("level=")
+		elif arg.begins_with("at="):
+			at = arg.trim_prefix("at=")
 
 	await get_tree().process_frame
 	var scene := (load(MAIN_SCENE) as PackedScene).instantiate()
 	get_tree().root.add_child(scene)
+	await _wait(5)
+
+	if level_path != "":
+		var manager := get_tree().get_first_node_in_group(LevelManager.GROUP) as LevelManager
+		manager.load_level(load(level_path) as LevelDefinition)
+		await _wait(5)
+	if at != "":
+		var parts := at.split(",")
+		var player := GameManager.get_player(0) as CharacterController
+		player.global_position = Vector3(float(parts[0]), float(parts[1]), float(parts[2]))
+		player.motor.reset()
+		player.visual_root.global_rotation.y = 0.0
+		for cam in scene.find_children("*", "ThirdPersonCamera", true, false):
+			(cam as ThirdPersonCamera).set_yaw(0.0)
+			(cam as ThirdPersonCamera).set_target(player, true)
+		await _wait(5)
 
 	if drive:
 		await _press(InputActions.SUMMON_KART)

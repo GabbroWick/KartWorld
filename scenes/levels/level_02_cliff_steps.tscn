@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/props/placeholder_block.tscn" id="1_block"]
 [ext_resource type="PackedScene" path="res://scenes/world/props/placeholder_cone.tscn" id="2_cone"]
@@ -27,9 +27,6 @@ ambient_light_source = 1
 reflected_light_source = 1
 tonemap_mode = 0
 
-[sub_resource type="BoxShape3D" id="shape_goal"]
-size = Vector3(8, 4, 8)
-
 [node name="CliffSteps" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -52,7 +49,7 @@ completion_delay = 3.5
 [node name="ReachTop" type="Node" parent="LevelController"]
 script = ExtResource("7_reach")
 description = "OBJ_CLIMB_CLIFF"
-goal_zone = NodePath("../../GoalZone")
+goal_zone = NodePath("../../GoalPortal")
 
 [node name="CollectStars" type="Node" parent="LevelController"]
 script = ExtResource("8_collect")
@@ -123,18 +120,14 @@ definition = ExtResource("10_slime")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 22.2, -49)
 definition = ExtResource("10_slime")
 
-[node name="GoalZone" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 24, -50)
-collision_layer = 8
-collision_mask = 18
-
-[node name="Shape" type="CollisionShape3D" parent="GoalZone"]
-shape = SubResource("shape_goal")
-
-[node name="GoalMarker" parent="." instance=ExtResource("1_block")]
+[node name="GoalPlinth" parent="." instance=ExtResource("1_block")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 22.05, -50)
 size = Vector3(6, 0.1, 6)
 color = Color(1, 0.85, 0.3, 1)
+
+[node name="GoalPortal" parent="." instance=ExtResource("3_portal")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 22, -52)
+completes_level = true
 
 [node name="ReturnPortal" parent="." instance=ExtResource("3_portal")]
 transform = Transform3D(0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, 0.7071, -6, 0, 6)

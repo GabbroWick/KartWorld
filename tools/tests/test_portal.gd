@@ -5,7 +5,7 @@ extends Node
 ##
 ## Loads the real main scene (island hub), walks the player into the portal,
 ## checks the level scene replaced the hub with player and kart at the level's
-## spawn, then walks into the return portal and checks the hub is back.
+## spawn, then walks into the finish portal and checks the hub is back.
 
 const MAIN_SCENE := "res://scenes/main.tscn"
 
@@ -118,9 +118,10 @@ func _test_kart_travels() -> void:
 
 func _test_return() -> void:
 	var portals := _manager.world.find_children("*", "Portal", true, false)
-	_check(portals.size() == 1, "level has one return portal")
+	_check(portals.size() == 1, "level has one finish portal")
 	var portal: Portal = portals[0]
-	_check(portal.returns_to_hub, "level portal returns to the hub")
+	_check(portal.completes_level, "level portal is the finish line")
+	_check(portal.label.text == tr(&"PORTAL_GOAL"), "finish portal is labelled (%s)" % portal.label.text)
 	_manager._loaded_at = -1000.0
 	var arrival := [Vector3.ZERO]
 	_manager.hub_loaded.connect(func() -> void: arrival[0] = _player.global_position)
@@ -130,7 +131,10 @@ func _test_return() -> void:
 	await _steps(5)
 	await _hold(&"move_forward", 80)
 	await _steps(10)
-	_check(_manager.is_in_hub(), "walking into the return portal brings the hub back")
+	_check(not _manager.is_in_hub(), "the finish portal does not travel by itself")
+	# The LevelController brings the party home after its completion delay.
+	await _steps(240)
+	_check(_manager.is_in_hub(), "finishing the level brings the hub back")
 	_check(_manager.world.name == "IslandHub", "world node is the island again")
 	await _steps(30)
 	var spawn := _manager.find_spawn_point()

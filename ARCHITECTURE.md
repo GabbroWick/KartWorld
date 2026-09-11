@@ -234,7 +234,9 @@ Main
   `level_completed(def, stars)` for the progression system to record later.
 * **`Portal`** (Area3D on layer 4, mask player|vehicle): walking or driving in
   travels — outbound portals carry a `LevelDefinition`, return portals set
-  `returns_to_hub`. Required abilities are checked on the traveller (and on
+  `returns_to_hub`, and a level's finish portal sets `completes_level`: it
+  travels nowhere itself, the `ReachDestinationObjective` watching it
+  completes the level and the controller brings the party home. Required abilities are checked on the traveller (and on
   progression); a locked portal shows "Needs: Triple jump" in red and refuses,
   and relabels itself the moment the ability is earned. Portals
   are inert for a grace period after any load, so arriving beside one never
@@ -248,16 +250,18 @@ Main
 ```text
 <Level scene root>
 ├── LevelController          objectives, star count, completion
-│   ├── ReachClearing        ReachDestinationObjective (goal_zone = ../../GoalZone)
+│   ├── ReachClearing        ReachDestinationObjective (goal_zone = ../../GoalPortal)
 │   └── CollectStars         CollectObjective (optional)
-├── GoalZone                 Area3D
+├── GoalPortal               Portal with completes_level (the finish line)
 ├── Checkpoint, Star, Star   gameplay props
 └── geometry, portal, trees
 ```
 
 * **`Objective`** (Node) is the base: `description`, `optional`,
   `completed` / `progress_changed`, `get_status_text()`. Subclasses:
-  `ReachDestinationObjective` (an Area3D goal zone) and `CollectObjective`
+  `ReachDestinationObjective` (an Area3D goal zone — normally the finish
+  `Portal` with `completes_level`, so a level ends by walking into it, never
+  by standing on a pad) and `CollectObjective`
   (N collectibles of a kind, 0 = all present). Defeat-enemies comes with
   combat. New objective types are new subclasses; levels pick and configure
   them in the scene, never in code.

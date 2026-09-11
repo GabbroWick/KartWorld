@@ -47,6 +47,7 @@ $G --headless --path . res://tools/tests/test_hub_runner.tscn      # hub stars /
 $G --path . res://tools/tests/test_lighting_runner.tscn            # lighting suite (needs a window)
 $G --path . res://tools/capture_screenshot.tscn -- out.png 120     # render a frame to PNG
 $G --path . res://tools/capture_screenshot.tscn -- out.png 120 drive   # ...while driving the kart
+$G --path . res://tools/capture_screenshot.tscn -- out.png 90 level=res://resources/levels/level_01_forest_trail.tres at=20,0.3,-40   # ...inside a level
 $G --path . --quit-after 400                                       # run the game 400 frames
 $G --headless --path . --editor --quit                             # reimport / refresh class cache
 $G --headless --path . --script res://tools/setup_input_map.gd     # regenerate input map
@@ -175,7 +176,9 @@ suites exit non-zero on failure.
 * Levels: `scripts/levels/` (LevelDefinition, LevelManager, Portal), level
   scenes in `scenes/levels/`, metadata in `resources/levels/`, portal prop
   `scenes/world/props/portal.tscn`. Every hostable scene has a `player_spawn`
-  Marker3D. LevelManager is found via group `level_manager`.
+  Marker3D. LevelManager is found via group `level_manager`. A level ends by
+  entering its finish portal (`completes_level = true`, the
+  `ReachDestinationObjective.goal_zone`), never by standing on a pad.
 * Audio: `Sfx` autoload (`scripts/audio/sfx.gd`) — `Sfx.play(&"name")`,
   `Sfx.play_music(&"hub"|&"level")`. File in `assets/audio/sfx/<name>.ogg`
   wins, else `SoundBank` synth. Kart hum: `EngineSound` in vehicle.tscn.

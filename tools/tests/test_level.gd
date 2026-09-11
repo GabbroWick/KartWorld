@@ -179,15 +179,17 @@ func _test_goal() -> void:
 	# Arrive hurt: finishing the level must send us home with full hearts.
 	_player.take_damage(2.0, null)
 	_player.invulnerable_left = 0.0
-	# Walk onto the goal marker from the clearing's near edge (past the gap).
-	_player.global_position = Vector3(20.0, 0.3, -38.5)
+	# Stand on the yellow plinth first: that alone must not finish the level.
+	_player.global_position = Vector3(20.0, 0.3, -46.0)
 	_player.motor.reset()
 	_camera_rig.set_yaw(0.0)
-	await _steps(5)
+	await _steps(10)
+	_check(done[0] == -1, "standing on the goal plinth does not complete the level")
+	# Then walk into the finish portal.
 	Sfx.clear_log()
 	await _hold(&"move_forward", 60)
 	await _steps(5)
-	_check(done[0] == 1, "reaching the clearing completes the level with 1 star (got %d)" % done[0])
+	_check(done[0] == 1, "entering the finish portal completes the level with 1 star (got %d)" % done[0])
 	_check(_hud.objective_label.text == tr(&"HUD_LEVEL_COMPLETE"), "HUD announces completion (%s)" % _hud.objective_label.text)
 	_check(not _manager.is_in_hub(), "return home waits for the completion delay")
 	_check(_hud.card.visible, "level-complete card is shown")

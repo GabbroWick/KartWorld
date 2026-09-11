@@ -1,8 +1,11 @@
 class_name ReachDestinationObjective
 extends Objective
 ## Complete when the player (on foot or in the kart) enters the goal zone.
+## Usually the goal is a Portal with `completes_level`, so the level ends by
+## walking into the finish portal, not by standing on a pad.
 
-## An Area3D in the level with a collision mask covering player and vehicle.
+## An Area3D in the level with a collision mask covering player and vehicle
+## (a Portal is one).
 @export var goal_zone: NodePath
 
 var _zone: Area3D

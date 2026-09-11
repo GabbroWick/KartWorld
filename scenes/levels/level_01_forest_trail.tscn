@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/props/placeholder_block.tscn" id="1_block"]
 [ext_resource type="PackedScene" path="res://scenes/world/props/kenney_tree.tscn" id="2_tree"]
@@ -32,9 +32,6 @@ ambient_light_source = 1
 reflected_light_source = 1
 tonemap_mode = 0
 
-[sub_resource type="BoxShape3D" id="shape_goal"]
-size = Vector3(8, 4, 8)
-
 [node name="ForestTrail" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -57,7 +54,7 @@ completion_delay = 3.5
 [node name="ReachClearing" type="Node" parent="LevelController"]
 script = ExtResource("7_reach")
 description = "OBJ_REACH_CLEARING"
-goal_zone = NodePath("../../GoalZone")
+goal_zone = NodePath("../../GoalPortal")
 
 [node name="CollectStars" type="Node" parent="LevelController"]
 script = ExtResource("8_collect")
@@ -119,22 +116,14 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -18)
 [node name="StarSecret" parent="." instance=ExtResource("4_star")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27, 3.8, -44)
 
-[node name="GoalZone" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 2, -44)
-collision_layer = 8
-collision_mask = 18
-
-[node name="Shape" type="CollisionShape3D" parent="GoalZone"]
-shape = SubResource("shape_goal")
-
-[node name="GoalMarker" parent="." instance=ExtResource("1_block")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0.05, -44)
-size = Vector3(6, 0.1, 6)
+[node name="GoalPlinth" parent="." instance=ExtResource("1_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0.05, -48)
+size = Vector3(6, 0.1, 4)
 color = Color(1, 0.85, 0.3, 1)
 
-[node name="ReturnPortal" parent="." instance=ExtResource("3_portal")]
+[node name="GoalPortal" parent="." instance=ExtResource("3_portal")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, -49)
-returns_to_hub = true
+completes_level = true
 
 [node name="TreeA" parent="." instance=ExtResource("2_tree")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -12)
