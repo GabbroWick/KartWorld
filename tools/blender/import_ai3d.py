@@ -117,6 +117,12 @@ def drop_loose_parts(obj: bpy.types.Object, min_ratio: float = 0.02) -> int:
     """Rimuove le isole di mesh con meno di `min_ratio` dei vertici totali
     (schegge staccate: una punta di coda, un pezzo di orecchio). Ritorna
     quante ne ha tolte."""
+    # Prima salda i vertici doppi: una mesh con UV (Hunyuan Paint, xatlas) e'
+    # spezzata lungo le cuciture e ogni isola UV sembrerebbe "sciolta".
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.mesh.remove_doubles(threshold=0.0001)
+    bpy.ops.object.mode_set(mode="OBJECT")
     total = len(obj.data.vertices)
     bpy.ops.object.mode_set(mode="EDIT")
     bpy.ops.mesh.select_all(action="SELECT")

@@ -232,9 +232,14 @@ and the running diary live in `tools/README_3D.md` — read it before touching
   `scenes/dev/character_preview.tscn` verified (12k tris, no texture).
   Fixed on the way: rembg cut the light belly out of the alpha (hole in
   the mesh) → mask holes filled; loose fragments dropped in Blender.
-  Paint/PBR NOT installed yet (next, after the human signs off on the
-  shape); then rig, then `generate_character` automation.
-* Rules from the human: no TDR registry change without explicit approval
+  Paint/PBR (`generate_texture.py`, preset `safe` 6x256) WORKS: 338 s,
+  16.9 GB VRAM; needs TdrDelay 60. Feed Blender the Paint **OBJ**, not the
+  fork's GLB (V flipped). `_final/leopard/leopard.glb` is textured now
+  (back side has artefacts: single reference view). Next: rig, then
+  `generate_character` automation.
+* Windows TDR: `TdrDelay = 60` was set by the human on 2026-09-11 (approved,
+  with rollback documented in README_3D) because Paint kernels exceeded 2 s.
+* Rules from the human: no further registry change without explicit approval
   (key, current value, new value, risk, rollback explained first); announce
   size + disk before every large download; keep _source/_generated/
   _processed/_final separate; never overwrite finals without backup.

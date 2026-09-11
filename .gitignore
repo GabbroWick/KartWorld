@@ -32,3 +32,7 @@ assets/characters/_processed/**/*.blend1
 __pycache__/
 *.pyc
 assets/characters/_generated/**/*.glb
+assets/characters/_processed/
+assets/characters/_generated/**/paint/*.jpg
+assets/characters/_generated/**/paint/*.mtl
+assets/characters/_generated/**/paint/*.png

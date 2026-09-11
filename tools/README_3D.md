@@ -57,6 +57,8 @@ uv pip install --python tools/ai3d/.venv --index-url https://repo.amd.com/rocm/w
 uv pip install --python tools/ai3d/.venv omegaconf einops "transformers>=4.45,<5" trimesh "rembg[cpu]" \
     huggingface-hub imageio scikit-image xatlas onnxruntime psutil pygltflib \
     "diffusers>=0.30,<0.36" accelerate safetensors pymeshlab opencv-python-headless pyyaml tqdm timm
+# solo per Paint/PBR:
+uv pip install --python tools/ai3d/.venv realesrgan basicsr fast_simplification pybind11 ninja setuptools     pytorch-lightning torchmetrics torchdiffeq sentencepiece loguru configargparse python-dotenv
 git clone --depth 1 https://github.com/VAST-AI-Research/TripoSR.git tools/ai3d/TripoSR
 git clone --depth 1 https://github.com/VladimirTalyzin/hunyuan3d-2.1-mac-rocm.git tools/ai3d/hunyuan3d
 git clone --depth 1 https://github.com/Tencent-Hunyuan/Hunyuan3D-2.1.git tools/ai3d/hunyuan3d/Hunyuan3D-2.1
@@ -84,6 +86,43 @@ Parametri Hunyuan: `--steps` 30 (test) … 50 (buono); `--octree` 128 (test),
 ripetere. Primo avvio: scarica DiT fp16 7,0 GB + VAE 0,6 GB in
 `tools/ai3d/models/hy3dgen/tencent/Hunyuan3D-2.1/` (~2 MB/s da HF: circa
 un'ora).
+
+### 2b. Texture (Paint/PBR), separata dalla shape
+
+```bash
+tools/ai3d/.venv/Scripts/python tools/ai3d/generate_texture.py --name leopard --preset safe
+```
+
+Legge `_generated/leopard/model_raw.glb` + `input_rgba.png`, scrive in
+`_generated/leopard/paint/` (obj/glb con texture, mappe PBR, report.json).
+**Usa l'OBJ (`model_raw_textured.obj`) come input di Blender, non il GLB**:
+l'export GLB del fork inverte l'asse V una volta di troppo e la texture,
+sull'atlante xatlas, sembra rumore colorato (chiazza della pancia sul muso).
+Misurato sul leopardo: 338 s, VRAM picco 16,9 GB (oltre i 16 fisici: usa
+memoria condivisa, ma passa), RAM 12,4 GB. Il retro del modello viene
+inventato (una sola vista di riferimento): artefatti possibili dietro.
+Preset: `safe` (6 viste, 256 px: sicuro in 16 GB senza flash attention),
+`low` (6 viste, 512 px: matrice di attenzione ~67 GB, NON passa il
+preflight su ROCm), `normal` solo con flash attention. Pesi: UNet+VAE+
+encoder 6,6 GB in `tools/ai3d/hunyuan3d/weights/Hunyuan3D-2.1/
+hunyuan3d-paintpbr-v2-1`, DINOv2-giant 4,3 GB in `models/hf`,
+RealESRGAN 64 MB in `hunyuan3d/Hunyuan3D-2.1/hy3dpaint/ckpt/`.
+Il rasterizer è quello puro-PyTorch del fork (`HY3D_RASTER=torch`);
+`mesh_inpaint_processor` (C++/pybind11) va compilato una volta con MSVC
+Build Tools (installati, toolset 14.50 + Windows SDK 10.0.26100).
+`scripts/build_extensions.py` del fork fallisce su questa macchina
+(`io.h` non trovato: non entra in vcvars, e vcvars si rompe per il
+`GnuWin32\bin` con parentesi nel PATH). Ricetta che funziona (PowerShell,
+dalla radice del progetto):
+
+```powershell
+$d = "$PWD\tools\ai3d\hunyuan3d\.build\mesh_inpaint_processor"   # creato da build_extensions.py
+cmd /c "set `"PATH=C:\Windows\System32;C:\Windows`" && cd /d `"$d`" && call `"C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat`" && set DISTUTILS_USE_SDK=1 && `"$PWD\tools\ai3d\.venv\Scripts\python.exe`" setup.py build_ext --inplace"
+Copy-Item "$d\*.pyd" tools\ai3d\hunyuan3d\Hunyuan3D-2.1\hy3dpaint\DifferentiableRenderer\
+```
+
+Il rasterizer GPU nativo non si può compilare (le ruote rocm-sdk non
+hanno header HIP né compilatore): si usa `torch_rasterizer.py`.
 
 ## 3. Elaborare in Blender
 
@@ -143,7 +182,7 @@ riferimento, misure a schermo (altezza, larghezza, profondità, min y).
 | argparse `expected one argument` | asse negativo: usa `--forward=-Y` |
 | Modello sdraiato / girato nell'anteprima | cambia `--up` / `--forward` e riguarda `preview.png` |
 | Out of memory Hunyuan | `--octree 128` o `--steps 20`; chiudi il browser/GPU apps |
-| Output GPU corrotto o reset schermo | Windows TDR (2 s): NON modificato; se serve, chiedere prima (chiave `HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers\TdrDelay`) |
+| "Timeout AMD" / reset del driver durante il Paint | Windows TDR. Il 2026-09-11 il Paint ha superato i 2 s di default: impostato `TdrDelay = 60` (DWORD) in `HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers`, con riavvio. Ripristino: `Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" -Name TdrDelay` (admin, riavvio). La shape da sola non lo richiedeva |
 | rembg sceglie `bria-rmbg` | licenza non commerciale: gli script forzano `u2net` |
 | Buco passante nella mesh dove il personaggio è chiaro (pancia) | rembg toglie le zone chiare interne; `generate_shape.py` chiude i buchi della maschera alpha (`binary_fill_holes`). Controlla `input_rgba.png` |
 | `No module named 'timm'` | dipendenza non dichiarata da hy3dshape: `uv pip install --python tools/ai3d/.venv timm` |
@@ -182,6 +221,12 @@ Nuovi pesi si scaricano da soli alla prima esecuzione; i vecchi restano in
   (285 s), pancia chiusa. Scheggia staccata della coda → rimozione parti
   sciolte nello script Blender. `_final/leopard/leopard.glb` = 12k tri,
   senza texture.
-  Non ancora fatto: Paint/PBR (texture), rig, automazione `generate_character`.
+  Paint/PBR: pesi scaricati (6,6 + 4,3 GB), `mesh_inpaint_processor`
+  compilato con MSVC, primo tentativo → reset driver (TDR 2 s); con
+  `TdrDelay = 60` texturing riuscito (338 s). GLB del fork con V invertita:
+  si usa l'OBJ. `_final/leopard/leopard.glb` ora è **texturizzato** (12k
+  tri, albedo 2048², occhi e pancia corretti; retro con artefatti).
+  Non ancora fatto: rig, automazione `generate_character`, backup
+  `_processed/leopard/leopard_untextured_backup.glb` della versione senza texture.
   Pesi: DiT+VAE 7,6 GB in `tools/ai3d/models/hy3dgen` (download HF ~2 MB/s,
   ~1 h); TripoSR 1,6 GB in `models/hf`.
