@@ -198,8 +198,18 @@ func _test_goal() -> void:
 	_check(_hud.card.reward_label.visible and _hud.card.reward_label.text.contains(tr(&"ABILITY_ENHANCED_JUMP")),
 		"card announces the reward ability (%s)" % _hud.card.reward_label.text)
 	_check(Sfx.played.has(&"fanfare"), "completion plays the fanfare")
-	await _steps(240)
+	_check(get_tree().paused and GameManager.is_frozen, "the world freezes while the card shows")
+	# A slime touching the player now must not hurt: enemies are frozen.
+	var slime := get_tree().get_first_node_in_group(&"enemy") as Node3D
+	var hearts_before := _player.health.current_health
+	if slime:
+		slime.global_position = _player.global_position
+	await _steps(30)
+	_check(_player.health.current_health == hearts_before, "frozen enemies deal no damage (%.0f -> %.0f)" % [hearts_before, _player.health.current_health])
+	_check(_player.global_position.distance_to(Vector3(20.0, _player.global_position.y, -49.0)) < 3.0, "the player stays put while frozen")
+	await _steps(210)
 	_check(_manager.is_in_hub(), "party is back in the hub after the delay")
+	_check(not get_tree().paused and not GameManager.is_frozen, "the world thaws back in the hub")
 	_check(not _hud.card.visible, "card is dismissed back in the hub")
 	_check(result[0] != null and result[0].id == &"forest_trail" and result[1] == 1,
 		"LevelManager reported forest_trail completed with 1 star")

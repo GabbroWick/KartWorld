@@ -16,6 +16,9 @@ var players: Array[Node] = []
 
 var _mouse_captured := false
 var is_paused := false
+## Gameplay frozen by the game itself (level-complete card): the tree is
+## paused but no menu opens and the mouse stays captured.
+var is_frozen := false
 
 
 ## The game is Italian regardless of the OS language. Strings live in
@@ -51,10 +54,23 @@ func set_paused(paused: bool) -> void:
 	if paused == is_paused:
 		return
 	is_paused = paused
-	get_tree().paused = paused
+	_apply_tree_pause()
 	set_mouse_captured(not paused)
 	Sfx.play(&"ui", -6.0)
 	pause_changed.emit(paused)
+
+
+## Freezes (or thaws) the world while something is shown over it — enemies,
+## hazards and the player all stop. Independent of the pause menu.
+func set_frozen(frozen: bool) -> void:
+	if frozen == is_frozen:
+		return
+	is_frozen = frozen
+	_apply_tree_pause()
+
+
+func _apply_tree_pause() -> void:
+	get_tree().paused = is_paused or is_frozen
 
 
 func set_mouse_captured(captured: bool) -> void:

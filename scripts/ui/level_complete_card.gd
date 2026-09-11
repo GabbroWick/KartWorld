@@ -18,6 +18,8 @@ var shown_total := 0
 
 
 func _ready() -> void:
+	# Shown while the world is frozen: keep animating.
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	visible = false
 	title_label.text = tr(&"CARD_LEVEL_COMPLETE")
 	footer_label.text = tr(&"CARD_RETURNING")

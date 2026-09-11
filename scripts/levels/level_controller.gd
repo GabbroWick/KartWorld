@@ -31,6 +31,11 @@ func _ready() -> void:
 	call_deferred(&"_start")
 
 
+func _exit_tree() -> void:
+	# Whatever way the level ends (completion, pause menu, death), thaw.
+	GameManager.set_frozen(false)
+
+
 ## The level scene's root: collectibles, checkpoints and zones live under it,
 ## next to this controller, not inside it.
 func get_level_root() -> Node:
@@ -85,6 +90,8 @@ func _on_objective_completed(_objective: Objective) -> void:
 				break
 		if all_required_done:
 			is_complete = true
+			# Freeze the world: nothing may hurt the player while the card shows.
+			GameManager.set_frozen(true)
 			objectives_changed.emit()
 			completed.emit(stars_collected)
 			if auto_return:
@@ -95,7 +102,9 @@ func _on_objective_completed(_objective: Objective) -> void:
 
 func _return_home() -> void:
 	if completion_delay > 0.0:
-		await get_tree().create_timer(completion_delay).timeout
+		# process_always: the timer must run while the world is frozen.
+		await get_tree().create_timer(completion_delay, true).timeout
+	GameManager.set_frozen(false)
 	var manager := get_tree().get_first_node_in_group(LevelManager.GROUP) as LevelManager
 	if manager:
 		manager.complete_level(stars_collected)

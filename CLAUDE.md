@@ -178,7 +178,9 @@ suites exit non-zero on failure.
   `scenes/world/props/portal.tscn`. Every hostable scene has a `player_spawn`
   Marker3D. LevelManager is found via group `level_manager`. A level ends by
   entering its finish portal (`completes_level = true`, the
-  `ReachDestinationObjective.goal_zone`), never by standing on a pad.
+  `ReachDestinationObjective.goal_zone`), never by standing on a pad. On
+  completion `GameManager.set_frozen(true)` pauses the tree (no menu, mouse
+  kept) until the hub loads; the card is PROCESS_MODE_ALWAYS.
 * Audio: `Sfx` autoload (`scripts/audio/sfx.gd`) — `Sfx.play(&"name")`,
   `Sfx.play_music(&"hub"|&"level")`. File in `assets/audio/sfx/<name>.ogg`
   wins, else `SoundBank` synth. Kart hum: `EngineSound` in vehicle.tscn.
