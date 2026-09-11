@@ -10,7 +10,7 @@ extends Node3D
 ## GLB or a visual scene (anything Node3D). GLB gets flip_forward + flatten
 ## through MeshyCharacterVisual so it matches the in-game wrapper.
 @export var model: PackedScene
-@export var flip_forward := false
+@export var flip_forward := true
 @export var flatten_materials := true
 @export var auto_ground := true
 @export var turntable_speed := 0.6
@@ -63,7 +63,7 @@ func _spawn() -> void:
 	pivot.add_child(_instance)
 	await get_tree().process_frame
 	var aabb := _measure(_instance)
-	info.text = "%s\naltezza %.2f m  larghezza %.2f m  profondità %.2f m\nmin y %.2f (piedi a 0?)  fronte = -Z (verso la camera)" % [
+	info.text = "%s\naltezza %.2f m  larghezza %.2f m  profondità %.2f m\nmin y %.2f (piedi a 0?)  la camera guarda il fronte (-Z dopo flip_forward)" % [
 		model.resource_path, aabb.size.y, aabb.size.x, aabb.size.z, aabb.position.y]
 
 

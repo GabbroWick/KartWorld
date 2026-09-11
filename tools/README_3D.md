@@ -147,7 +147,9 @@ tools/blender/blender.cmd -b --python tools/blender/import_ai3d.py -- \
 * Parti sciolte sotto il 2% dei vertici (schegge staccate dall'AI) vengono
   tolte; `--keep-loose` le conserva.
 * `--preview`: PNG con 4 viste (fronte, lato, retro, 3/4). Guardalo sempre.
-* Esporta GLB Y-up con il davanti a -Z, la convenzione di Godot.
+* Esporta GLB Y-up con il davanti a **+Z** (convenzione glTF: Blender -Y →
+  glTF +Z). In Godot il personaggio guarda -Z, quindi la visual scene usa
+  `flip_forward = true` (come per i modelli Meshy).
 
 ## 4. Dove finiscono i file
 
@@ -159,9 +161,9 @@ solo quella cartella è importata da Godot.
 
 `assets/characters/_final/<nome>/<nome>.glb` viene importato al primo avvio
 dell'editor (`make import` o `godot --headless --editor --quit`). Poi:
-`scenes/characters/visuals/<nome>_meshy.tscn` con `MeshyCharacterVisual`
-(`model`, `flip_forward` se serve, `flatten_materials = true` per il look
-flat) e `resources/characters/<nome>.tres` → `visual_scene`. Scena di
+`scenes/characters/visuals/<nome>_ai.tscn` con `MeshyCharacterVisual`
+(`model`, `flip_forward = true`, `auto_ground = true`, `flatten_materials =
+true` per il look flat; esempio: `leopard_ai.tscn`) e `resources/characters/<nome>.tres` → `visual_scene`. Scena di
 anteprima: `scenes/dev/character_preview.tscn`:
 
 ```bash

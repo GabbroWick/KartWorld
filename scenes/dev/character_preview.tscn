@@ -1,6 +1,7 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/dev/character_preview.gd" id="1_preview"]
+[ext_resource type="PackedScene" path="res://assets/characters/_final/leopard/leopard.glb" id="2_default_model"]
 
 [sub_resource type="Environment" id="environment"]
 background_mode = 1
@@ -38,6 +39,7 @@ size = Vector3(0.02, 0.02, 6)
 
 [node name="CharacterPreview" type="Node3D"]
 script = ExtResource("1_preview")
+model = ExtResource("2_default_model")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("environment")
@@ -66,7 +68,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, 0)
 mesh = SubResource("ring_mesh")
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.94, 0.342, 0, -0.342, 0.94, 0, 1.8, 3.6)
+transform = Transform3D(-1, 0, 0, 0, 0.94, 0.342, 0, 0.342, -0.94, 0, 1.8, -3.6)
 fov = 45.0
 
 [node name="UI" type="CanvasLayer" parent="."]
