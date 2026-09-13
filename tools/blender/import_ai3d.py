@@ -266,10 +266,17 @@ def add_tail(obj: bpy.types.Object, length: float, radius: float) -> int:
     bpy.ops.mesh.normals_make_consistent(inside=False)
     bpy.ops.object.mode_set(mode="OBJECT")
     added = len(tail.data.vertices)
+    had_uv = bool(obj.data.uv_layers)
     tail.select_set(True)
     obj.select_set(True)
     bpy.context.view_layer.objects.active = obj
     bpy.ops.object.join()
+    if not had_uv:
+        # La coda (da curva) porta un layer UV: nel join il corpo lo riceve
+        # con tutte le UV a zero e il bake diventa un colore piatto.
+        joined = bpy.context.view_layer.objects.active
+        while joined.data.uv_layers:
+            joined.data.uv_layers.remove(joined.data.uv_layers[0])
     return added
 
 
