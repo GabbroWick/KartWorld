@@ -47,6 +47,13 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--clip-back", type=float, default=0.0,
                    help="tieni solo la geometria entro questa profondita' (m) dal punto piu' avanti "
                         "(muso) e chiudi il taglio: code inventate dall'AI. 0 = niente")
+    p.add_argument("--tail", type=float, default=0.0,
+                   help="aggiunge una coda procedurale (tubo su curva) di questa lunghezza (m) "
+                        "dal bacino, curva verso l'alto. 0 = niente. Usalo con --clip-back")
+    p.add_argument("--tail-radius", type=float, default=0.055)
+    p.add_argument("--cut-tail-root", type=float, default=0.0,
+                   help="rimuove la radice della coda AI: vertici centrali (|x| < 8 cm) sotto il 28%% "
+                        "dell'altezza e oltre questa profondita' (m) dal muso; chiude i fori. 0 = niente")
     p.add_argument("--keep-loose", action="store_true",
                    help="non rimuovere le parti sciolte piccole (frammenti staccati dall'AI)")
     return p.parse_args(argv)
@@ -190,6 +197,82 @@ def clip_back(obj: bpy.types.Object, distance: float) -> int:
     return before - len(obj.data.vertices)
 
 
+def cut_tail_root(obj: bpy.types.Object, depth: float) -> int:
+    """La coda inventata dall'AI parte dal bacino e scende fra le gambe: dopo
+    --clip-back ne resta la radice. Elimina i vertici centrali e bassi oltre
+    `depth` dal muso, poi chiude i fori. Ritorna i vertici rimossi."""
+    if depth <= 0.0:
+        return 0
+    vs = obj.data.vertices
+    front = min(v.co.y for v in vs)
+    zs = [v.co.z for v in vs]
+    zmax = min(zs) + (max(zs) - min(zs)) * 0.28
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="DESELECT")
+    bpy.ops.object.mode_set(mode="OBJECT")
+    count = 0
+    for v in vs:
+        if abs(v.co.x) < 0.08 and v.co.z < zmax and v.co.y > front + depth:
+            v.select = True
+            count += 1
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.delete(type="VERT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.mesh.fill_holes(sides=0)
+    bpy.ops.mesh.normals_make_consistent(inside=False)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    return count
+
+
+def add_tail(obj: bpy.types.Object, length: float, radius: float) -> int:
+    """Coda cartoon: tubo lungo una curva che parte dal retro del bacino
+    (+Y, a ~30% dell'altezza), va indietro e si arriccia verso l'alto,
+    rastremata fino alla punta. Restituisce i vertici aggiunti."""
+    if length <= 0.0:
+        return 0
+    zs = [v.co.z for v in obj.data.vertices]
+    height = max(zs) - min(zs)
+    z0 = min(zs) + height * 0.30
+    # Punto piu' arretrato del corpo all'altezza del bacino.
+    band = [v.co for v in obj.data.vertices if abs(v.co.z - z0) < height * 0.06 and abs(v.co.x) < height * 0.12]
+    rear = max(c.y for c in band) if band else max(v.co.y for v in obj.data.vertices)
+    curve = bpy.data.curves.new("TailCurve", "CURVE")
+    curve.dimensions = "3D"
+    curve.bevel_depth = radius
+    curve.bevel_resolution = 4
+    curve.resolution_u = 12
+    curve.use_fill_caps = True
+    spline = curve.splines.new("BEZIER")
+    pts = [
+        (Vector((0.0, rear - radius * 1.5, z0)), 1.15),
+        (Vector((0.0, rear + length * 0.45, z0 - height * 0.02)), 0.95),
+        (Vector((0.0, rear + length * 0.85, z0 + length * 0.35)), 0.7),
+        (Vector((0.0, rear + length * 0.95, z0 + length * 0.75)), 0.35),
+    ]
+    spline.bezier_points.add(len(pts) - 1)
+    for bp, (co, r) in zip(spline.bezier_points, pts):
+        bp.co = co
+        bp.handle_left_type = bp.handle_right_type = "AUTO"
+        bp.radius = r
+    tail = bpy.data.objects.new("Tail", curve)
+    bpy.context.scene.collection.objects.link(tail)
+    for o in bpy.context.scene.objects:
+        o.select_set(o == tail)
+    bpy.context.view_layer.objects.active = tail
+    bpy.ops.object.convert(target="MESH")
+    tail = bpy.context.view_layer.objects.active
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.mesh.normals_make_consistent(inside=False)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    added = len(tail.data.vertices)
+    tail.select_set(True)
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.join()
+    return added
+
+
 def decimate(obj: bpy.types.Object, faces: int) -> None:
     tri = sum(len(p.vertices) - 2 for p in obj.data.polygons)
     if faces <= 0 or tri <= faces:
@@ -321,6 +404,9 @@ def main() -> None:
     clipped = clip_back(obj, args.clip_back)
     if clipped:
         norm = normalize(obj, args.height)   # ricentra dopo il taglio
+    root_cut = cut_tail_root(obj, args.cut_tail_root)
+    tail_added = add_tail(obj, args.tail, args.tail_radius)
+    obj = bpy.context.view_layer.objects.active
     decimate(obj, args.faces)
     shading(obj, args.flat)
     material = ensure_material(obj)
@@ -337,7 +423,7 @@ def main() -> None:
              "triangles": sum(len(p.vertices) - 2 for p in obj.data.polygons),
              "dimensions": [round(d, 3) for d in obj.dimensions], "material": material}
     log(input=str(src), output=str(dst), before=before, loose_parts_removed=loose_removed,
-        clipped_vertices=clipped,
+        clipped_vertices=clipped, tail_root_vertices=root_cut, tail_vertices=tail_added,
         normalize=norm, after=after, glb_bytes=dst.stat().st_size)
 
 

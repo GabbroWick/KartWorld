@@ -2,20 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://maensys0lxqw"
-path.s3tc="res://.godot/imported/leopard_model_raw_textured_metallic-model_raw_textured_roughness.png-59581cd80d29ce5741dec7c310828c55.s3tc.ctex"
+uid="uid://b1sbuargajvxo"
+path.s3tc="res://.godot/imported/leopard_tpose_leopard_tpose_baked_albedo.png-c81b240489d53323eb24d1edfb692b0b.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "4a06e8e0efacbf9539e4e323f48c26fb"
+"md5": "44a22ef9218ed6ef2ba193e4f70d6926"
 }
 
 [deps]
 
-source_file="res://assets/characters/_final/leopard/leopard_model_raw_textured_metallic-model_raw_textured_roughness.png"
-dest_files=["res://.godot/imported/leopard_model_raw_textured_metallic-model_raw_textured_roughness.png-59581cd80d29ce5741dec7c310828c55.s3tc.ctex"]
+source_file="res://assets/models/ai/leopard/leopard_tpose_leopard_tpose_baked_albedo.png"
+dest_files=["res://.godot/imported/leopard_tpose_leopard_tpose_baked_albedo.png-c81b240489d53323eb24d1edfb692b0b.s3tc.ctex"]
 
 [params]
 

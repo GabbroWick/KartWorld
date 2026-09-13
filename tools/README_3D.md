@@ -181,8 +181,10 @@ tools/blender/blender.cmd -b --python tools/blender/export_for_mixamo.py --     
 
 **Mixamo vuole la T-pose.** Il modello a braccia basse viene rifiutato
 dall'auto-rigger. Ricetta usata: render del rig Meshy in posa di riposo
-(= T-pose) come concept → `generate_shape.py` → `import_ai3d.py
---clip-back 1.1` (l'AI inventa una coda di 2 m dietro il corpo: si taglia)
+(= T-pose) come concept → `generate_shape.py` → `import_ai3d.py --clip-back 0.62
+--cut-tail-root 0.44 --tail 0.65` (l'AI inventa una coda di 2 m larga e
+verso terra: si taglia tutta, radice compresa, e si sostituisce con una coda
+procedurale a tubo su curva, arricciata in su)
 → `bake_transfer.py --source assets/models/meshy/leopard/leopard_rig.fbx
 --source-texture .../leopard_rig_0.png` (l'FBX Mixamo ha la texture sul
 canale normal e base color nero: va forzata) → `export_for_mixamo.py`.
