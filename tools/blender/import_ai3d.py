@@ -27,7 +27,7 @@ import sys
 from pathlib import Path
 
 import bpy
-from mathutils import Quaternion, Vector
+from mathutils import Matrix, Quaternion, Vector
 
 
 def parse_args() -> argparse.Namespace:
@@ -44,6 +44,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--preview", default="")
     p.add_argument("--blend", default="")
     p.add_argument("--flat", action="store_true", help="shading flat (low-poly) invece di smooth")
+    p.add_argument("--clip-back", type=float, default=0.0,
+                   help="tieni solo la geometria entro questa profondita' (m) dal punto piu' avanti "
+                        "(muso) e chiudi il taglio: code inventate dall'AI. 0 = niente")
     p.add_argument("--keep-loose", action="store_true",
                    help="non rimuovere le parti sciolte piccole (frammenti staccati dall'AI)")
     return p.parse_args(argv)
@@ -88,7 +91,11 @@ def join_meshes() -> bpy.types.Object:
         if o != obj:
             bpy.data.objects.remove(o, do_unlink=True)
     obj.parent = None
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    # Matrice applicata ai dati: transform_apply in batch mode e' inaffidabile
+    # (un FBX importato resterebbe ruotato). Niente modificatori residui.
+    obj.modifiers.clear()
+    obj.data.transform(obj.matrix_world)
+    obj.matrix_world = Matrix.Identity(4)
     return obj
 
 
@@ -162,6 +169,25 @@ def normalize(obj: bpy.types.Object, height: float) -> dict:
     obj.location = (0, 0, 0)
     return {"source_size": [round(c, 3) for c in size], "scale": round(scale, 4),
             "final_height": round(size.z * scale, 3)}
+
+
+def clip_back(obj: bpy.types.Object, distance: float) -> int:
+    """Rimuove la geometria dietro y = +distance (dopo la normalizzazione: il
+    davanti e' -Y) e chiude il foro. Ritorna i vertici rimossi."""
+    if distance <= 0.0:
+        return 0
+    before = len(obj.data.vertices)
+    # Misurato dal punto piu' avanti (il muso), non dal centro del bounding box:
+    # una coda lunga sposterebbe il centro.
+    front = min(v.co.y for v in obj.data.vertices)
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.mesh.bisect(plane_co=(0.0, front + distance, 0.0), plane_no=(0.0, 1.0, 0.0),
+                        clear_outer=True, use_fill=True)
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.mesh.normals_make_consistent(inside=False)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    return before - len(obj.data.vertices)
 
 
 def decimate(obj: bpy.types.Object, faces: int) -> None:
@@ -292,6 +318,9 @@ def main() -> None:
     loose_removed = 0 if args.keep_loose else drop_loose_parts(obj)
     obj = bpy.context.view_layer.objects.active
     norm = normalize(obj, args.height)
+    clipped = clip_back(obj, args.clip_back)
+    if clipped:
+        norm = normalize(obj, args.height)   # ricentra dopo il taglio
     decimate(obj, args.faces)
     shading(obj, args.flat)
     material = ensure_material(obj)
@@ -308,6 +337,7 @@ def main() -> None:
              "triangles": sum(len(p.vertices) - 2 for p in obj.data.polygons),
              "dimensions": [round(d, 3) for d in obj.dimensions], "material": material}
     log(input=str(src), output=str(dst), before=before, loose_parts_removed=loose_removed,
+        clipped_vertices=clipped,
         normalize=norm, after=after, glb_bytes=dst.stat().st_size)
 
 

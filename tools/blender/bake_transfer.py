@@ -23,7 +23,7 @@ from pathlib import Path
 
 import bpy
 import numpy as np
-from mathutils import Vector
+from mathutils import Matrix, Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import import_ai3d as ai  # noqa: E402  (riusa import/normalize/preview)
@@ -40,6 +40,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--cage", type=float, default=0.06)
     p.add_argument("--ray", type=float, default=0.25)
     p.add_argument("--margin", type=int, default=16)
+    p.add_argument("--source-texture", default="",
+                   help="immagine albedo da forzare come Base Color della sorgente (FBX Mixamo: la "
+                        "texture arriva collegata al canale normal e il colore base e' nero)")
     p.add_argument("--preview", default="")
     p.add_argument("--blend", default="")
     return p.parse_args(argv)
@@ -60,11 +63,30 @@ def load_one(path: Path, name: str, height: float) -> bpy.types.Object:
         if o != obj and o.name in bpy.data.objects:
             bpy.data.objects.remove(o, do_unlink=True)
     obj.parent = None
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    # Matrice applicata direttamente ai dati (transform_apply in batch mode e'
+    # inaffidabile: un FBX importato resta ruotato/scalato). Via anche i
+    # modificatori: l'Armature di un rig deformerebbe con la posa, non il rest.
+    obj.modifiers.clear()
+    obj.data.transform(obj.matrix_world)
+    obj.matrix_world = Matrix.Identity(4)
     obj.name = name
     # Stessa normalizzazione di import_ai3d: piedi a 0, centro XY, altezza.
     ai.normalize(obj, height)
     return obj
+
+
+def force_source_texture(obj: bpy.types.Object, path: Path) -> None:
+    """Un materiale Principled con `path` come Base Color, su tutto l'oggetto."""
+    image = bpy.data.images.load(str(path))
+    m = bpy.data.materials.new("SourceAlbedo")
+    m.use_nodes = True
+    nodes = m.node_tree.nodes
+    bsdf = nodes.get("Principled BSDF")
+    tex = nodes.new("ShaderNodeTexImage")
+    tex.image = image
+    m.node_tree.links.new(tex.outputs["Color"], bsdf.inputs["Base Color"])
+    obj.data.materials.clear()
+    obj.data.materials.append(m)
 
 
 def ensure_image_node(obj: bpy.types.Object, image: bpy.types.Image) -> None:
@@ -128,9 +150,17 @@ def main() -> None:
     ai.clear_scene()
     scene = bpy.context.scene
     source = load_one(src, "Source", args.height)
+    if args.source_texture:
+        force_source_texture(source, Path(args.source_texture).resolve())
     target = load_one(tgt, "Target", args.height)
     if not target.data.uv_layers:
-        raise SystemExit("Il bersaglio non ha UV.")
+        # Shape senza Paint: nessuna UV. Smart UV Project basta per un bake
+        # di colore (isole in base agli angoli, margine per il filtro).
+        bpy.ops.object.mode_set(mode="EDIT")
+        bpy.ops.mesh.select_all(action="SELECT")
+        bpy.ops.uv.smart_project(angle_limit=1.15, island_margin=0.003)
+        bpy.ops.object.mode_set(mode="OBJECT")
+        print("AI3D " + json.dumps({"uv": "smart_project"}))
 
     image = bpy.data.images.new("baked_albedo", args.size, args.size, alpha=False)
     image.generated_color = (0.5, 0.5, 0.5, 1.0)

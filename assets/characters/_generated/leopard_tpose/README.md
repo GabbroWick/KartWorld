@@ -1,0 +1,42 @@
+# leopard_tpose — Hunyuan3D 2.1 shape
+
+Input: `C:\Users\gabri\Progetti\KartWorld\assets\characters\_source\leopard_tpose\leopard_tpose_front.png`
+
+model_raw.glb: geometria grezza, nessuna texture.
+
+```json
+{
+  "tool": "Hunyuan3D-2.1 shape (fork mac-rocm, rasterizer non usato)",
+  "input": "C:\\Users\\gabri\\Progetti\\KartWorld\\assets\\characters\\_source\\leopard_tpose\\leopard_tpose_front.png",
+  "params": {
+    "steps": 40,
+    "octree": 256,
+    "guidance": 5.0,
+    "seed": 1234
+  },
+  "errors": [],
+  "backend": {
+    "kind": "rocm",
+    "device": "cuda",
+    "dtype": "torch.float16",
+    "gpu": "AMD Radeon RX 9060 XT"
+  },
+  "t_preprocess_s": 3.2,
+  "t_load_s": 57.2,
+  "t_generate_s": 325.0,
+  "vram_peak_gb": 12.32,
+  "vram_reserved_gb": 12.5,
+  "ram_peak_gb": 17.07,
+  "vertices": 32014,
+  "faces": 64024,
+  "extents": [
+    0.845,
+    0.825,
+    1.988
+  ],
+  "watertight": true,
+  "glb_bytes": 1153236,
+  "t_total_s": 385.6,
+  "valid": true
+}
+```

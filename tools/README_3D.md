@@ -179,7 +179,14 @@ Rigify dà lo scheletro ma non le animazioni.
 tools/blender/blender.cmd -b --python tools/blender/export_for_mixamo.py --     --input assets/characters/_final/leopard/leopard.glb     --outdir assets/characters/_processed/leopard/mixamo
 ```
 
-Poi a mano su mixamo.com: Upload character → `leopard_untextured.fbx`
+**Mixamo vuole la T-pose.** Il modello a braccia basse viene rifiutato
+dall'auto-rigger. Ricetta usata: render del rig Meshy in posa di riposo
+(= T-pose) come concept → `generate_shape.py` → `import_ai3d.py
+--clip-back 1.1` (l'AI inventa una coda di 2 m dietro il corpo: si taglia)
+→ `bake_transfer.py --source assets/models/meshy/leopard/leopard_rig.fbx
+--source-texture .../leopard_rig_0.png` (l'FBX Mixamo ha la texture sul
+canale normal e base color nero: va forzata) → `export_for_mixamo.py`.
+Poi a mano su mixamo.com: Upload character → `leopard_for_mixamo.fbx`
 (quello con texture fa fallire l'auto-rigger) → marker (mento, polsi,
 gomiti, ginocchia, inguine) → skeleton Standard → download **With Skin**,
 FBX Binary, 30 fps, con la clip "Breathing Idle" → salva come
