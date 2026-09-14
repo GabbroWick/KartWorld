@@ -23,6 +23,9 @@ shape = SubResource("shape_body")
 
 [node name="VisualRoot" type="Node3D" parent="."]
 
+[node name="Seat" type="Node3D" parent="VisualRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0.1)
+
 [node name="InputSource" type="Node" parent="."]
 script = ExtResource("2_input")
 

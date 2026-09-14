@@ -93,6 +93,11 @@ func _apply_definition() -> void:
 		motor.landed.connect(_on_landed_sound)
 
 
+## The instanced visual (placeholder, Meshy or rigged), or null.
+func get_visual() -> Node3D:
+	return _visual_instance if is_instance_valid(_visual_instance) else null
+
+
 func _spawn_visual() -> void:
 	if is_instance_valid(_visual_instance):
 		_visual_instance.queue_free()

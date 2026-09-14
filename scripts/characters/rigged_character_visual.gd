@@ -89,6 +89,10 @@ func animate(delta: float, speed_ratio: float, grounded: bool) -> void:
 	super.animate(delta, speed_ratio, grounded)
 	if player == null:
 		return
+	if is_seated():
+		_action = &""
+		_play(&"idle", 1.0)
+		return
 	if _action != &"":
 		var moving := speed_ratio > 0.1 or not grounded
 		if player.is_playing() and player.current_animation == _action and not (_action == &"emote" and moving):

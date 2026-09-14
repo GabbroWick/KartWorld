@@ -97,6 +97,13 @@ func enter_vehicle() -> void:
 	_character.input.clear()
 	_character.set_physics_process(false)
 	_character.collision.disabled = true
+	# The character stays visible: its visual rides on the kart's seat, the
+	# (now empty) body is hidden.
+	var visual := _character.get_visual()
+	if visual:
+		vehicle.seat_visual(visual)
+		if visual.has_method(&"set_seated"):
+			visual.call(&"set_seated", true)
 	_character.visible = false
 	entered_vehicle.emit(vehicle)
 
@@ -105,6 +112,9 @@ func exit_vehicle() -> void:
 	if not is_driving:
 		return
 	is_driving = false
+	var visual := vehicle.unseat_visual(_character.visual_root, _character.definition.visual_scale)
+	if visual and visual.has_method(&"set_seated"):
+		visual.call(&"set_seated", false)
 	vehicle.dismount()
 	_character.global_position = vehicle.get_exit_position()
 	_character.visual_root.global_rotation.y = vehicle.global_rotation.y

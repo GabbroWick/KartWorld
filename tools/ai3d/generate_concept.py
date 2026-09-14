@@ -49,6 +49,8 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--name", required=True)
     ap.add_argument("--prompt", required=True, help="descrizione del personaggio (senza posa/stile)")
+    ap.add_argument("--object", action="store_true",
+                    help="oggetto, non personaggio: niente suffisso T-pose/chibi, negativo anti-personaggio")
     ap.add_argument("--style", default=str(STYLE_DEFAULT), help="immagine di riferimento per lo stile (IP-Adapter); '' = nessuna")
     ap.add_argument("--variants", type=int, default=4)
     ap.add_argument("--seed", type=int, default=1)
@@ -95,9 +97,15 @@ def main() -> int:
     pipe.to(device)
     print("[sd] loaded in %.1fs" % (time.perf_counter() - t0), flush=True)
 
-    prompt = args.prompt.strip().rstrip(",") + POSITIVE_SUFFIX
+    suffix = POSITIVE_SUFFIX
+    negative = NEGATIVE
+    if args.object:
+        suffix = ", single object centered, low-poly cartoon 3D render, flat colors, plain gray background"
+        negative = ("person, character, driver, animal, mascot, face, hands, rider, text, watermark, "
+                    "multiple objects, cropped, blurry, realistic, photo, scenery")
+    prompt = args.prompt.strip().rstrip(",") + suffix
     lines = ["# %s — concept SDXL Turbo" % args.name, "", "prompt: `%s`" % prompt,
-             "negative: `%s`" % NEGATIVE, "style: `%s` (ip-scale %.2f)" % (args.style, args.ip_scale),
+             "negative: `%s`" % negative, "style: `%s` (ip-scale %.2f)" % (args.style, args.ip_scale),
              "steps %d, guidance %.1f, size %d" % (args.steps, args.guidance, args.size), ""]
     if device == "cuda":
         torch.cuda.reset_peak_memory_stats()
@@ -105,7 +113,7 @@ def main() -> int:
         seed = args.seed + i
         gen = torch.Generator(device="cpu").manual_seed(seed)
         t0 = time.perf_counter()
-        kwargs = dict(prompt=prompt, negative_prompt=NEGATIVE, num_inference_steps=args.steps,
+        kwargs = dict(prompt=prompt, negative_prompt=negative, num_inference_steps=args.steps,
                       guidance_scale=args.guidance, width=args.size, height=args.size, generator=gen)
         if style is not None:
             kwargs["ip_adapter_image"] = style

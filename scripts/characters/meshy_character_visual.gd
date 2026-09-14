@@ -30,12 +30,15 @@ extends Node3D
 @export var albedo_override: Texture2D
 ## Procedural motion strength (0 = static model).
 @export_range(0.0, 2.0, 0.05) var motion := 1.0
+## How far the model sinks when seated in a kart (legs hidden by the body).
+@export_range(0.0, 1.0, 0.05) var seat_sink := 0.45
 
 var _pivot: Node3D
 var _instance: Node3D
 var _phase := 0.0
 var _was_grounded := true
 var _squash := 0.0
+var _seated := false
 
 
 func _ready() -> void:
@@ -56,8 +59,22 @@ func _ready() -> void:
 		_flatten(_instance)
 
 
+## Seated in a vehicle: sunk into the seat, no bob/lean of its own (the
+## vehicle's seat leans instead).
+func set_seated(seated: bool) -> void:
+	_seated = seated
+	if _pivot:
+		_pivot.position = Vector3(0.0, -seat_sink if seated else 0.0, 0.0)
+		_pivot.rotation = Vector3.ZERO
+		_pivot.scale = Vector3.ONE
+
+
+func is_seated() -> bool:
+	return _seated
+
+
 func animate(delta: float, speed_ratio: float, grounded: bool) -> void:
-	if _pivot == null or motion <= 0.0:
+	if _pivot == null or motion <= 0.0 or _seated:
 		return
 	_phase += delta * (3.0 + 11.0 * speed_ratio)
 	if grounded and not _was_grounded:

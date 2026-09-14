@@ -21,6 +21,13 @@ extends Resource
 @export_range(1.0, 30.0, 0.5) var tilt_speed := 9.0
 ## Where the driver reappears when leaving, relative to the vehicle.
 @export var exit_offset := Vector3(2.0, 0.5, 0.0)
+## Where the driver's feet go, in vehicle space (the driver stays visible,
+## sunk into the seat so the legs are hidden by the body).
+@export var seat_offset := Vector3(0.0, 0.15, 0.1)
+## Driver visual scale at the wheel (1 = as on foot).
+@export_range(0.3, 1.5, 0.05) var seat_scale := 0.85
+## Driver lean (radians) per unit of steer input.
+@export_range(0.0, 0.6, 0.01) var seat_lean := 0.18
 
 @export_group("Driving")
 @export_range(1.0, 60.0, 0.5) var max_speed := 16.0

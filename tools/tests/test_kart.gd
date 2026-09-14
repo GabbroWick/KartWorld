@@ -57,7 +57,7 @@ func _run() -> void:
 func _test_setup() -> void:
 	_check(_kart.get_parent() != _player, "kart is not a child of the character")
 	_check(_kart.definition.display_name == "VEHICLE_KART", "kart uses the basic_kart definition")
-	_check(_kart.visual_root.get_child_count() == 1, "kart placeholder visual instantiated")
+	_check(_kart.visual_root.get_children().filter(func(c: Node) -> bool: return c.name != "Seat").size() == 1, "kart visual instantiated")
 	_check(_kart.abilities.has(&"turbo") and _kart.abilities.has(&"vehicle_jump"),
 		"kart starts with turbo and jump abilities")
 	_check(_kart.turbo != null, "turbo ability node is registered")

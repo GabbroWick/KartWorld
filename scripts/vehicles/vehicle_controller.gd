@@ -21,10 +21,12 @@ signal fell_out_of_world
 @onready var abilities: AbilityComponent = $Abilities
 @onready var ability_nodes: Node = $AbilityNodes
 @onready var visual_root: Node3D = $VisualRoot
+@onready var seat: Node3D = $VisualRoot/Seat
 @onready var collision: CollisionShape3D = $Collision
 
 var driver: Node = null
 var turbo: TurboAbility
+var _seated: Node3D
 var _visual_instance: Node3D
 var _camera_reversed := false
 
@@ -56,6 +58,10 @@ func _physics_process(delta: float) -> void:
 	_tilt_to_ground(delta)
 	if _visual_instance and _visual_instance.has_method(&"update_visual"):
 		_visual_instance.call(&"update_visual", motor.speed, delta)
+	# Seated driver leans into the steering and keeps its idle clip running.
+	seat.rotation.z = lerp_angle(seat.rotation.z, -input.steer * definition.seat_lean, 8.0 * delta)
+	if _seated and _seated.has_method(&"animate"):
+		_seated.call(&"animate", delta, 0.0, true)
 
 	if global_position.y < fall_limit:
 		fell_out_of_world.emit()
@@ -163,6 +169,32 @@ func get_heading_yaw() -> float:
 	return global_rotation.y + (PI if _camera_reversed else 0.0)
 
 
+## Parks a character's visual on the seat (driver stays visible). The
+## visual keeps animating through `animate()` from the vehicle's speed.
+func seat_visual(visual: Node3D) -> void:
+	if visual.get_parent():
+		visual.get_parent().remove_child(visual)
+	seat.add_child(visual)
+	visual.position = Vector3.ZERO
+	visual.rotation = Vector3.ZERO
+	visual.scale = Vector3.ONE * definition.seat_scale
+	_seated = visual
+
+
+## Returns the seated visual to `parent` (or frees nothing if none).
+func unseat_visual(parent: Node3D, scale: float) -> Node3D:
+	var visual := _seated
+	_seated = null
+	if visual == null:
+		return null
+	seat.remove_child(visual)
+	parent.add_child(visual)
+	visual.position = Vector3.ZERO
+	visual.rotation = Vector3.ZERO
+	visual.scale = Vector3.ONE * scale
+	return visual
+
+
 func _apply_definition() -> void:
 	abilities.setup(definition.starting_abilities)
 	health.setup(definition.max_health)
@@ -182,6 +214,7 @@ func _apply_definition() -> void:
 			if ability is TurboAbility:
 				turbo = ability
 
+	seat.position = definition.seat_offset
 	_spawn_visual()
 
 
