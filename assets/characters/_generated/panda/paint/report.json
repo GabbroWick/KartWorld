@@ -18,8 +18,8 @@
   },
   "vram_peak_gb": 16.86,
   "vram_reserved_gb": 17.13,
-  "ram_peak_gb": 12.42,
-  "t_total_s": 380.2,
+  "ram_peak_gb": 14.14,
+  "t_total_s": 400.7,
   "result": {
     "obj": "C:\\Users\\gabri\\Progetti\\KartWorld\\assets\\characters\\_generated\\panda\\paint\\model_raw_textured.obj",
     "glb": "C:\\Users\\gabri\\Progetti\\KartWorld\\assets\\characters\\_generated\\panda\\paint\\model_raw_textured.glb",
@@ -28,6 +28,6 @@
       "metallic": "C:\\Users\\gabri\\Progetti\\KartWorld\\assets\\characters\\_generated\\panda\\paint\\model_raw_textured_metallic.jpg",
       "roughness": "C:\\Users\\gabri\\Progetti\\KartWorld\\assets\\characters\\_generated\\panda\\paint\\model_raw_textured_roughness.jpg"
     },
-    "elapsed": "380.2375822067261"
+    "elapsed": "400.7167637348175"
   }
 }

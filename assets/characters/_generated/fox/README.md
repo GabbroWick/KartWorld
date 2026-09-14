@@ -21,22 +21,22 @@ model_raw.glb: geometria grezza, nessuna texture.
     "dtype": "torch.float16",
     "gpu": "AMD Radeon RX 9060 XT"
   },
-  "t_preprocess_s": 3.3,
-  "t_load_s": 44.9,
-  "t_generate_s": 334.1,
+  "t_preprocess_s": 2.7,
+  "t_load_s": 42.7,
+  "t_generate_s": 2550.6,
   "vram_peak_gb": 12.32,
   "vram_reserved_gb": 12.5,
-  "ram_peak_gb": 19.27,
-  "vertices": 121261,
-  "faces": 242514,
+  "ram_peak_gb": 18.74,
+  "vertices": 121412,
+  "faces": 242820,
   "extents": [
-    1.594,
-    1.987,
-    0.798
+    1.788,
+    1.986,
+    0.845
   ],
-  "watertight": true,
-  "glb_bytes": 4366088,
-  "t_total_s": 382.5,
+  "watertight": false,
+  "glb_bytes": 4371572,
+  "t_total_s": 2596.2,
   "valid": true
 }
 ```
