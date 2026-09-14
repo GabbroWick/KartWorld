@@ -141,6 +141,28 @@ Risultato molto migliore del Paint a 256 px: è la strada per il leopardo.
 Per personaggi senza modello di partenza: Paint, Dream Textures o pittura a
 mano in Blender (vedi Diario).
 
+### 2d. Concept 2D in locale (SDXL Turbo + IP-Adapter)
+
+Per i personaggi senza modello di partenza (volpe, panda):
+
+```bash
+tools/ai3d/.venv/Scripts/python tools/ai3d/generate_concept.py --name fox     --prompt "cute cartoon fox mascot, orange fur, white belly, white tail tip, big green eyes"     --variants 4 --seed 1
+```
+
+SDXL Turbo fp16 (6,6 GB) + IP-Adapter SDXL ViT-H (3,1 GB) in
+`tools/ai3d/models/hf`. 4 passi, guidance 0. Lo stile viene dal render del
+leopardo in T-pose (`--style`, peso `--ip-scale` 0.55). Il prompt fisso
+aggiunge T-pose, vista frontale, sfondo grigio, colori piatti. Scrive
+`assets/characters/_source/<nome>/<nome>_concept_<seed>.png`: scegli la
+migliore e passala a `generate_shape.py`.
+
+### 2e. Slime: modellato, non generato
+
+`tools/blender/make_slime.py --output assets/characters/_final/slime/slime.glb`:
+blob verde a base piatta, occhi, bocca, 2,2k tri, materiali flat. Scena
+`scenes/enemies/visuals/slime_ai.tscn`; `Enemy` ora chiama `animate()` del
+visual (bob/squash).
+
 ## 3. Elaborare in Blender
 
 ```bash

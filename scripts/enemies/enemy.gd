@@ -62,6 +62,9 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	if wish.length_squared() > 0.001:
 		visual_root.rotation.y = lerp_angle(visual_root.rotation.y, atan2(-wish.x, -wish.z), 10.0 * delta)
+	if _visual_instance and _visual_instance.has_method(&"animate"):
+		var ratio := clampf(Vector2(velocity.x, velocity.z).length() / maxf(definition.move_speed * 1.35, 0.1), 0.0, 1.0)
+		_visual_instance.call(&"animate", delta, ratio, is_on_floor())
 	# Keep pressing damage on a player standing inside us.
 	for body in contact_area.get_overlapping_bodies():
 		_on_contact(body)
