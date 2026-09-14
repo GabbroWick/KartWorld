@@ -306,9 +306,14 @@ Plan, one verifiable step at a time (commit + suites + screenshot each):
    9 NPC karts) near the spawn, Hamlet (4) at (-400, 150).
 1b. **Visible driver — DONE**: `VehicleController.seat_visual()` parks the
    character's visual on the kart's Seat (sunk, idle clip, leans with
-   steering). **Kart v2 model — in progress**: `make character NAME=kart`
-   (concept `--object` mode, seed 62) → replace `kart_kenney.tscn`; wheels
-   to be split in Blender.
+   steering). **Kart v2 model — DONE 2026-09-15**: `make character
+   NAME=kart` (concept `--object`, seed 62) → `tools/blender/
+   split_wheels.py` (Body + Wheel_FL/FR/RL/RR, origin at the hub) →
+   `assets/characters/_final/kart/kart.glb` → `scenes/vehicles/visuals/
+   kart_ai.tscn` (`KenneyVehicleVisual`, `model_scale` 1.6) in
+   `basic_kart.tres`; `seat_offset` (0, 0.5, 0.35) so the driver's head
+   shows above the seat. Recipe in `tools/README_3D.md` §9. Screenshot
+   tool takes `yaw=<deg>` for side views.
 2. **Level 3 "Vulcano"** (long): kart section (downhill track with jumps and
    moving blocks) → on-foot climb (platforms, springs, spikes, moving
    blocks, coins) → slime arena → finish portal. 3 stars, ~4-5 min.

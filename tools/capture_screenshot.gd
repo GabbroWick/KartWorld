@@ -1,7 +1,7 @@
 extends Node
 ## Loads the main scene, lets it settle, saves a PNG and quits.
 ##
-## Run:  godot --path <project> res://tools/capture_screenshot.tscn -- <out.png> [frames] [drive] [level=<.tres>] [at=x,y,z]
+## Run:  godot --path <project> res://tools/capture_screenshot.tscn -- <out.png> [frames] [drive] [level=<.tres>] [at=x,y,z] [yaw=deg]
 ##
 ## With the optional "drive" word the player summons the kart, gets in and
 ## holds the accelerator for the given frames, so the shot shows driving.
@@ -25,7 +25,10 @@ func _run() -> void:
 	var drive := user_args.has("drive")
 	var level_path := ""
 	var at := ""
+	var yaw := ""
 	for arg in user_args:
+		if arg.begins_with("yaw="):
+			yaw = arg.trim_prefix("yaw=")
 		if arg.begins_with("level="):
 			level_path = arg.trim_prefix("level=")
 		elif arg.begins_with("at="):
@@ -60,6 +63,11 @@ func _run() -> void:
 	for i in frames:
 		await get_tree().process_frame
 	Input.action_release(InputActions.ACCELERATE)
+	if yaw != "":
+		# Camera heading in degrees (e.g. yaw=90 looks at the kart's side).
+		for cam in scene.find_children("*", "ThirdPersonCamera", true, false):
+			(cam as ThirdPersonCamera).set_yaw(deg_to_rad(float(yaw)))
+		await _wait(3)
 	await RenderingServer.frame_post_draw
 
 	var image := get_tree().root.get_texture().get_image()

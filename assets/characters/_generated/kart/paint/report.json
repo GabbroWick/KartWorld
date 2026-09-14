@@ -1,0 +1,33 @@
+{
+  "tool": "Hunyuan3D-2.1 paint (fork mac-rocm, rasterizer torch)",
+  "mesh": "C:\\Users\\gabri\\Progetti\\KartWorld\\assets\\characters\\_generated\\kart\\model_raw.glb",
+  "image": "C:\\Users\\gabri\\Progetti\\KartWorld\\assets\\characters\\_generated\\kart\\input_rgba.png",
+  "preset": "safe",
+  "params": {
+    "max_num_view": 6,
+    "resolution": 256,
+    "render_size": 1024,
+    "texture_size": 2048
+  },
+  "remesh": true,
+  "backend": {
+    "kind": "rocm",
+    "device": "cuda",
+    "dtype": "torch.float16",
+    "raster": "torch"
+  },
+  "vram_peak_gb": 16.86,
+  "vram_reserved_gb": 17.15,
+  "ram_peak_gb": 14.69,
+  "t_total_s": 385.9,
+  "result": {
+    "obj": "C:\\Users\\gabri\\Progetti\\KartWorld\\assets\\characters\\_generated\\kart\\paint\\model_raw_textured.obj",
+    "glb": "C:\\Users\\gabri\\Progetti\\KartWorld\\assets\\characters\\_generated\\kart\\paint\\model_raw_textured.glb",
+    "maps": {
+      "albedo": "C:\\Users\\gabri\\Progetti\\KartWorld\\assets\\characters\\_generated\\kart\\paint\\model_raw_textured.jpg",
+      "metallic": "C:\\Users\\gabri\\Progetti\\KartWorld\\assets\\characters\\_generated\\kart\\paint\\model_raw_textured_metallic.jpg",
+      "roughness": "C:\\Users\\gabri\\Progetti\\KartWorld\\assets\\characters\\_generated\\kart\\paint\\model_raw_textured_roughness.jpg"
+    },
+    "elapsed": "385.8564991950989"
+  }
+}

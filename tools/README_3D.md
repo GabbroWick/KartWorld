@@ -371,6 +371,24 @@ texture e' nel GLB, ma il rig Mixamo la perde → cuocila in
 `assets/models/ai/<nome>/<nome>_albedo.png` (e' il JPG di
 `_generated/<nome>/paint/model_raw_textured.jpg`, che segue le stesse UV).
 
+## 9. Veicolo (kart) con ruote che girano
+
+```bash
+make concept NAME=kart PROMPT="cute cartoon go-kart, blue body, yellow seat, big black wheels, side view" ARGS="--object"
+make character NAME=kart ARGS="--height 1.0 --faces 8000"     # niente coda/rig: e' un oggetto
+blender -b --python tools/blender/split_wheels.py --     --input assets/characters/_processed/kart/kart_clean.glb     --output assets/characters/_final/kart/kart.glb            # [--wheel-radius 0.22]
+```
+
+`split_wheels.py` cerca, per ogni quadrante (sinistra/destra × davanti/
+dietro), il baricentro dei vertici bassi ed esterni e separa quelli entro un
+cilindro orizzontale attorno al mozzo in `Wheel_FL/FR/RL/RR` (origine al
+mozzo); il resto e' `Body`. Il GLB finale ha 5 nodi. In Godot
+`scenes/vehicles/visuals/kart_ai.tscn` usa `KenneyVehicleVisual` (trova i
+nodi `wheel*`, qualsiasi maiuscola) con `model_scale 1.6`, `wheel_radius
+0.22`, `flip_forward` (il modello guarda +Z come le Kenney). Il pilota
+siede su `VehicleDefinition.seat_offset` (0, 0.5, 0.35). Fatto il
+2026-09-15 (concept seed 62).
+
 ## Diario
 
 * **2026-09-14 (notte)** — Volpe e panda rigenerati in vera T-pose con
