@@ -237,9 +237,16 @@ and the running diary live in `tools/README_3D.md` — read it before touching
   fork's GLB (V flipped). Paint at 256 px looked poor (back
   hallucinated), so `_final/leopard/leopard.glb` now carries the **Meshy
   texture baked onto the AI mesh** (`tools/blender/bake_transfer.py`, Cycles
-  CPU, cage 0.15 / ray 0.8, black texels filled). Player visual =
-  `scenes/characters/visuals/leopard_ai.tscn` (procedural animation).
-  Next: rig, then `generate_character` automation.
+  CPU, cage 0.15 / ray 0.8, black texels filled). The leopard was then regenerated in **T-pose** (concept = Meshy rig
+  rest pose), AI tail replaced by a procedural one (`import_ai3d.py
+  --clip-back/--cut-tail-root/--tail`), texture baked, and rigged on Mixamo
+  by the human: `assets/models/ai/leopard/leopard_rig.fbx` (metres,
+  33 bones). Player visual = `scenes/characters/visuals/leopard_ai_rigged.tscn`
+  (RiggedCharacterVisual, model_scale 1, albedo_override, Meshy clips;
+  clip hip tracks are rescaled to the rig's rest hip height).
+  `leopard_ai.tscn` (unrigged, procedural) and `leopard_rigged.tscn` (Meshy)
+  remain as fallbacks. Next: `generate_character` automation, then fox/
+  panda/slime through the same pipeline.
 * Windows TDR: `TdrDelay = 60` was set by the human on 2026-09-11 (approved,
   with rollback documented in README_3D) because Paint kernels exceeded 2 s.
 * Rules from the human: no further registry change without explicit approval

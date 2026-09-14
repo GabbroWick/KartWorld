@@ -133,16 +133,38 @@ func _extract_clip(scene: PackedScene) -> Animation:
 
 
 ## Mixamo clips move the hips forward; the character controller already moves
-## the body, so keep the hips' first horizontal position on every key.
+## the body, so keep the hips' first horizontal position on every key. The
+## vertical part is rescaled so the clip's average hip height matches this
+## rig's rest pose: clips exported for a centimetre rig (Meshy, x100) would
+## otherwise drop a metre-scale rig's pelvis to the floor.
 func _strip_root_motion(animation: Animation) -> void:
+	var rest_hip_y := _rest_hip_height()
 	for track in animation.get_track_count():
 		if animation.track_get_type(track) != Animation.TYPE_POSITION_3D:
 			continue
 		if not String(animation.track_get_path(track)).ends_with("Hips"):
 			continue
-		if animation.track_get_key_count(track) == 0:
+		var count := animation.track_get_key_count(track)
+		if count == 0:
 			continue
 		var first: Vector3 = animation.track_get_key_value(track, 0)
-		for key in animation.track_get_key_count(track):
+		var mean_y := 0.0
+		for key in count:
+			mean_y += (animation.track_get_key_value(track, key) as Vector3).y
+		mean_y /= count
+		var scale := 1.0
+		if rest_hip_y > 0.0 and mean_y > 0.0001:
+			scale = rest_hip_y / mean_y
+		for key in count:
 			var value: Vector3 = animation.track_get_key_value(track, key)
-			animation.track_set_key_value(track, key, Vector3(first.x, value.y, first.z))
+			animation.track_set_key_value(track, key, Vector3(first.x, value.y * scale, first.z))
+
+
+func _rest_hip_height() -> float:
+	if _instance == null:
+		return 0.0
+	var skeleton := _instance.find_child("Skeleton3D", true, false) as Skeleton3D
+	if skeleton == null:
+		return 0.0
+	var hips := skeleton.find_bone("mixamorig_Hips")
+	return skeleton.get_bone_rest(hips).origin.y if hips >= 0 else 0.0

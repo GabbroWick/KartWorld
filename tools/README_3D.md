@@ -188,6 +188,16 @@ procedurale a tubo su curva, arricciata in su)
 → `bake_transfer.py --source assets/models/meshy/leopard/leopard_rig.fbx
 --source-texture .../leopard_rig_0.png` (l'FBX Mixamo ha la texture sul
 canale normal e base color nero: va forzata) → `export_for_mixamo.py`.
+**Fatto per il leopardo (2026-09-14)**: `assets/models/ai/leopard/leopard_rig.fbx`
+(With Skin + Breathing Idle, 33 ossa = No Fingers), scena
+`scenes/characters/visuals/leopard_ai_rigged.tscn`: `model_scale = 1`
+(Mixamo ha letto i metri correttamente, diversamente dal Meshy),
+`albedo_override = leopard_albedo.png`, clip riusate da `meshy/leopard/`.
+`RiggedCharacterVisual` riscala la traccia posizione dei fianchi delle clip
+all'altezza rest del rig: le clip Meshy sono in cm (fianchi a 0,005), il rig
+AI in metri (0,37); senza riscalamento il bacino andrebbe a terra.
+Tracce per ossa assenti (dita) vengono ignorate.
+
 Poi a mano su mixamo.com: Upload character → `leopard_for_mixamo.fbx`
 (quello con texture fa fallire l'auto-rigger) → marker (mento, polsi,
 gomiti, ginocchia, inguine) → skeleton Standard → download **With Skin**,
@@ -260,6 +270,11 @@ Nuovi pesi si scaricano da soli alla prima esecuzione; i vecchi restano in
 
 ## Diario
 
+* **2026-09-14** — Rig Mixamo del leopardo AI in T-pose collegato al
+  personaggio (`leopard_ai_rigged.tscn`): idle/walk/run/jump/attack/hurt/
+  emote con le clip Meshy, texture cotta via `albedo_override`. Suite
+  movimento/combat/kart/portale verdi. Pipeline shape → texture → rig
+  completa per un personaggio; manca l'automazione `generate_character`.
 * **2026-09-11** — Fase 1 analisi, Fase 2 struttura, Fase 3 venv + torch
   ROCm (GPU vista, matmul ok), TripoSR smoke test riuscito (inferenza 24 s,
   VRAM 3 GB, 101k tri) → Blender `import_ai3d.py` verificato con anteprima

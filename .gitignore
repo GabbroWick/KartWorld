@@ -38,3 +38,5 @@ assets/characters/_generated/**/paint*/*.mtl
 assets/characters/_generated/**/paint*/*.png
 assets/models/ai/**/*_for_mixamo.fbx.import
 assets/models/ai/**/*_tpose.glb.import
+assets/models/ai/**/*_tpose_*_albedo.png
+assets/models/ai/**/*_tpose_*_albedo.png.import
