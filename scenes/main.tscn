@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/core/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/world/island_hub.tscn" id="2_world"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://scripts/levels/level_manager.gd" id="9_levels"]
 [ext_resource type="PackedScene" path="res://scenes/ui/game_hud.tscn" id="10_game_hud"]
 [ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="11_pause"]
+[ext_resource type="PackedScene" path="res://scenes/ui/touch_controls.tscn" id="12_touch"]
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_main")
@@ -31,3 +32,5 @@ visible = false
 [node name="GameHUD" parent="." instance=ExtResource("10_game_hud")]
 
 [node name="PauseMenu" parent="." instance=ExtResource("11_pause")]
+
+[node name="TouchControls" parent="." instance=ExtResource("12_touch")]

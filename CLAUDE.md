@@ -45,6 +45,7 @@ $G --headless --path . res://tools/tests/test_level_runner.tscn    # objectives 
 $G --headless --path . res://tools/tests/test_combat_runner.tscn   # melee / enemies / damage / death suite
 $G --headless --path . res://tools/tests/test_progression_runner.tscn  # unlocks / best stars / save suite
 $G --headless --path . res://tools/tests/test_hub_runner.tscn      # hub stars / gated portal / Cliff Steps suite
+$G --headless --path . res://tools/tests/test_touch_runner.tscn    # on-screen touch controls suite
 $G --path . res://tools/tests/test_lighting_runner.tscn            # lighting suite (needs a window)
 $G --path . res://tools/capture_screenshot.tscn -- out.png 120     # render a frame to PNG
 $G --path . res://tools/capture_screenshot.tscn -- out.png 120 drive   # ...while driving the kart
@@ -309,11 +310,18 @@ Plan, one verifiable step at a time (commit + suites + screenshot each):
    blocks, coins) → slime arena → finish portal. 3 stars, ~4-5 min.
    Reuse `LevelController` objectives; add `MovingPlatform`, `Spring`,
    `Hazard` (spikes) components under `scripts/gameplay/`.
-2. (moved up at the human's request) **Mobile/Web touch controls** — see 3.
-3. **Mobile** — touch controls (virtual stick + buttons, `TouchControls`
-   CanvasLayer shown when `DisplayServer.is_touchscreen_available()`),
-   Android export preset, performance pass (Compatibility renderer,
-   shadow distance, prop LOD by distance), test on the Web build first.
+2. **Mobile/Web touch controls — DONE 2026-09-15**: `scenes/ui/
+   touch_controls.tscn` (`TouchControls`, layer 4, in main.tscn). Shown when
+   a touchscreen exists (`force_visible` for tests). Left half = virtual
+   stick feeding move_* / accelerate / brake / run via
+   `Input.parse_input_event(InputEventAction)` with strength; right half =
+   drag → `ThirdPersonCamera.add_look_delta`; buttons Jump / Attack|Turbo /
+   Use / Kart / Dance / Pause press the actions. HUD hides key hints when
+   `TouchControls.active`. Web preset: mobile viewport meta, landscape,
+   `touch-action:none`. Suite `test_touch_runner.tscn` (18 checks) sends
+   window-space ScreenTouch/Drag (headless viewport is stretched ×0.05).
+   Verified in a headless Edge with a phone UA and touch events.
+   Not done: Android native export, perf pass on a real phone.
 4. **Graphics pass** — sky gradient + clouds, water with shader (waves,
    foam line), grass patches, ambient particles, portal glow, camera
    collision smoothing, HUD polish. Keep the lighting recipe (no ambient).

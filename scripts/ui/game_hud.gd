@@ -46,7 +46,10 @@ func bind_level_manager(manager: LevelManager) -> void:
 func _process(delta: float) -> void:
 	prompt_label.text = _prompt_text()
 	if is_instance_valid(_player):
-		controls_label.text = tr(&"HUD_CONTROLS_KART") if _player.driver.is_driving else tr(&"HUD_CONTROLS_FOOT")
+		if TouchControls.active:
+			controls_label.text = ""
+		else:
+			controls_label.text = tr(&"HUD_CONTROLS_KART") if _player.driver.is_driving else tr(&"HUD_CONTROLS_FOOT")
 	if _notice_left > 0.0:
 		_notice_left -= delta
 		if _notice_left <= 0.0:

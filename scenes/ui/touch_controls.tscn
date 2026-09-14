@@ -1,0 +1,168 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/touch_controls.gd" id="1_touch"]
+
+[sub_resource type="StyleBoxFlat" id="btn_style"]
+bg_color = Color(0.1, 0.12, 0.2, 0.55)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 1, 1, 0.7)
+corner_radius_top_left = 40
+corner_radius_top_right = 40
+corner_radius_bottom_right = 40
+corner_radius_bottom_left = 40
+
+[sub_resource type="StyleBoxFlat" id="btn_pressed"]
+bg_color = Color(1, 0.85, 0.25, 0.8)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 1, 1, 0.9)
+corner_radius_top_left = 40
+corner_radius_top_right = 40
+corner_radius_bottom_right = 40
+corner_radius_bottom_left = 40
+
+[node name="TouchControls" type="CanvasLayer"]
+layer = 4
+script = ExtResource("1_touch")
+
+[node name="Root" type="Control" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Stick" type="Control" parent="Root"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="Base" type="ColorRect" parent="Root/Stick"]
+offset_right = 180.0
+offset_bottom = 180.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0.12)
+
+[node name="Knob" type="ColorRect" parent="Root/Stick"]
+offset_right = 70.0
+offset_bottom = 70.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0.45)
+
+[node name="Buttons" type="Control" parent="Root"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="Jump" type="Button" parent="Root/Buttons"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -130.0
+offset_top = -180.0
+offset_right = -40.0
+offset_bottom = -90.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("btn_style")
+theme_override_styles/hover = SubResource("btn_style")
+theme_override_styles/pressed = SubResource("btn_pressed")
+text = "Salta"
+
+[node name="Action" type="Button" parent="Root/Buttons"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -240.0
+offset_top = -140.0
+offset_right = -150.0
+offset_bottom = -50.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("btn_style")
+theme_override_styles/hover = SubResource("btn_style")
+theme_override_styles/pressed = SubResource("btn_pressed")
+text = "Attacca"
+
+[node name="Use" type="Button" parent="Root/Buttons"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -130.0
+offset_top = -290.0
+offset_right = -40.0
+offset_bottom = -200.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("btn_style")
+theme_override_styles/hover = SubResource("btn_style")
+theme_override_styles/pressed = SubResource("btn_pressed")
+text = "Usa"
+
+[node name="Kart" type="Button" parent="Root/Buttons"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -240.0
+offset_top = -250.0
+offset_right = -150.0
+offset_bottom = -160.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("btn_style")
+theme_override_styles/hover = SubResource("btn_style")
+theme_override_styles/pressed = SubResource("btn_pressed")
+text = "Kart"
+
+[node name="Dance" type="Button" parent="Root/Buttons"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -350.0
+offset_top = -200.0
+offset_right = -260.0
+offset_bottom = -110.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("btn_style")
+theme_override_styles/hover = SubResource("btn_style")
+theme_override_styles/pressed = SubResource("btn_pressed")
+text = "Balla"
+
+[node name="Pause" type="Button" parent="Root/Buttons"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -80.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 80.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("btn_style")
+theme_override_styles/hover = SubResource("btn_style")
+theme_override_styles/pressed = SubResource("btn_pressed")
+text = "II"

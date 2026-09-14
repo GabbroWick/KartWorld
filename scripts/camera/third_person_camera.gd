@@ -55,6 +55,7 @@ func _ready() -> void:
 	_yaw = rotation.y
 	if is_instance_valid(target):
 		global_position = _desired_position()
+	add_to_group(&"camera_rig")
 	GameManager.mouse_capture_changed.connect(_on_mouse_capture_changed)
 	_on_mouse_capture_changed(GameManager.is_mouse_captured())
 
@@ -64,6 +65,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		if _now() < _mouse_blocked_until or event.relative.length() > MAX_MOUSE_DELTA:
 			return
 		_mouse_delta += event.relative
+
+
+## Touch drag (TouchControls): pixels of finger motion, same units as the mouse.
+func add_look_delta(pixels: Vector2) -> void:
+	_mouse_delta += pixels
 
 
 func _on_mouse_capture_changed(captured: bool) -> void:

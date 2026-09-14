@@ -44,3 +44,9 @@ PAUSE_TITLE,Pause,Pausa
 PAUSE_RESUME,Resume,Riprendi
 PAUSE_HUB,Back to the island,Torna sull'isola
 PAUSE_QUIT,Quit game,Esci dal gioco
+TOUCH_JUMP,Jump,Salta
+TOUCH_ATTACK,Attack,Attacca
+TOUCH_TURBO,Turbo,Turbo
+TOUCH_USE,Use,Usa
+TOUCH_KART,Kart,Kart
+TOUCH_DANCE,Dance,Balla
