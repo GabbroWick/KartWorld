@@ -245,8 +245,17 @@ and the running diary live in `tools/README_3D.md` — read it before touching
   (RiggedCharacterVisual, model_scale 1, albedo_override, Meshy clips;
   clip hip tracks are rescaled to the rig's rest hip height).
   `leopard_ai.tscn` (unrigged, procedural) and `leopard_rigged.tscn` (Meshy)
-  remain as fallbacks. Next: `generate_character` automation, then fox/
-  panda/slime through the same pipeline.
+  remain as fallbacks.
+* Concepts are generated locally too: `generate_concept.py` (SDXL Turbo +
+  IP-Adapter, 640 px, ip-scale 0.25). Fox and panda went concept → shape →
+  **Hunyuan Paint** (good on clean flat concepts, unlike the leopard render)
+  → Blender → `_final/<name>/<name>.glb`, wired as NPC visuals
+  (`fox_ai.tscn`, `panda_ai.tscn`, procedural animation). Slime is modelled
+  in Blender (`make_slime.py`). `generate_character.py` / `make character
+  NAME=x` chains everything up to the Mixamo FBX; the rig upload stays
+  manual (`assets/models/ai/<name>/<name>_for_mixamo.fbx` →
+  `<name>_rig.fbx`), then a `<name>_ai_rigged.tscn` like the leopard's.
+  Pending: fox/panda rigs from the human.
 * Windows TDR: `TdrDelay = 60` was set by the human on 2026-09-11 (approved,
   with rollback documented in README_3D) because Paint kernels exceeded 2 s.
 * Rules from the human: no further registry change without explicit approval

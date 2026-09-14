@@ -1,0 +1,42 @@
+# fox — Hunyuan3D 2.1 shape
+
+Input: `C:\Users\gabri\Progetti\KartWorld\assets\characters\_source\fox\fox_front.png`
+
+model_raw.glb: geometria grezza, nessuna texture.
+
+```json
+{
+  "tool": "Hunyuan3D-2.1 shape (fork mac-rocm, rasterizer non usato)",
+  "input": "C:\\Users\\gabri\\Progetti\\KartWorld\\assets\\characters\\_source\\fox\\fox_front.png",
+  "params": {
+    "steps": 40,
+    "octree": 256,
+    "guidance": 5.0,
+    "seed": 1234
+  },
+  "errors": [],
+  "backend": {
+    "kind": "rocm",
+    "device": "cuda",
+    "dtype": "torch.float16",
+    "gpu": "AMD Radeon RX 9060 XT"
+  },
+  "t_preprocess_s": 3.3,
+  "t_load_s": 44.9,
+  "t_generate_s": 334.1,
+  "vram_peak_gb": 12.32,
+  "vram_reserved_gb": 12.5,
+  "ram_peak_gb": 19.27,
+  "vertices": 121261,
+  "faces": 242514,
+  "extents": [
+    1.594,
+    1.987,
+    0.798
+  ],
+  "watertight": true,
+  "glb_bytes": 4366088,
+  "t_total_s": 382.5,
+  "valid": true
+}
+```

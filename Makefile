@@ -25,7 +25,7 @@ WEB_DIR := builds/web
 SUITES := test_runner test_kart_runner test_island_runner test_portal_runner \
           test_level_runner test_combat_runner test_progression_runner test_hub_runner
 
-.PHONY: help run web serve test test-lighting import screenshot clean-web
+.PHONY: help run web serve test test-lighting import screenshot clean-web character concept gpu-check
 
 help:
 	@echo "make run            - launch the game"
@@ -36,6 +36,9 @@ help:
 	@echo "make import         - reimport assets / refresh the class cache"
 	@echo "make screenshot     - render a frame to screenshot.png"
 	@echo "make clean-web      - delete the Web build"
+	@echo "make gpu-check      - verify PyTorch sees the AMD GPU (ROCm)"
+	@echo "make concept NAME=fox PROMPT=\"cute cartoon fox...\"  - local SDXL concepts"
+	@echo "make character NAME=fox [ARGS=\"--tail 0.5\"]        - concept -> shape -> texture -> Blender -> Mixamo FBX"
 
 run:
 	"$(GODOT)" --path .
@@ -67,3 +70,14 @@ screenshot:
 
 clean-web:
 	rm -rf $(WEB_DIR)
+
+AI3D_PY := tools/ai3d/.venv/Scripts/python
+
+gpu-check:
+	$(AI3D_PY) tools/ai3d/check_gpu.py
+
+concept:
+	$(AI3D_PY) tools/ai3d/generate_concept.py --name $(NAME) --prompt "$(PROMPT)" --variants 6 --size 640
+
+character:
+	$(AI3D_PY) tools/ai3d/generate_character.py $(NAME) $(ARGS)

@@ -248,8 +248,8 @@ func _test_npcs(world: Node) -> void:
 		ids[npc.definition.id] = true
 		_check(npc.definition.id != _player.definition.id,
 			"NPC '%s' uses a different definition than the player" % npc.definition.display_name)
-		_check(npc.visual_root.get_children().any(func(c: Node) -> bool: return c is CreaturePlaceholder),
-			"NPC '%s' has its placeholder visual" % npc.definition.display_name)
+		_check(npc.visual_root.get_children().any(func(c: Node) -> bool: return c.has_method(&"animate")),
+			"NPC '%s' has an animatable visual" % npc.definition.display_name)
 		_check(not npc.input.reads_local_device,
 			"NPC '%s' ignores the local device" % npc.definition.display_name)
 	_check(ids.size() == npcs.size(), "every NPC is a distinct character")

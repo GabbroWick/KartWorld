@@ -285,16 +285,34 @@ tools/ai3d/.venv/Scripts/python tools/ai3d/check_gpu.py
 Nuovi pesi si scaricano da soli alla prima esecuzione; i vecchi restano in
 `tools/ai3d/models/hf/hub` (cancellabili a mano).
 
-## 8. Nuovo personaggio
+## 8. Nuovo personaggio (un comando)
 
-1. Concept in `assets/characters/_source/<nome>/<nome>_front.png`.
-2. `generate_shape.py <png> --name <nome>` → controlla `report.json`.
-3. `import_ai3d.py` con anteprima → guarda `preview.png`, sistema assi/altezza.
-4. Copia in `_final/<nome>/<nome>.glb`, scena visual + `.tres`, prova in Godot.
-5. (dopo) texture, rig, animazioni: sezioni da aggiungere.
+```bash
+make concept NAME=fox PROMPT="cute cartoon fox mascot, orange fur, cream belly, big green eyes, arms spread wide open"
+#   -> guarda assets/characters/_source/fox/fox_concept_*.png, copia la migliore in fox_front.png
+make character NAME=fox ARGS="--height 1.25"
+#   -> shape (5 min) -> Paint (6 min) -> Blender -> _final/fox/fox.glb + assets/models/ai/fox/fox_for_mixamo.fbx
+#   opzioni: --no-paint, --bake-from X --bake-texture Y (texture da un modello esistente),
+#            --clip-back/--cut-tail-root/--tail (coda), --from paint|blender (riparte a meta')
+```
+
+Poi a mano: Mixamo (§3b) → `assets/models/ai/<nome>/<nome>_rig.fbx`, scena
+`scenes/characters/visuals/<nome>_ai_rigged.tscn` (copia di
+`leopard_ai_rigged.tscn` con i propri path) e `resources/characters/<nome>.tres`.
+Per un NPC bastano idle + walk; le clip Mixamo del leopardo valgono per tutti.
+Con la texture del Paint (non cotta) non serve `albedo_override`: la
+texture e' nel GLB, ma il rig Mixamo la perde → cuocila in
+`assets/models/ai/<nome>/<nome>_albedo.png` (e' il JPG di
+`_generated/<nome>/paint/model_raw_textured.jpg`, che segue le stesse UV).
 
 ## Diario
 
+* **2026-09-14 (sera)** — Concept locali (SDXL Turbo + IP-Adapter):
+  volpe e panda generati, shape + **Paint** (sui concept puliti la texture
+  Paint e' buona: il problema del leopardo era il concept a macchie fini),
+  Blender, in gioco come NPC (`fox_ai.tscn`, `panda_ai.tscn`, 1.25 / 1.5 m).
+  Slime modellato da primitive (`make_slime.py`). `generate_character.py`
+  + `make character`. FBX per Mixamo pronti in `assets/models/ai/{fox,panda}`.
 * **2026-09-14** — Rig Mixamo del leopardo AI in T-pose collegato al
   personaggio (`leopard_ai_rigged.tscn`): idle/walk/run/jump/attack/hurt/
   emote con le clip Meshy, texture cotta via `albedo_override`. Suite
