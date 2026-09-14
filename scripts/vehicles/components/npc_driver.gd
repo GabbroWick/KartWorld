@@ -29,6 +29,8 @@ var _closed := true
 var _cursor := 0
 var _last_progress_time := 0.0
 var _last_position := Vector3.ZERO
+var _gliding := false
+var _glide_offset := 0.0
 
 
 func _ready() -> void:
@@ -105,17 +107,25 @@ func _teleport_to(index: int) -> void:
 	if heading.length_squared() < 0.001:
 		heading = Vector3.FORWARD
 	# The terrain tile may not be built yet (streaming): ask for it.
-	if terrain.streaming and not terrain.is_built_at(here.x, here.z):
-		terrain.set_focus(Vector3(here.x, here.y, here.z))
-		terrain._stream_step(false, true)
+	terrain.ensure_built_at(here.x, here.z)
 	vehicle.place(Transform3D(Basis.looking_at(heading.normalized(), Vector3.UP),
 		Vector3(here.x, here.y + 0.3, here.z)))
 	_last_position = vehicle.global_position
 	_last_progress_time = _now()
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	var pos := vehicle.global_position
+	# Far from the player the terrain tile is not built: glide along the
+	# road samples kinematically instead of falling through the world.
+	if terrain.streaming and not terrain.is_built_at(pos.x, pos.z):
+		_glide(delta)
+		return
+	elif _gliding:
+		_gliding = false
+		vehicle.set_physics_process(true)
+		_teleport_to(_cursor)
+		return
 	# Advance the cursor to the closest sample within a window ahead.
 	var n := _samples.size()
 	var best := _cursor
@@ -173,6 +183,33 @@ func _physics_process(_delta: float) -> void:
 		_teleport_to(_cursor)
 	if pos.y < vehicle.fall_limit + 5.0 or (terrain and terrain.road_distance(pos.x, pos.z) > 25.0):
 		_teleport_to(_cursor)
+
+
+## Kinematic travel along the road (no physics, no terrain needed).
+func _glide(delta: float) -> void:
+	if not _gliding:
+		_gliding = true
+		vehicle.set_physics_process(false)
+		vehicle.velocity = Vector3.ZERO
+		_glide_offset = 0.0
+	var n := _samples.size()
+	_glide_offset += speed_factor * vehicle.definition.max_speed * 0.8 * delta
+	while true:
+		var a := _samples[_cursor]
+		var b := _samples[(_cursor + 1) % n]
+		var seg := Vector2(a.x, a.z).distance_to(Vector2(b.x, b.z))
+		if _glide_offset < seg or seg <= 0.0:
+			var t := clampf(_glide_offset / maxf(seg, 0.001), 0.0, 1.0)
+			var here := a.lerp(b, t)
+			var heading := Vector3(b.x - a.x, 0.0, b.z - a.z)
+			if heading.length_squared() > 0.0001:
+				vehicle.global_transform = Transform3D(Basis.looking_at(heading.normalized(), Vector3.UP),
+					Vector3(here.x, here.y + 0.3, here.z))
+			break
+		_glide_offset -= seg
+		_cursor = (_cursor + 1) % n
+	_last_position = vehicle.global_position
+	_last_progress_time = _now()
 
 
 func _now() -> float:

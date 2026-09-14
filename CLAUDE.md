@@ -295,16 +295,20 @@ Plan, one verifiable step at a time (commit + suites + screenshot each):
    `near_chunk_built/freed` signals. Driving: 16.7 ms avg, no frame > 33 ms.
    Tests teleporting far away call `_ensure_ground()` (builds the tiles).
    Still to do here: ramps/jumps/bridges as track dressing, more stars.
-1c. **Life on the island** (human's request): many NPCs — some driving
-   karts around the road network (`NpcDriver`: follows the road samples,
-   avoids the player), some on foot wandering/talking in a village; more
-   buildings (Kenney Modular Buildings houses/towers as a village around the
-   spawn plus hamlets along the road).
-1b. **Kart v2 + visible driver** (human's request): new kart model through
-   the concept → Hunyuan shape → Paint pipeline (no rig needed; wheels as
-   separate spinning nodes found by name or added in Blender), and the
-   character stays visible seated in the kart (Mixamo "Sitting Idle" clip
-   or a fixed sit pose, body lean on steering) instead of hiding.
+1c. **Life on the island — DONE 2026-09-15**: `Village` (@tool, ring of
+   Kenney Modular Buildings on flat pads; pads reach the terrain through the
+   `terrain_flatten` group + `get_flat_zones()`), `NpcSpawner` (walkers with
+   NpcBehaviour + dialogue pool, NPC karts with `NpcDriver` on the road
+   rings, an NPC visual seated in each). Streaming rules: `ensure_built_at`
+   builds one tile without freeing others; walkers park while their tile
+   is unloaded (`NpcBehaviour`), NPC karts glide along the road samples
+   kinematically when off built tiles. Hub: Village (7 houses, 7 villagers,
+   9 NPC karts) near the spawn, Hamlet (4) at (-400, 150).
+1b. **Visible driver — DONE**: `VehicleController.seat_visual()` parks the
+   character's visual on the kart's Seat (sunk, idle clip, leans with
+   steering). **Kart v2 model — in progress**: `make character NAME=kart`
+   (concept `--object` mode, seed 62) → replace `kart_kenney.tscn`; wheels
+   to be split in Blender.
 2. **Level 3 "Vulcano"** (long): kart section (downhill track with jumps and
    moving blocks) → on-foot climb (platforms, springs, spikes, moving
    blocks, coins) → slime arena → finish portal. 3 stars, ~4-5 min.

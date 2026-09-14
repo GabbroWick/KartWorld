@@ -22,6 +22,8 @@ extends StaticBody3D
 ## sliding down until the fall limit triggers a respawn.
 
 const GROUP := &"terrain"
+## Nodes in this group provide extra flat pads: `get_flat_zones() -> Array[Vector4]`.
+const FLATTEN_GROUP := &"terrain_flatten"
 
 ## Streaming: a detailed (collidable) tile appeared / went away.
 signal near_chunk_built(tile: Vector2i, x0: float, z0: float, size: float)
@@ -164,6 +166,8 @@ const ROAD_GRID := 32.0   # metres per bucket of the road spatial hash
 
 var _noise := FastNoiseLite.new()
 var _rebuild_queued := false
+## flat_zones + every provider's zones, gathered at rebuild (read by workers).
+var _all_flat_zones: Array[Vector4] = []
 ## Fetched on the main thread; worker builds only read it.
 var _terrain_material: Material
 ## Dense samples along the road: position (x, z) and smoothed height.
@@ -239,7 +243,7 @@ func sample_height(x: float, z: float) -> float:
 		height = lerpf(beach_height, sea_floor_height, t * t)
 
 	# Flatten pads for buildings; blended edge so there is no visible seam.
-	for zone in flat_zones:
+	for zone in _all_flat_zones:
 		var zone_distance := Vector2(x, z).distance_to(Vector2(zone.x, zone.y))
 		var weight := 1.0 - smoothstep(zone.z * 0.55, zone.z, zone_distance)
 		height = lerpf(height, zone.w, weight)
@@ -312,6 +316,22 @@ func _all_roads() -> Array:
 			var closed := extra_roads_closed[i] if i < extra_roads_closed.size() else true
 			result.append([extra_roads[i], closed])
 	return result
+
+
+## Builds the detailed tile under (x, z) right now, leaving every other
+## tile alone (for spawning things far from the player). The streamer
+## frees it again later when it is out of range.
+func ensure_built_at(x: float, z: float) -> void:
+	if not streaming or is_built_at(x, z):
+		return
+	var tile := _tile_of(x, z)
+	if _chunks.has(tile):
+		_free_chunk(_chunks[tile])
+		_chunks.erase(tile)
+	if _in_flight.has(tile):
+		WorkerThreadPool.wait_for_task_completion(_in_flight[tile]["task"])
+		_in_flight.erase(tile)
+	_build_chunk(tile, true, true)
 
 
 ## True when the terrain has a mesh (and collision) at this point right now.
@@ -412,6 +432,11 @@ func rebuild() -> void:
 	_terrain_material = FlatMaterial.flat_vertex_colored()
 	# Workers read the road samples: finish them before replacing the data.
 	_wait_in_flight()
+	_all_flat_zones = flat_zones.duplicate()
+	if is_inside_tree():
+		for provider in get_tree().get_nodes_in_group(FLATTEN_GROUP):
+			if provider.has_method(&"get_flat_zones"):
+				_all_flat_zones.append_array(provider.call(&"get_flat_zones"))
 	# Any parameter can move the land under the road: always resample (cheap).
 	_rebuild_road()
 	_clear_chunks()

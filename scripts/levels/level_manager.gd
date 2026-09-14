@@ -100,6 +100,13 @@ func _swap_world(scene: PackedScene) -> void:
 		world_parent.remove_child(world)
 		world.queue_free()
 	world = scene.instantiate() as Node3D
+	# Streaming terrain: build its first detailed tiles around the spawn, not
+	# the origin (the player is placed there right after).
+	var terrain := world.find_children("*", "IslandTerrain", true, false)
+	for node in world.find_children("*", "Marker3D", true, false):
+		if node.is_in_group(&"player_spawn") and terrain.size() > 0:
+			(terrain[0] as IslandTerrain).set_focus((node as Node3D).position)
+			break
 	world_parent.add_child(world)
 	# Keep the world first in the tree so the camera still updates last.
 	world_parent.move_child(world, 0)

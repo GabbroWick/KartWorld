@@ -28,6 +28,8 @@ var _line_index := 0
 var _bubble: Label3D
 var _bubble_left := 0.0
 var _stuck_time := 0.0
+var _terrain: IslandTerrain
+var _parked := false
 
 
 func _ready() -> void:
@@ -46,11 +48,27 @@ func _ready() -> void:
 func _late_setup() -> void:
 	home = _character.global_position
 	_character.input.uses_world_direction = true
+	_terrain = get_tree().get_first_node_in_group(IslandTerrain.GROUP) as IslandTerrain
 	set_physics_process(true)
 
 
 func _physics_process(delta: float) -> void:
 	_tick_bubble(delta)
+	# Streaming terrain: no ground under us right now → stand still on the
+	# analytic surface until the tile is back (else we would fall through).
+	if _terrain and _terrain.streaming:
+		var p := _character.global_position
+		if not _terrain.is_built_at(p.x, p.z):
+			_character.velocity = Vector3.ZERO
+			_character.input.world_direction = Vector3.ZERO
+			_character.global_position.y = maxf(p.y, _terrain.sample_height(p.x, p.z) + 0.05)
+			_character.set_physics_process(false)
+			_parked = true
+			return
+		elif _parked:
+			_parked = false
+			_character.global_position.y = _terrain.sample_height(p.x, p.z) + 0.3
+			_character.set_physics_process(true)
 	var player := _nearest_player()
 	if player and player.global_position.distance_to(_character.global_position) < notice_radius:
 		_walking = false

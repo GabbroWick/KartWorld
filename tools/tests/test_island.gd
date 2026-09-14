@@ -103,11 +103,10 @@ func _test_kart_climbs_mountain() -> void:
 
 
 func _test_npcs_alive() -> void:
-	var fox: CharacterController = null
-	for npc in _scene.get("world").find_children("*", "CharacterController", true, false):
-		if (npc as CharacterController).definition.id == &"fox":
-			fox = npc
-	_check(fox != null, "fox NPC found")
+	# The hand-placed fox by the house (villagers far away may be parked on
+	# unbuilt terrain tiles, by design).
+	var fox := _scene.get("world").get_node_or_null("NPCs/Fox") as CharacterController
+	_check(fox != null and fox.definition.id == &"fox", "fox NPC found")
 	if fox == null:
 		return
 	var behaviour := fox.get_node_or_null("Behaviour") as NpcBehaviour
@@ -273,7 +272,7 @@ func _test_npcs(world: Node) -> void:
 			"NPC '%s' has an animatable visual" % npc.definition.display_name)
 		_check(not npc.input.reads_local_device,
 			"NPC '%s' ignores the local device" % npc.definition.display_name)
-	_check(ids.size() == npcs.size(), "every NPC is a distinct character")
+	_check(ids.size() >= 2, "NPCs use at least two different characters (%d kinds over %d NPCs)" % [ids.size(), npcs.size()])
 
 	# Same creature body, different colours: proves visuals are data too.
 	var fox := _find_visual(npcs, &"fox")
@@ -415,7 +414,9 @@ func _clear_heading(from: Vector3, length: float) -> Vector3:
 ## there before physics runs. Builds them synchronously.
 func _ensure_ground(at: Vector3) -> void:
 	_terrain.set_focus(at)
-	_terrain._stream_step(false, true)
+	for dx in [-1, 0, 1]:
+		for dz in [-1, 0, 1]:
+			_terrain.ensure_built_at(at.x + dx * _terrain.chunk_size, at.z + dz * _terrain.chunk_size)
 
 
 func _steps(count: int) -> void:
