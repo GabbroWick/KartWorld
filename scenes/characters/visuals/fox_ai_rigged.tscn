@@ -1,0 +1,34 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/characters/rigged_character_visual.gd" id="1_visual"]
+[ext_resource type="PackedScene" path="res://assets/models/ai/fox/fox_rig.fbx" id="2_rig"]
+[ext_resource type="Texture2D" path="res://assets/models/ai/fox/fox_albedo.jpg" id="3_albedo"]
+[ext_resource type="PackedScene" path="res://assets/models/meshy/leopard/anim_walk.fbx" id="4_walk"]
+[ext_resource type="PackedScene" path="res://assets/models/meshy/leopard/anim_run.fbx" id="5_run"]
+[ext_resource type="PackedScene" path="res://assets/models/meshy/leopard/anim_jump.fbx" id="6_jump"]
+[ext_resource type="PackedScene" path="res://assets/models/meshy/leopard/anim_fall.fbx" id="7_fall"]
+[ext_resource type="PackedScene" path="res://assets/models/meshy/leopard/anim_attack.fbx" id="8_attack"]
+[ext_resource type="PackedScene" path="res://assets/models/meshy/leopard/anim_hurt.fbx" id="9_hurt"]
+[ext_resource type="PackedScene" path="res://assets/models/meshy/leopard/anim_emote.fbx" id="10_emote"]
+
+[node name="FoxAIRigged" type="Node3D"]
+script = ExtResource("1_visual")
+model = ExtResource("2_rig")
+model_scale = 1.0
+flip_forward = true
+auto_ground = false
+flatten_materials = true
+albedo_override = ExtResource("3_albedo")
+motion = 0.35
+walk_clip = ExtResource("4_walk")
+run_clip = ExtResource("5_run")
+jump_clip = ExtResource("6_jump")
+fall_clip = ExtResource("7_fall")
+attack_clip = ExtResource("8_attack")
+hurt_clip = ExtResource("9_hurt")
+emote_clip = ExtResource("10_emote")
+reference_speed = 10.0
+walk_clip_speed = 1.0
+run_clip_speed = 3.3
+run_threshold = 0.6
+max_speed_scale = 2.2

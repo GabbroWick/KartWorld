@@ -1,0 +1,43 @@
+# Pacchetti Python della pipeline 3D locale (venv tools/ai3d/.venv, Python 3.12).
+# torch/torchvision NON sono qui: vanno dall'indice AMD ROCm (vedi setup_ai3d.ps1).
+# Versioni verificate il 2026-09-14 sulla RX 9060 XT (gfx1200).
+
+# --- comuni (TripoSR, Hunyuan3D shape, tool) ---
+numpy==2.4.4
+pillow==12.2.0
+scipy==1.18.1
+scikit-image==0.26.0
+trimesh==5.1.0
+pygltflib==1.16.5
+xatlas==0.0.11
+omegaconf==2.3.1
+einops==0.8.2
+imageio==2.37.4
+tqdm==4.70.1
+pyyaml==6.0.3
+psutil==7.2.2
+huggingface-hub<1.0
+safetensors==0.8.0
+transformers==4.57.6      # deve restare < 5 (TripoSR, hy3dpaint)
+diffusers==0.35.2         # < 0.36 per hy3dpaint
+accelerate==1.15.0
+timm==1.0.29
+rembg==2.0.84
+onnxruntime==1.30.0
+pymeshlab==2025.7.post1
+opencv-python-headless
+
+# --- Hunyuan3D Paint (texture) ---
+realesrgan==0.3.0
+basicsr==1.4.2
+fast_simplification
+pybind11==3.1.0
+ninja==1.13.2
+setuptools
+pytorch-lightning==2.6.6
+torchmetrics==1.9.0
+torchdiffeq==0.2.5
+sentencepiece==0.2.2
+loguru==0.7.3
+configargparse==1.7.7
+python-dotenv==1.2.3

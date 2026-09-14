@@ -14,6 +14,69 @@ Nessuna API cloud. Stato aggiornato a fine file (sezione "Diario").
 | Python | 3.12 nel venv `tools/ai3d/.venv` (creato con `uv`) |
 | Blender | 5.1.2 (`tools/blender/blender.cmd` è il wrapper) |
 
+## Setup da zero su un altro PC
+
+Tutto gratuito. Serve una GPU AMD RX 7000/9000 (ROCm su Windows: gfx110x /
+gfx120x) con 16 GB, 32 GB di RAM, ~45 GB di disco per i pesi.
+
+### Software da installare a mano
+
+| Cosa | Versione usata | Come | Serve per |
+| --- | --- | --- | --- |
+| Driver AMD Adrenalin | 25.20 (apr 2026) o piu' recente | amd.com | ROCm su Windows |
+| Python | 3.12.x | python.org o `winget install Python.Python.3.12` | venv |
+| uv | 0.11 | `winget install astral-sh.uv` | venv + pacchetti (veloce) |
+| Git | qualsiasi | git-scm.com | cloni |
+| Blender | 5.1.2 in `C:\Program Files\Blender Foundation\Blender 5.1\` | blender.org | pulizia, bake, slime, FBX |
+| Godot | 4.7.2 (console exe) | godotengine.org | il gioco, preview |
+| VS Build Tools 2026 + workload "Desktop development with C++" | MSVC 14.50, SDK 10.0.26100 | visualstudio.microsoft.com/visual-cpp-build-tools | solo `mesh_inpaint_processor` (Paint) |
+| GNU make | GnuWin32 | opzionale, per `make character` | comodita' |
+| Account Mixamo (Adobe, gratuito) | — | mixamo.com | rig + animazioni (manuale) |
+
+### Installazione automatica
+
+```powershell
+git clone https://github.com/GabbroWick/KartWorld.git ; cd KartWorld
+powershell -ExecutionPolicy Bypass -File toolsi3d\setup_ai3d.ps1 -Gfx gfx1200   # gfx1201 per RX 9070, gfx1100 per RX 7900
+```
+
+Lo script: crea `tools/ai3d/.venv`, installa torch 2.12+rocm7.14.1 dall'indice
+AMD, i pacchetti di `tools/ai3d/requirements.txt` (versioni bloccate), clona
+i tre repository ai commit verificati (TripoSR `107cefd`, fork Hunyuan
+`6f4b63b`, Hunyuan3D-2.1 `82920d6`), scarica i pesi, compila l'estensione
+C++. Flag: `-SkipWeights`, `-SkipPaint`, `-SkipConcept`. Rilanciabile.
+
+Pesi scaricati (tutti in `tools/ai3d/`, gitignored):
+
+| Pesi | Dove | Dimensione | Stadio |
+| --- | --- | --- | --- |
+| TripoSR | `models/hf` | 1,6 GB | smoke test |
+| Hunyuan3D-2.1 DiT + VAE fp16 | `models/hy3dgen/tencent/Hunyuan3D-2.1` | 7,6 GB | shape |
+| rembg u2net | `models/rembg` | 0,2 GB | shape (sfondo) |
+| Hunyuan3D-2.1 paintpbr | `hunyuan3d/weights/Hunyuan3D-2.1` | 6,6 GB | Paint |
+| DINOv2-giant | `models/hf` | 4,3 GB | Paint |
+| RealESRGAN x4plus | `hunyuan3d/Hunyuan3D-2.1/hy3dpaint/ckpt` | 64 MB | Paint |
+| SDXL Turbo fp16 | `models/hf` | 6,6 GB | concept |
+| IP-Adapter SDXL ViT-H + encoder | `models/hf` | 3,1 GB | concept (stile) |
+| ControlNet OpenPose SDXL (xinsir) | `models/hf` | 2,4 GB | concept (T-pose) |
+
+Da Hugging Face a ~2 MB/s: circa 4 ore in tutto. Nessun token richiesto.
+
+### Modifiche di sistema (una sola, manuale, con approvazione)
+
+`HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers\TdrDelay = 60`
+(DWORD) + riavvio: il Paint lancia kernel GPU sopra i 2 s del watchdog
+Windows. Senza, il driver si resetta a meta' texturing. Ripristino:
+`Remove-ItemProperty` sulla stessa chiave. Shape e concept non lo richiedono.
+
+### Verifica
+
+```bash
+make gpu-check                      # "GPU OK"
+make concept NAME=test PROMPT="cute cartoon cat mascot, gray fur, big eyes"
+make character NAME=test            # ~15 min: shape 5 + paint 7 + blender
+```
+
 ## Struttura
 
 ```
@@ -310,6 +373,15 @@ texture e' nel GLB, ma il rig Mixamo la perde → cuocila in
 
 ## Diario
 
+* **2026-09-14 (notte)** — Volpe e panda rigenerati in vera T-pose con
+  ControlNet OpenPose: muso e schiena puliti, il Paint su concept puliti
+  e' buono. Rig Mixamo caricati dall'umano (41 ossa, metri):
+  `fox_ai_rigged.tscn`, `panda_ai_rigged.tscn` in gioco come NPC.
+  Bug trovato: l'AnimationLibrary dell'FBX e' condivisa fra istanze, il
+  secondo NPC non trovava piu' la clip idle → ogni visual duplica la
+  libreria. **Procedura validata**: concept ControlNet → `make character`
+  → Mixamo → scena riggata. `setup_ai3d.ps1` + `requirements.txt` per
+  rifare tutto su un altro PC.
 * **2026-09-14 (sera)** — Concept locali (SDXL Turbo + IP-Adapter):
   volpe e panda generati, shape + **Paint** (sui concept puliti la texture
   Paint e' buona: il problema del leopardo era il concept a macchie fini),

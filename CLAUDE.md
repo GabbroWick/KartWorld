@@ -255,7 +255,14 @@ and the running diary live in `tools/README_3D.md` — read it before touching
   NAME=x` chains everything up to the Mixamo FBX; the rig upload stays
   manual (`assets/models/ai/<name>/<name>_for_mixamo.fbx` →
   `<name>_rig.fbx`), then a `<name>_ai_rigged.tscn` like the leopard's.
-  Pending: fox/panda rigs from the human.
+  Fox and panda were then regenerated from **ControlNet OpenPose** T-pose
+  concepts (make_pose.py skeleton), rigged on Mixamo by the human, and are
+  NPCs through `fox_ai_rigged.tscn` / `panda_ai_rigged.tscn`. The human
+  approved the result: this is the validated character procedure.
+  `RiggedCharacterVisual` duplicates the FBX AnimationLibrary per instance
+  (shared resource bug with two NPCs of one rig).
+* Reproducible setup: `tools/ai3d/setup_ai3d.ps1` (+ `requirements.txt`,
+  pinned repo commits, weight table, TDR note) — README_3D "Setup da zero".
 * Windows TDR: `TdrDelay = 60` was set by the human on 2026-09-11 (approved,
   with rollback documented in README_3D) because Paint kernels exceeded 2 s.
 * Rules from the human: no further registry change without explicit approval

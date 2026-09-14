@@ -45,9 +45,20 @@ func _ready() -> void:
 	if player == null:
 		push_error("RiggedCharacterVisual: model has no AnimationPlayer.")
 		return
-	var library := player.get_animation_library(&"")
-	_register(library, &"idle", library.get_animation(MIXAMO_CLIP), true)
-	library.remove_animation(MIXAMO_CLIP)
+	# The imported FBX's AnimationLibrary is a shared resource: two NPCs of the
+	# same rig would see each other's edits. Work on a private copy, and never
+	# remove the source clip (the second instance still needs it).
+	var library := player.get_animation_library(&"").duplicate() as AnimationLibrary
+	player.remove_animation_library(&"")
+	player.add_animation_library(&"", library)
+	var idle_source := library.get_animation(MIXAMO_CLIP)
+	if idle_source == null and library.get_animation_list().size() > 0:
+		idle_source = library.get_animation(library.get_animation_list()[0])
+	if idle_source == null:
+		push_error("RiggedCharacterVisual: the rig has no animation to use as idle.")
+		return
+	if not library.has_animation(&"idle"):
+		_register(library, &"idle", idle_source, true)
 	for entry in [[&"walk", walk_clip, true], [&"run", run_clip, true], [&"jump", jump_clip, false], [&"fall", fall_clip, true], [&"attack", attack_clip, false], [&"hurt", hurt_clip, false], [&"emote", emote_clip, false]]:
 		var scene: PackedScene = entry[1]
 		if scene == null:
