@@ -243,11 +243,16 @@ def add_tail(obj: bpy.types.Object, length: float, radius: float) -> int:
     curve.resolution_u = 12
     curve.use_fill_caps = True
     spline = curve.splines.new("BEZIER")
+    # Coda da leopardo: parte dal bacino leggermente in giu', sale con una
+    # curva morbida e finisce con un ricciolo (la punta torna verso il corpo).
+    L = length
     pts = [
-        (Vector((0.0, rear - radius * 1.5, z0)), 1.15),
-        (Vector((0.0, rear + length * 0.45, z0 - height * 0.02)), 0.95),
-        (Vector((0.0, rear + length * 0.85, z0 + length * 0.35)), 0.7),
-        (Vector((0.0, rear + length * 0.95, z0 + length * 0.75)), 0.35),
+        (Vector((0.0, rear - radius * 1.5, z0)), 1.1),
+        (Vector((0.0, rear + L * 0.40, z0 - L * 0.12)), 0.95),
+        (Vector((0.0, rear + L * 0.78, z0 - L * 0.08)), 0.72),
+        (Vector((0.0, rear + L * 1.00, z0 + L * 0.10)), 0.52),
+        (Vector((0.0, rear + L * 0.92, z0 + L * 0.30)), 0.38),
+        (Vector((0.0, rear + L * 0.74, z0 + L * 0.26)), 0.26),
     ]
     spline.bezier_points.add(len(pts) - 1)
     for bp, (co, r) in zip(spline.bezier_points, pts):
