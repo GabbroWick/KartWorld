@@ -34,6 +34,14 @@ extends Node3D
 	set(value):
 		count = value
 		_request_rebuild()
+## Streaming mode (terrain with `streaming = true`): props are generated per
+## terrain tile as it comes into detail range and freed with it. `count` is
+## then ignored; `density` = props per 100 x 100 m, `center`/`radius`/filters
+## still limit where they go.
+@export_range(0.0, 400.0, 0.5) var density := 0.0:
+	set(value):
+		density = value
+		_request_rebuild()
 
 @export_group("Region")
 ## Centre of the scatter disc, in world XZ.
@@ -64,6 +72,11 @@ extends Node3D
 	set(value):
 		max_slope_degrees = value
 		_request_rebuild()
+## Keep this far (m) from the kart road's edge; negative = may sit on it.
+@export_range(-5.0, 20.0, 0.5) var road_clearance := 1.5:
+	set(value):
+		road_clearance = value
+		_request_rebuild()
 @export_range(0.0, 50.0, 0.5) var min_spacing := 3.0:
 	set(value):
 		min_spacing = value
@@ -87,6 +100,9 @@ extends Node3D
 var placed_positions: PackedVector3Array = []
 var terrain: IslandTerrain
 var _rebuild_queued := false
+## Streaming: Vector2i tile -> Array[Node3D] props of that tile.
+var _tile_props: Dictionary = {}
+var _streaming := false
 
 
 func _ready() -> void:
@@ -105,6 +121,19 @@ func rebuild() -> void:
 		return
 	if not terrain.is_node_ready():
 		await terrain.ready
+	if _streaming:
+		terrain.near_chunk_built.disconnect(_on_chunk_built)
+		terrain.near_chunk_freed.disconnect(_on_chunk_freed)
+		_streaming = false
+	if terrain.streaming and density > 0.0:
+		_streaming = true
+		terrain.near_chunk_built.connect(_on_chunk_built)
+		terrain.near_chunk_freed.connect(_on_chunk_freed)
+		# Tiles already built before we connected.
+		for tile in terrain._chunks:
+			if terrain._chunks[tile]["near"]:
+				_on_chunk_built(tile, tile.x * terrain.chunk_size, tile.y * terrain.chunk_size, terrain.chunk_size)
+		return
 
 	var rng := RandomNumberGenerator.new()
 	rng.seed = scatter_seed
@@ -135,6 +164,75 @@ func rebuild() -> void:
 		add_child(prop)
 
 
+## One tile's worth of props, deterministic per (scatter_seed, tile).
+func _on_chunk_built(tile: Vector2i, x0: float, z0: float, size: float) -> void:
+	if _tile_props.has(tile):
+		return
+	# Quick reject: tile fully outside the scatter disc.
+	var tile_centre := Vector2(x0 + size * 0.5, z0 + size * 0.5)
+	if tile_centre.distance_to(center) > radius + size * 0.75:
+		_tile_props[tile] = []
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(Vector3i(scatter_seed, tile.x, tile.y))
+	var variant_rng := RandomNumberGenerator.new()
+	variant_rng.seed = rng.seed * 7919 + 1
+	var wanted := int(round(density * size * size / 10000.0))
+	var local_positions: PackedVector3Array = []
+	var nodes: Array = []
+	var attempts := wanted * 6
+	while local_positions.size() < wanted and attempts > 0:
+		attempts -= 1
+		var x := x0 + rng.randf() * size
+		var z := z0 + rng.randf() * size
+		if Vector2(x, z).distance_to(center) > radius:
+			continue
+		if not _accepts_streaming(x, z, local_positions):
+			continue
+		var y := terrain.sample_height(x, z) - sink
+		var position_3d := Vector3(x, y, z)
+		local_positions.append(position_3d)
+		var prop := prop_scene.instantiate() as Node3D
+		prop.position = position_3d
+		prop.rotation.y = rng.randf_range(0.0, TAU)
+		prop.scale = Vector3.ONE * rng.randf_range(scale_min, scale_max)
+		prop.set_meta(&"scattered", true)
+		if not models.is_empty() and prop is ModelProp:
+			(prop as ModelProp).model = models[variant_rng.randi_range(0, models.size() - 1)]
+		add_child(prop)
+		nodes.append(prop)
+	_tile_props[tile] = nodes
+
+
+func _on_chunk_freed(tile: Vector2i) -> void:
+	if not _tile_props.has(tile):
+		return
+	for node in _tile_props[tile]:
+		if is_instance_valid(node):
+			node.queue_free()
+	_tile_props.erase(tile)
+
+
+func _accepts_streaming(x: float, z: float, local: PackedVector3Array) -> bool:
+	if not terrain.is_on_land(x, z):
+		return false
+	var height := terrain.sample_height(x, z)
+	if height < min_height or height > max_height:
+		return false
+	if terrain.sample_slope_degrees(x, z) > max_slope_degrees:
+		return false
+	if road_clearance >= 0.0 and terrain.road_distance(x, z) < terrain.road_width * 0.5 + road_clearance:
+		return false
+	for zone in exclusion_zones:
+		if Vector2(x, z).distance_to(Vector2(zone.x, zone.y)) < zone.z:
+			return false
+	var spacing_squared := min_spacing * min_spacing
+	for other in local:
+		if Vector2(x, z).distance_squared_to(Vector2(other.x, other.z)) < spacing_squared:
+			return false
+	return true
+
+
 func _resolve_terrain() -> IslandTerrain:
 	if not terrain_path.is_empty():
 		return get_node_or_null(terrain_path) as IslandTerrain
@@ -149,6 +247,8 @@ func _accepts(x: float, z: float) -> bool:
 		return false
 	if terrain.sample_slope_degrees(x, z) > max_slope_degrees:
 		return false
+	if road_clearance >= 0.0 and terrain.has_method(&"road_distance") 			and terrain.road_distance(x, z) < terrain.road_width * 0.5 + road_clearance:
+		return false
 	for zone in exclusion_zones:
 		if Vector2(x, z).distance_to(Vector2(zone.x, zone.y)) < zone.z:
 			return false
@@ -160,6 +260,7 @@ func _accepts(x: float, z: float) -> bool:
 
 
 func _clear() -> void:
+	_tile_props.clear()
 	for child in get_children():
 		if child.has_meta(&"scattered"):
 			remove_child(child)

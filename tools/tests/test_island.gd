@@ -65,8 +65,10 @@ func _test_kart_climbs_mountain() -> void:
 	# real height and lean with the slope while doing it.
 	var kart := _player.driver.vehicle
 	var peak := Vector3(_terrain.mountain_center.x, 0.0, _terrain.mountain_center.y)
-	var foot := peak + Vector3(0.0, 0.0, 20.0)
+	# Start on the steep flank (the huge mountain is nearly flat near its top).
+	var foot := peak + Vector3(0.0, 0.0, _terrain.mountain_radius * 0.6)
 	foot.y = _terrain.sample_height(foot.x, foot.z) + 0.3
+	_ensure_ground(foot)
 	var heading := (peak - foot)
 	heading.y = 0.0
 	kart.place(Transform3D(Basis.looking_at(heading.normalized(), Vector3.UP), foot))
@@ -88,8 +90,13 @@ func _test_kart_climbs_mountain() -> void:
 		% [climbed, max_tilt])
 	_check(max_tilt > 12.0, "kart model leans with the slope (max %.0f deg)" % max_tilt)
 	# The lean must follow the ground, not mirror it (a sign bug once did).
-	var agreement := kart.visual_root.global_basis.y.dot(kart.get_floor_normal()) if kart.is_on_floor() else 1.0
-	_check(agreement > 0.97, "kart model's up matches the floor normal (dot %.3f)" % agreement)
+	# Compare with the terrain's analytic normal: the sphere collider's contact
+	# normal is one triangle of a 1.5 m grid, the visual averages four rays.
+	var kp := kart.global_position
+	var agreement := kart.visual_root.global_basis.y.dot(_terrain.sample_normal(kp.x, kp.z))
+	# The visual pitch is clamped (~35 deg) for readability, so on a 55 deg
+	# flank it cannot match fully; it must still lean the right way.
+	_check(agreement > 0.85, "kart model's up follows the terrain normal (dot %.3f)" % agreement)
 	_check(kart.is_on_floor(), "kart still on the ground on the hillside")
 	await _hold(InputActions.INTERACT, 3)
 	await _steps(20)
@@ -106,7 +113,7 @@ func _test_npcs_alive() -> void:
 	var behaviour := fox.get_node_or_null("Behaviour") as NpcBehaviour
 	_check(behaviour != null, "fox has an NpcBehaviour")
 	# Stand far away so it wanders instead of staring at us.
-	_player.global_position = Vector3(14.0, 4.5, 30.0)
+	_player.global_position = Vector3(60.0, 5.0, 98.0)
 	_player.motor.reset()
 	var start := fox.global_position
 	var moved := 0.0
@@ -144,7 +151,7 @@ func _test_kart_parked_still() -> void:
 func _test_kart_on_terrain() -> void:
 	# The kart suite runs on flat ground; here it has to cope with the island's
 	# slopes and trimesh collision: drive from the house pad down to the beach.
-	var start_point := Vector3(14.0, 4.5, 24.0)
+	var start_point := Vector3(60.0, 5.0, 92.0)
 	var heading := _clear_heading(start_point, 32.0)
 	_check(heading != Vector3.ZERO, "found a tree-free corridor to drive along")
 	_player.global_position = start_point
@@ -194,37 +201,51 @@ func _test_kart_on_terrain() -> void:
 
 func _test_terrain() -> void:
 	_check(_terrain.is_in_group(&"terrain"), "terrain is in the 'terrain' group")
-	var mesh := _terrain.mesh_instance.mesh as ArrayMesh
-	_check(mesh != null and mesh.get_surface_count() == 1, "terrain mesh generated")
-	if mesh:
-		var faces := mesh.get_faces().size() / 3
-		_check(faces > 5000, "terrain has a real triangle count (%d)" % faces)
-	_check(_terrain.collision.shape is ConcavePolygonShape3D, "terrain collision is a trimesh")
-	if mesh:
+	_check(_terrain.streaming, "hub terrain streams in chunks")
+	var house := Vector2(60.0, 80.0)
+	# The tile under the house must be built with collision (the player spawns there).
+	_check(_terrain.is_built_at(house.x, house.y), "terrain tile under the house is built with collision")
+	var near_tiles := 0
+	var near_faces := 0
+	var pad_faces := 0
+	var up_faces := 0
+	for tile in _terrain._chunks:
+		var chunk: Dictionary = _terrain._chunks[tile]
+		if not chunk["near"]:
+			continue
+		near_tiles += 1
+		var mesh := (chunk["node"] as MeshInstance3D).mesh as ArrayMesh
 		var faces := mesh.get_faces()
-		var pad_faces := 0
-		var up_faces := 0
+		near_faces += faces.size() / 3
+		_check(chunk["shape"] != null and (chunk["shape"] as CollisionShape3D).shape is ConcavePolygonShape3D,
+			"near tile %s has a trimesh collision" % tile) if near_tiles == 1 else null
 		for i in range(0, faces.size(), 3):
 			var centre := (faces[i] + faces[i + 1] + faces[i + 2]) / 3.0
-			if Vector2(centre.x, centre.z).distance_to(Vector2(14.0, 12.0)) < 4.0:
+			if Vector2(centre.x, centre.z).distance_to(house) < 5.0:
 				pad_faces += 1
 				if Plane(faces[i], faces[i + 1], faces[i + 2]).normal.y > 0.9:
 					up_faces += 1
-		_check(pad_faces > 0 and up_faces == pad_faces,
-			"terrain faces wind clockwise / face up (%d/%d on the pad)" % [up_faces, pad_faces])
+	_check(near_tiles >= 9, "detailed tiles around the spawn (%d)" % near_tiles)
+	_check(near_faces > 5000, "near terrain has a real triangle count (%d)" % near_faces)
+	_check(pad_faces > 0 and up_faces == pad_faces,
+		"terrain faces wind clockwise / face up (%d/%d on the pad)" % [up_faces, pad_faces])
 
-	var pad := _terrain.sample_height(14.0, 12.0)
-	_check(absf(pad - 3.5) < 0.05, "house pad is flattened to 3.5 (got %.2f)" % pad)
+	var pad := _terrain.sample_height(house.x, house.y)
+	_check(absf(pad - 4.0) < 0.05, "house pad is flattened to 4.0 (got %.2f)" % pad)
 	var peak := _terrain.sample_height(_terrain.mountain_center.x, _terrain.mountain_center.y)
-	_check(peak > 12.0, "mountain peak is high (%.1f)" % peak)
-	var beach := _terrain.sample_height(0.0, 52.0)
+	_check(peak > 50.0, "main mountain peak is high (%.1f)" % peak)
+	var beach := _terrain.sample_height(0.0, _terrain.shore_radius - 2.0)
 	_check(beach > 0.2 and beach < 1.6, "beach is low and above water (%.2f)" % beach)
 	var sea := _terrain.sample_height(0.0, _terrain.shore_radius + _terrain.drop_width + 1.0)
 	_check(sea < -30.0, "terrain plunges past the shore (%.1f)" % sea)
-	_check(_terrain.is_on_land(10.0, 10.0) and not _terrain.is_on_land(0.0, 70.0),
+	_check(_terrain.is_on_land(10.0, 10.0) and not _terrain.is_on_land(0.0, _terrain.shore_radius + 16.0),
 		"is_on_land distinguishes island from sea")
-	var slope_flat := _terrain.sample_slope_degrees(14.0, 12.0)
+	var slope_flat := _terrain.sample_slope_degrees(house.x, house.y)
 	_check(slope_flat < 3.0, "house pad is level (%.1f deg)" % slope_flat)
+	_check(_terrain.road_length() > 9000.0, "kart road network is over 9 km (%.0f m)" % _terrain.road_length())
+	var on_road := _terrain.is_on_road(570.0, 0.0)
+	_check(on_road, "the coast road passes the east beach star")
+	_check(_terrain.sample_slope_degrees(570.0, 0.0) < 8.0, "road is gentle there (%.1f deg)" % _terrain.sample_slope_degrees(570.0, 0.0))
 
 
 func _test_spawn() -> void:
@@ -275,12 +296,16 @@ func _test_scatter(world: Node) -> void:
 	_check(scatters.size() >= 3, "island has scatter groups (%d)" % scatters.size())
 	var total := 0
 	for scatter: PropScatter in scatters:
-		var placed := scatter.placed_positions.size()
-		total += placed
-		_check(placed >= scatter.count * 0.6,
-			"'%s' placed %d/%d props" % [scatter.name, placed, scatter.count])
+		# Streaming scatters own their props per tile; collect what exists now.
+		var placed := PackedVector3Array()
+		for child in scatter.get_children():
+			if child.has_meta(&"scattered"):
+				placed.append((child as Node3D).position)
+		scatter.placed_positions = placed
+		total += placed.size()
+		_check(scatter.density > 0.0, "'%s' is a streaming scatter (density %.1f)" % [scatter.name, scatter.density])
 		var all_ok := true
-		for p in scatter.placed_positions:
+		for p in placed:
 			if not _terrain.is_on_land(p.x, p.z):
 				all_ok = false
 			if _terrain.sample_slope_degrees(p.x, p.z) > scatter.max_slope_degrees + 0.01:
@@ -288,14 +313,16 @@ func _test_scatter(world: Node) -> void:
 			for zone in scatter.exclusion_zones:
 				if Vector2(p.x, p.z).distance_to(Vector2(zone.x, zone.y)) < zone.z:
 					all_ok = false
-		_check(all_ok, "'%s' respects land, slope and exclusion rules" % scatter.name)
-	_check(total > 80, "island is populated (%d props)" % total)
+			if scatter.road_clearance >= 0.0 and _terrain.road_distance(p.x, p.z) < _terrain.road_width * 0.5:
+				all_ok = false
+		_check(all_ok, "'%s' respects land, slope, road and exclusion rules" % scatter.name)
+	_check(total > 80, "area around the spawn is populated (%d props)" % total)
 
 	# Nothing scattered on the house pad.
 	var house_hits := 0
 	for scatter: PropScatter in scatters:
 		for p in scatter.placed_positions:
-			if Vector2(p.x, p.z).distance_to(Vector2(14.0, 12.0)) < 8.0:
+			if Vector2(p.x, p.z).distance_to(Vector2(60.0, 80.0)) < 8.0:
 				house_hits += 1
 	_check(house_hits == 0, "house pad is clear of props (%d)" % house_hits)
 
@@ -304,7 +331,7 @@ func _test_walk() -> void:
 	# Run from the house pad down to the beach (camera facing +Z) and make sure
 	# we never fall through the mesh on the way.
 	_camera_rig.set_yaw(PI)
-	var start := Vector3(14.0, 4.5, 24.0)
+	var start := Vector3(60.0, 5.0, 92.0)
 	_player.global_position = start
 	_player.motor.reset()
 	await _steps(20)
@@ -330,12 +357,12 @@ func _test_walk() -> void:
 func _test_house() -> void:
 	# Walk into the house front wall: it must block.
 	_camera_rig.set_yaw(0.0)
-	_player.global_position = Vector3(14.0, 4.0, 20.0)
+	_player.global_position = Vector3(60.0, 4.5, 88.0)
 	_player.motor.reset()
 	await _steps(20)
 	await _hold(&"move_forward", 120)
-	# Body is 6.5 deep centred at z=12 -> front face at z=15.25.
-	_check(_player.global_position.z > 15.4,
+	# Body is 6.5 deep centred at z=80 -> front face at z=83.25.
+	_check(_player.global_position.z > 83.4,
 		"house wall blocks the player (z %.2f)" % _player.global_position.z)
 	await _steps(10)
 
@@ -343,6 +370,7 @@ func _test_house() -> void:
 func _test_sea() -> void:
 	# Beyond the shore the ground drops away; the player must respawn.
 	var spawn := _player.spawn_transform.origin
+	_ensure_ground(Vector3(0.0, 2.0, _terrain.shore_radius + 4.0))
 	_player.global_position = Vector3(0.0, 2.0, _terrain.shore_radius + 4.0)
 	_player.motor.reset()
 	var respawned := false
@@ -381,6 +409,13 @@ func _clear_heading(from: Vector3, length: float) -> Vector3:
 		if not blocked:
 			return dir
 	return Vector3.ZERO
+
+
+## Streaming terrain: teleporting somewhere far needs the detailed tiles
+## there before physics runs. Builds them synchronously.
+func _ensure_ground(at: Vector3) -> void:
+	_terrain.set_focus(at)
+	_terrain._stream_step(false, true)
 
 
 func _steps(count: int) -> void:

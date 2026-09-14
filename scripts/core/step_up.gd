@@ -11,6 +11,9 @@ extends RefCounted
 
 const FORWARD_PROBE := 0.06
 const WALKABLE_NORMAL_Y := 0.7
+## Shortest horizontal probe: a body that just got stopped by a kerb moves
+## millimetres per frame and would never "see" it again.
+const MIN_PROBE := 0.12
 
 
 ## Returns true when the body was lifted onto a step.
@@ -19,6 +22,8 @@ static func try_step(body: CharacterBody3D, horizontal_motion: Vector3, max_heig
 		return false
 	if horizontal_motion.length_squared() < 0.000001:
 		return false
+	if horizontal_motion.length() < MIN_PROBE:
+		horizontal_motion = horizontal_motion.normalized() * MIN_PROBE
 	var transform := body.global_transform
 	var ahead := KinematicCollision3D.new()
 	# Nothing in the way: no step needed.

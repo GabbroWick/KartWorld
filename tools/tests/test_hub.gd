@@ -49,7 +49,7 @@ func _portals() -> Array:
 
 
 func _test_hub_setup() -> void:
-	_check(_hub_stars().size() == 3, "island has three persistent stars (%d)" % _hub_stars().size())
+	_check(_hub_stars().size() == 5, "island has five persistent stars (%d)" % _hub_stars().size())
 	_check(_portals().size() == 2, "island has two portals (%d)" % _portals().size())
 	var locked := _portals().filter(func(p: Portal) -> bool: return p.is_locked())
 	_check(locked.size() == 1, "exactly one portal is locked at the start")
@@ -74,7 +74,7 @@ func _test_persistent_star() -> void:
 	await _steps(5)
 	_manager.return_to_hub()
 	await _steps(5)
-	_check(_hub_stars().size() == 2, "collected hub star does not respawn (%d left)" % _hub_stars().size())
+	_check(_hub_stars().size() == 4, "collected hub star does not respawn (%d left)" % _hub_stars().size())
 	_check(_hud.stars_label.text == "1", "HUD still shows 1 star back in the hub (%s)" % _hud.stars_label.text)
 
 

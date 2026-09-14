@@ -41,6 +41,15 @@ func _ready() -> void:
 	Sfx.play_music(&"hub")
 
 
+func _process(_delta: float) -> void:
+	# Streaming terrain follows whoever the camera follows (player or kart).
+	var terrain := get_tree().get_first_node_in_group(IslandTerrain.GROUP) as IslandTerrain
+	if terrain and terrain.streaming:
+		var focus: Node3D = vehicle if (vehicle and player and player.driver.is_driving) else player
+		if focus:
+			terrain.set_focus(focus.global_position)
+
+
 func _build_world() -> void:
 	if world_scene == null:
 		push_error("Main: no world_scene assigned.")

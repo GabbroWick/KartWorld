@@ -31,7 +31,7 @@ verify before moving on, stop and report at the end of a phase.
 
 ## Commands
 
-Godot binary (this machine): `C:\Godot\Godot_v4.7.2\Godot_v4.7.2-stable_win64_console.exe`
+Godot binary (this machine): `C:\Users\gabri\Godot_v4.7.2\Godot_v4.7.2-stable_win64_console.exe`
 (`_console` prints to the terminal; the non-console exe is the same engine).
 Adjust the path below to wherever Godot is installed on your machine.
 
@@ -271,6 +271,55 @@ and the running diary live in `tools/README_3D.md` — read it before touching
   _processed/_final separate; never overwrite finals without backup.
 * Folders `tools/ai3d`, `tools/blender`, `assets/characters/_source|
   _generated|_processed` carry `.gdignore`; only `_final` is imported.
+
+## Phase 9 — first really playable version (started 2026-09-15)
+
+Human's brief: a genuinely playable, engaging first version, also on
+mobile. Bigger island with things to do and a kart circuit (ramps, jumps,
+paths); one long, well-made level with obstacles and routes both on foot
+and by kart; better graphics. Character pipeline is done (Phase 8).
+
+Plan, one verifiable step at a time (commit + suites + screenshot each):
+
+1. **Island v2 — DONE 2026-09-15**: human asked for a *huge* island
+   (~15 min per lap). Terrain is now analytic + **streamed in 64 m tiles**
+   around the player (`IslandTerrain.streaming`; near tiles 2 m cells +
+   trimesh collision within 160 m, far tiles 8 m cells to 720 m, freed
+   beyond; height sampling on WorkerThreadPool, mesh/collision assembly on
+   the main thread one tile per frame — building meshes on workers crashed
+   the engine during world swaps). Island: plateau 520 / shore 600 m, seven
+   mountains, a lake, 3 wavy road rings + 6 connectors = **10.3 km** of
+   smoothed dirt road (`road_points`/`extra_roads`, road spatial hash).
+   `PropScatter.density` streams props per tile from the terrain's
+   `near_chunk_built/freed` signals. Driving: 16.7 ms avg, no frame > 33 ms.
+   Tests teleporting far away call `_ensure_ground()` (builds the tiles).
+   Still to do here: ramps/jumps/bridges as track dressing, more stars.
+1c. **Life on the island** (human's request): many NPCs — some driving
+   karts around the road network (`NpcDriver`: follows the road samples,
+   avoids the player), some on foot wandering/talking in a village; more
+   buildings (Kenney Modular Buildings houses/towers as a village around the
+   spawn plus hamlets along the road).
+1b. **Kart v2 + visible driver** (human's request): new kart model through
+   the concept → Hunyuan shape → Paint pipeline (no rig needed; wheels as
+   separate spinning nodes found by name or added in Blender), and the
+   character stays visible seated in the kart (Mixamo "Sitting Idle" clip
+   or a fixed sit pose, body lean on steering) instead of hiding.
+2. **Level 3 "Vulcano"** (long): kart section (downhill track with jumps and
+   moving blocks) → on-foot climb (platforms, springs, spikes, moving
+   blocks, coins) → slime arena → finish portal. 3 stars, ~4-5 min.
+   Reuse `LevelController` objectives; add `MovingPlatform`, `Spring`,
+   `Hazard` (spikes) components under `scripts/gameplay/`.
+2. (moved up at the human's request) **Mobile/Web touch controls** — see 3.
+3. **Mobile** — touch controls (virtual stick + buttons, `TouchControls`
+   CanvasLayer shown when `DisplayServer.is_touchscreen_available()`),
+   Android export preset, performance pass (Compatibility renderer,
+   shadow distance, prop LOD by distance), test on the Web build first.
+4. **Graphics pass** — sky gradient + clouds, water with shader (waves,
+   foam line), grass patches, ambient particles, portal glow, camera
+   collision smoothing, HUD polish. Keep the lighting recipe (no ambient).
+
+Rules: nothing hand-placed that a scatter/path can do; every new mechanic
+is a component or scene; keep suites green; Italian strings in the CSV.
 
 ## Next step (Phase 8 — polish, continued)
 

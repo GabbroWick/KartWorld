@@ -20,7 +20,7 @@ endif
 export PATH := $(patsubst %/,%,$(dir $(SHELL))):$(PATH)
 endif
 
-GODOT ?= C:/Godot/Godot_v4.7.2/Godot_v4.7.2-stable_win64_console.exe
+GODOT ?= C:/Users/gabri/Godot_v4.7.2/Godot_v4.7.2-stable_win64_console.exe
 WEB_DIR := builds/web
 SUITES := test_runner test_kart_runner test_island_runner test_portal_runner \
           test_level_runner test_combat_runner test_progression_runner test_hub_runner
