@@ -150,9 +150,12 @@ tools/ai3d/.venv/Scripts/python tools/ai3d/generate_concept.py --name fox     --
 ```
 
 SDXL Turbo fp16 (6,6 GB) + IP-Adapter SDXL ViT-H (3,1 GB) in
-`tools/ai3d/models/hf`. 4 passi, guidance 0. Lo stile viene dal render del
-leopardo in T-pose (`--style`, peso `--ip-scale` 0.55). Il prompt fisso
-aggiunge T-pose, vista frontale, sfondo grigio, colori piatti. Scrive
+`tools/ai3d/models/hf`. 6 passi, guidance 0, **640 px** (a 1024 Turbo
+duplica teste e arti), `--ip-scale 0.25` (a 0.55 copia le macchie del
+leopardo). Il prompt fisso aggiunge T-pose, vista frontale, sfondo grigio;
+CLIP taglia a 77 token, tenere corta la descrizione. "arms spread wide
+open" nel prompt aiuta la posa. ~2 s a immagine dopo il warm-up, VRAM
+~8 GB. Scelte: volpe seed 34, panda seed 35 (fogli `_sheet_30-35.png`). Scrive
 `assets/characters/_source/<nome>/<nome>_concept_<seed>.png`: scegli la
 migliore e passala a `generate_shape.py`.
 

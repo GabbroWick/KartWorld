@@ -34,13 +34,13 @@ import torch  # noqa: E402
 from PIL import Image  # noqa: E402
 
 STYLE_DEFAULT = PROJECT / "assets" / "characters" / "_source" / "leopard_tpose" / "leopard_tpose_front.png"
-POSITIVE_SUFFIX = (", full body, standing in a T-pose with both arms stretched out horizontally, "
-                   "front view, facing the camera, symmetrical, feet on the ground, "
-                   "cute chibi mascot proportions with a big round head, simple stylized low-poly "
-                   "cartoon 3D render, flat colors, soft studio lighting, plain uniform gray background, "
-                   "no props, no text, kids video game character")
-NEGATIVE = ("realistic, photo, fur detail, text, watermark, multiple characters, side view, "
-            "arms down, sitting, cropped, blurry, background scenery, weapon, clothes")
+# CLIP taglia a 77 token: descrizione + suffisso devono restare corti.
+POSITIVE_SUFFIX = (", one single character, full body T-pose, arms straight out to the sides, "
+                   "front view, symmetrical, chibi big round head, low-poly cartoon 3D render, "
+                   "flat colors, plain gray background")
+NEGATIVE = ("two heads, extra limbs, extra arms, extra tails, multiple characters, duplicate, "
+            "spots, leopard pattern, text, watermark, side view, arms down, cropped, blurry, "
+            "realistic, photo, scenery, clothes")
 
 
 def main() -> int:
@@ -50,9 +50,9 @@ def main() -> int:
     ap.add_argument("--style", default=str(STYLE_DEFAULT), help="immagine di riferimento per lo stile (IP-Adapter); '' = nessuna")
     ap.add_argument("--variants", type=int, default=4)
     ap.add_argument("--seed", type=int, default=1)
-    ap.add_argument("--steps", type=int, default=4)
+    ap.add_argument("--steps", type=int, default=6)
     ap.add_argument("--guidance", type=float, default=0.0)
-    ap.add_argument("--ip-scale", type=float, default=0.55)
+    ap.add_argument("--ip-scale", type=float, default=0.35)
     ap.add_argument("--size", type=int, default=1024)
     ap.add_argument("--out-root", default=str(PROJECT / "assets" / "characters" / "_source"))
     args = ap.parse_args()
