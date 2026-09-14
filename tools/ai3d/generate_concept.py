@@ -8,7 +8,9 @@ Uso:
       [--variants 4] [--seed 1] [--steps 4] [--ip-scale 0.55] [--guidance 0.0]
 
 Scrive in assets/characters/_source/<nome>/:
-  <nome>_concept_<seed>.png   una per variante (1024x1024, sfondo grigio)
+  <nome>_concept_<seed>.png   una per variante (sfondo grigio)
+La posa e' imposta da ControlNet OpenPose (`--pose`, scheletro T-pose chibi
+da make_pose.py); `--pose-scale` 0.6-1.0.
   README.md                   prompt e parametri usati
 Poi si sceglie la migliore e la si passa a generate_shape.py.
 
@@ -54,6 +56,9 @@ def main() -> int:
     ap.add_argument("--guidance", type=float, default=0.0)
     ap.add_argument("--ip-scale", type=float, default=0.35)
     ap.add_argument("--size", type=int, default=1024)
+    ap.add_argument("--pose", default=str(ROOT / "poses" / "tpose_chibi.png"),
+                    help="scheletro OpenPose per ControlNet (T-pose); '' = senza ControlNet")
+    ap.add_argument("--pose-scale", type=float, default=0.8)
     ap.add_argument("--out-root", default=str(PROJECT / "assets" / "characters" / "_source"))
     args = ap.parse_args()
 
@@ -65,8 +70,18 @@ def main() -> int:
 
     from diffusers import AutoPipelineForText2Image
     t0 = time.perf_counter()
-    pipe = AutoPipelineForText2Image.from_pretrained(
-        "stabilityai/sdxl-turbo", torch_dtype=dtype, variant="fp16", use_safetensors=True)
+    pose = None
+    if args.pose:
+        from diffusers import ControlNetModel, StableDiffusionXLControlNetPipeline
+        controlnet = ControlNetModel.from_pretrained(
+            "xinsir/controlnet-openpose-sdxl-1.0", torch_dtype=dtype, use_safetensors=True)
+        pipe = StableDiffusionXLControlNetPipeline.from_pretrained(
+            "stabilityai/sdxl-turbo", controlnet=controlnet, torch_dtype=dtype, variant="fp16",
+            use_safetensors=True)
+        pose = Image.open(args.pose).convert("RGB").resize((args.size, args.size), Image.NEAREST)
+    else:
+        pipe = AutoPipelineForText2Image.from_pretrained(
+            "stabilityai/sdxl-turbo", torch_dtype=dtype, variant="fp16", use_safetensors=True)
     style = None
     if args.style:
         from transformers import CLIPVisionModelWithProjection
@@ -94,6 +109,9 @@ def main() -> int:
                       guidance_scale=args.guidance, width=args.size, height=args.size, generator=gen)
         if style is not None:
             kwargs["ip_adapter_image"] = style
+        if pose is not None:
+            kwargs["image"] = pose
+            kwargs["controlnet_conditioning_scale"] = args.pose_scale
         image = pipe(**kwargs).images[0]
         path = out / ("%s_concept_%d.png" % (args.name, seed))
         image.save(path)

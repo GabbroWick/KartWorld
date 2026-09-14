@@ -153,8 +153,11 @@ SDXL Turbo fp16 (6,6 GB) + IP-Adapter SDXL ViT-H (3,1 GB) in
 `tools/ai3d/models/hf`. 6 passi, guidance 0, **640 px** (a 1024 Turbo
 duplica teste e arti), `--ip-scale 0.25` (a 0.55 copia le macchie del
 leopardo). Il prompt fisso aggiunge T-pose, vista frontale, sfondo grigio;
-CLIP taglia a 77 token, tenere corta la descrizione. "arms spread wide
-open" nel prompt aiuta la posa. ~2 s a immagine dopo il warm-up, VRAM
+CLIP taglia a 77 token, tenere corta la descrizione. La **T-pose e'
+imposta da ControlNet OpenPose** (`xinsir/controlnet-openpose-sdxl-1.0`,
+2,4 GB) con lo scheletro chibi di `make_pose.py` (`tools/ai3d/poses/
+tpose_chibi.png`, `--pose-scale 0.8`): senza, Turbo ignora la posa nel
+prompt. ~20 s a immagine con ControlNet. ~2 s a immagine dopo il warm-up, VRAM
 ~8 GB. Scelte: volpe seed 34, panda seed 35 (fogli `_sheet_30-35.png`). Scrive
 `assets/characters/_source/<nome>/<nome>_concept_<seed>.png`: scegli la
 migliore e passala a `generate_shape.py`.
