@@ -166,6 +166,9 @@ suites exit non-zero on failure.
   random camera heading on every launch and in screenshots.
 * The screenshot tool runs windowed, so it *does* capture the mouse; keep the
   physical cursor still or rely on the settle window.
+* `Label3D.billboard` does nothing on the Compatibility renderer: the NPC
+  speech bubble read mirrored from behind. NpcBehaviour keeps the bubble
+  `top_level` and turns it toward the camera every frame instead.
 
 ## Where things are
 
@@ -216,8 +219,9 @@ suites exit non-zero on failure.
   `level_controller`, `collectible`, `star`, `checkpoint`, `enemy`,
   `interactable`.
 * Physics layers: 1 world, 2 player, 3 enemy, 4 interactable, 5 vehicle.
-  Player mask = world|vehicle (17); vehicle mask = world (1); portal area on
-  layer 4 with mask player|vehicle (18).
+  Player mask = world|vehicle (17); vehicle mask = world|vehicle (17, karts
+  are solid to each other and `VehicleMotor.shove()` knocks the one that
+  was hit); portal area on layer 4 with mask player|vehicle (18).
 
 ## Local AI 3D pipeline (in progress, 2026-09-11)
 
@@ -382,6 +386,10 @@ Plan, one verifiable step at a time (commit + suites + screenshot each):
    (`game_hud.tscn` TopLeft/TopLeftRows), visible at the wheel, blinks
    while boosting. Flames: `VisualRoot/TurboFlames` CPUParticles3D in
    vehicle.tscn, `emitting` = turbo active. Kart suite 69 checks.
+   Human then asked for a longer boost: `turbo_duration` 4 s, refill 5 s.
+   Karts are solid: `vehicle.tscn` mask 17, `VehicleMotor._bump_other_karts`
+   shoves whoever was hit (fading planar velocity), NpcDriver then steers
+   back to its road on its own (`bumped` signal → hit sound).
    Also fixed: NPCs walked backwards — spawners rotate the body, and the
    face-direction code applied a world yaw as a local one; now
    `target_yaw - global_rotation.y` (controller and NpcBehaviour).

@@ -34,11 +34,16 @@ var _terrain: IslandTerrain
 
 
 func _ready() -> void:
+	motor.bumped.connect(_on_bumped)
 	if definition == null:
 		push_error("VehicleController '%s' has no VehicleDefinition assigned." % name)
 		set_physics_process(false)
 		return
 	_apply_definition()
+
+
+func _on_bumped(_other: Node3D) -> void:
+	Sfx.play(&"hit", -8.0)
 
 
 func _physics_process(delta: float) -> void:

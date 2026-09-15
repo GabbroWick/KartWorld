@@ -136,13 +136,20 @@ func interact(_player: CharacterController) -> void:
 func say(line: String) -> void:
 	if _bubble == null:
 		_bubble = Label3D.new()
-		_bubble.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		# Label3D's billboard flag does nothing on the Compatibility renderer
+		# (the text stayed glued to the NPC and read mirrored from behind):
+		# the bubble is top-level and turned toward the camera every frame.
+		_bubble.billboard = BaseMaterial3D.BILLBOARD_DISABLED
+		_bubble.top_level = true
 		_bubble.font_size = 48
 		_bubble.outline_size = 12
-		_bubble.pixel_size = 0.006
-		_bubble.position = Vector3(0.0, _character.definition.capsule_height + 0.8, 0.0)
+		_bubble.pixel_size = 0.0038
+		_bubble.autowrap_mode = TextServer.AUTOWRAP_WORD
+		_bubble.width = 700.0
 		_bubble.no_depth_test = true
+		_bubble.double_sided = false
 		_character.add_child(_bubble)
+		_place_bubble()
 	_bubble.text = line
 	_bubble.visible = true
 	_bubble_left = bubble_time
@@ -155,6 +162,22 @@ func _tick_bubble(delta: float) -> void:
 	_bubble_left -= delta
 	if _bubble_left <= 0.0 and _bubble:
 		_bubble.visible = false
+	elif _bubble:
+		_place_bubble()
+
+
+## Above the head, facing the current camera (readable from any side).
+func _place_bubble() -> void:
+	_bubble.global_position = _character.global_position + Vector3(0.0, _character.definition.capsule_height + 0.8, 0.0)
+	var camera := get_viewport().get_camera_3d()
+	if camera == null:
+		return
+	var to_camera := camera.global_position - _bubble.global_position
+	to_camera.y = 0.0
+	if to_camera.length_squared() < 0.001:
+		return
+	# Label3D reads correctly from +Z: point its +Z at the camera.
+	_bubble.global_basis = Basis.looking_at(-to_camera.normalized(), Vector3.UP)
 
 
 func _face(point: Vector3, delta: float) -> void:

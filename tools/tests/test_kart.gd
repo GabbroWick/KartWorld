@@ -47,6 +47,7 @@ func _run() -> void:
 	await _test_brake_and_reverse()
 	await _test_camera_align()
 	await _test_turbo()
+	await _test_bump()
 	await _test_jump()
 	await _test_wall()
 	await _test_kerb()
@@ -205,9 +206,9 @@ func _test_turbo() -> void:
 	var boosted := _kart.get_speed()
 	_check(boosted > normal_top * 1.25,
 		"turbo raises speed clearly (%.1f -> %.1f m/s)" % [normal_top, boosted])
-	_check(_kart.turbo.charge < 0.85, "gauge drains while boosting (%.2f)" % _kart.turbo.charge)
+	_check(_kart.turbo.charge < 0.95, "gauge drains while boosting (%.2f)" % _kart.turbo.charge)
 	if hud:
-		_check(hud.turbo_gauge.charge < 0.85 and hud.turbo_gauge.boosting, "HUD gauge follows the turbo")
+		_check(hud.turbo_gauge.charge < 0.95 and hud.turbo_gauge.boosting, "HUD gauge follows the turbo")
 	Input.action_release(InputActions.TURBO)
 	Input.action_release(InputActions.ACCELERATE)
 	Input.action_press(InputActions.BRAKE)
@@ -229,6 +230,28 @@ func _test_turbo() -> void:
 	await _steps(int(_kart.definition.turbo_cooldown * 60.0) + 10)
 	_check(_kart.turbo.charge > 0.95, "gauge refills to full (%.2f)" % _kart.turbo.charge)
 	await _steps(30)
+
+
+func _test_bump() -> void:
+	# A parked kart in the way is solid and gets shoved along, not crossed.
+	var other := (load("res://scenes/vehicles/vehicle.tscn") as PackedScene).instantiate() as VehicleController
+	other.definition = _kart.definition
+	_kart.get_parent().add_child(other)
+	_kart.place(Transform3D(Basis.IDENTITY, Vector3(24.0, 0.3, 20.0)))
+	other.place(Transform3D(Basis.IDENTITY, Vector3(24.0, 0.3, 8.0)))
+	await _steps(10)
+	var other_start := other.global_position
+	Sfx.clear_log()
+	Input.action_press(InputActions.ACCELERATE)
+	await _steps(75)
+	Input.action_release(InputActions.ACCELERATE)
+	await _steps(30)
+	var pushed := other.global_position.distance_to(other_start)
+	_check(pushed > 1.0, "ramming a parked kart shoves it along (%.1f m)" % pushed)
+	_check(_kart.global_position.distance_to(other.global_position) > 1.0, "karts do not overlap after the hit (%.1f m apart)" % _kart.global_position.distance_to(other.global_position))
+	_check(Sfx.played.has(&"hit"), "a kart bump makes a sound")
+	other.queue_free()
+	await _steps(5)
 
 
 func _test_jump() -> void:
