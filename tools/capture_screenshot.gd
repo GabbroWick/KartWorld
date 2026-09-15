@@ -1,7 +1,7 @@
 extends Node
 ## Loads the main scene, lets it settle, saves a PNG and quits.
 ##
-## Run:  godot --path <project> res://tools/capture_screenshot.tscn -- <out.png> [frames] [drive] [turbo] [talk] [level=<.tres>] [at=x,y,z] [yaw=deg] [zoom=m]
+## Run:  godot --path <project> res://tools/capture_screenshot.tscn -- <out.png> [frames] [drive] [turbo] [talk] [picker] [level=<.tres>] [at=x,y,z] [yaw=deg] [zoom=m]
 ##
 ## With the optional "drive" word the player summons the kart, gets in and
 ## holds the accelerator for the given frames, so the shot shows driving.
@@ -65,6 +65,11 @@ func _run() -> void:
 			(cam as ThirdPersonCamera).set_target(player, true)
 		await _wait(5)
 
+	if user_args.has("picker"):
+		GameManager.set_paused(true)
+		await _wait(2)
+		(scene.get_node("PauseMenu") as PauseMenu).character_button.pressed.emit()
+		await _wait(2)
 	if user_args.has("talk"):
 		await _press(InputActions.INTERACT)
 		await _wait(5)

@@ -434,7 +434,17 @@ them, one commit + suite + screenshot each:
    (`CharacterController.set_definition`, kart exited, hub reloaded).
    NPCs never duplicate the hero: `CharacterRoster.for_npc()` re-casts
    them as the leopard (controller `_ready`, NpcSpawner kart passengers).
-   Hub suite 34 checks.
+   Human asked for pictures: the pause menu's "Personaggio" opens a
+   picker panel with one card per character (portrait + name); portraits
+   are rendered by `tools/render_portraits.tscn` into
+   `assets/ui/portraits/<id>.png` (re-run after a model changes).
+   Hub suite 36 checks.
+3. **Doors instead of portals — DONE**: `portal.tscn` is a door (frame,
+   two leaves with collision, vortex inside, back wall); it swings open
+   within `open_radius` unless locked and the trigger sits in the
+   doorway, so a door has a front (`global_basis.z`). Portal sites in
+   the hub face the spawn; level goal/return doors face the approach.
+   `capture_screenshot` args: `talk`, `picker`.
 3. **Doors instead of portals**: a level entrance is a door that opens
    when the player comes close and is entered by walking through.
 4. **The house is enterable**: kitchen, bed (sleep = night skip / heal),
