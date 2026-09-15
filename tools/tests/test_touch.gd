@@ -36,6 +36,16 @@ func _run() -> void:
 	_touch.force_visible = true
 	_touch._ready()
 	_check(_touch.root.visible and TouchControls.active, "force_visible shows the touch layer")
+	var mouse_bound := false
+	for ev in InputMap.action_get_events(InputActions.ATTACK):
+		if ev is InputEventMouseButton:
+			mouse_bound = true
+	_check(not mouse_bound, "mouse bindings are stripped while touch controls are active")
+	var lowest := 0.0
+	for b in _touch.buttons.get_children():
+		if b is Control and b.name != "Pause":
+			lowest = maxf(lowest, (b as Control).get_global_rect().end.y)
+	_check(lowest <= _viewport_size().y - 80.0, "buttons keep a margin from the bottom edge (%.0f of %.0f)" % [lowest, _viewport_size().y])
 	await _steps(2)
 	var hud: CanvasLayer = _scene.get_node("GameHUD")
 	_check(hud.controls_label.text == "", "keyboard hints hidden while touch controls are active")
@@ -88,9 +98,16 @@ func _test_stick_walk() -> void:
 	var start := _player.global_position
 	_touch_press(0, origin)
 	await _steps(1)
+	var yaw_before := _camera.rotation.y
 	_touch_drag(0, origin, origin + Vector2(0, -60))   # push forward, 2/3 stick
 	await _steps(1)
 	_check(_touch.stick_knob.visible, "stick appears under the finger")
+	_check(not Input.is_action_pressed(InputActions.ATTACK), "a touch on the left half does not attack")
+	_touch_drag(0, origin + Vector2(0, -60), origin + Vector2(80, -60))
+	await _steps(3)
+	_check(absf(wrapf(_camera.rotation.y - yaw_before, -PI, PI)) < 0.01, "dragging on the left half does not turn the camera")
+	_touch_drag(0, origin + Vector2(80, -60), origin + Vector2(0, -60))
+	await _steps(1)
 	_check(Input.get_action_strength(InputActions.MOVE_FORWARD) > 0.5, "stick feeds move_forward (%.2f)" % Input.get_action_strength(InputActions.MOVE_FORWARD))
 	await _steps(45)
 	var moved := start.distance_to(_player.global_position)

@@ -64,6 +64,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and GameManager.is_mouse_captured():
 		if _now() < _mouse_blocked_until or event.relative.length() > MAX_MOUSE_DELTA:
 			return
+		# Touch screens: only the right-half drag turns the camera
+		# (TouchControls.add_look_delta), never a touch-emulated mouse.
+		if TouchControls.active:
+			return
 		_mouse_delta += event.relative
 
 

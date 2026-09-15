@@ -8,8 +8,8 @@ extends CanvasLayer
 ## for the stick), so every controller keeps polling `InputActions` as
 ## before. Camera drag goes straight to `ThirdPersonCamera.add_look_delta`.
 ##
-## Layout (landscape): left half = virtual stick (walk / steer+throttle),
-## right half = drag to look; buttons bottom-right: Jump, Attack|Turbo,
+## Layout (landscape): left half = virtual stick only (walk / steer+throttle),
+## right half = drag to look (the only way to turn the camera on touch); buttons bottom-right: Jump, Attack|Turbo,
 ## Use, Kart, Dance; top-right: Pause.
 
 @export var force_visible := false
@@ -43,6 +43,13 @@ func _ready() -> void:
 	set_process_input(touch)
 	if not touch:
 		return
+	# Browsers and phones emulate a mouse from touches: a tap would attack
+	# (mouse left = attack) and any drag would turn the camera. Strip the
+	# mouse bindings; the camera ignores emulated motion while we are active.
+	for action in InputMap.get_actions():
+		for ev in InputMap.action_get_events(action):
+			if ev is InputEventMouseButton:
+				InputMap.action_erase_event(action, ev)
 	stick_base.visible = false
 	stick_knob.visible = false
 	for button in buttons.get_children():
@@ -89,6 +96,11 @@ func _set_label(button_name: String, text: String) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	# Emulated mouse events must not reach the game (camera, actions).
+	if (event is InputEventMouseMotion or event is InputEventMouseButton) 			and event.device == InputEvent.DEVICE_ID_EMULATION:
+		if event is InputEventMouseMotion:
+			get_viewport().set_input_as_handled()
+		return
 	if event is InputEventScreenTouch:
 		var touch := event as InputEventScreenTouch
 		if touch.pressed:

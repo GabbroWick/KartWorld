@@ -330,7 +330,23 @@ Plan, one verifiable step at a time (commit + suites + screenshot each):
    `touch-action:none`. Suite `test_touch_runner.tscn` (18 checks) sends
    window-space ScreenTouch/Drag (headless viewport is stretched ×0.05).
    Verified in a headless Edge with a phone UA and touch events.
+   Human's phone feedback (2026-09-15, fixed): buttons cut off at the
+   bottom → raised 40 px (suite checks an 80 px margin); a left-half touch
+   turned the camera and attacked → browsers emulate a mouse from touch:
+   TouchControls strips mouse bindings from the InputMap while active,
+   swallows emulated (`device == DEVICE_ID_EMULATION`) mouse events, and
+   the camera ignores mouse motion when `TouchControls.active`. Only the
+   right-half drag turns the camera.
    Not done: Android native export, perf pass on a real phone.
+1d. **Road dressing — DONE 2026-09-15**: `RoadDressing` (`RoadJumps` in
+   the hub) places a `Ramp` hump every ~450 m on level, straight stretches
+   of the three road rings, away from flat zones, with a persistent 3-star
+   arc after each (20 ramps / 60 stars). `IslandTerrain.road_pose(road,
+   distance)` is the road-space API. Karts fly off ramps and crests:
+   `VehicleMotor._crest_launch` keeps the uphill vertical momentum ×
+   `VehicleDefinition.launch_factor` (1.6) when the slope ends, snap off
+   while rising. A parked kart on a streamed-out tile now waits for its
+   ground (it used to fall out and drag the player back to spawn).
 4. **Graphics pass** — sky gradient + clouds, water with shader (waves,
    foam line), grass patches, ambient particles, portal glow, camera
    collision smoothing, HUD polish. Keep the lighting recipe (no ambient).
