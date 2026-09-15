@@ -27,6 +27,7 @@ var vehicle: VehicleController
 
 
 func _ready() -> void:
+	add_to_group(&"main")
 	_build_world()
 	_spawn_player()
 	_spawn_vehicle()
@@ -64,8 +65,8 @@ func _spawn_player() -> void:
 		push_error("Main: no character_scene assigned.")
 		return
 	player = character_scene.instantiate() as CharacterController
-	if character_definition:
-		player.definition = character_definition
+	# The saved choice wins over the scene's default (character select).
+	player.definition = CharacterRoster.player_definition()
 	player.view_node = camera_rig
 	add_child(player)
 
@@ -76,6 +77,18 @@ func _spawn_player() -> void:
 	camera_rig.set_target(player)
 	if hud.has_method(&"bind_player"):
 		hud.call(&"bind_player", player)
+
+
+## Character select: the hero becomes `id`; NPCs are re-cast on the next
+## world build, so the hub reloads right away (nobody is a duplicate).
+func set_character(id: StringName) -> void:
+	ProgressionManager.set_character(id)
+	if player.driver.is_driving:
+		player.driver.exit_vehicle()
+	player.set_definition(CharacterRoster.player_definition())
+	ProgressionManager.apply_to(player.abilities)
+	if level_manager.is_in_hub():
+		level_manager.return_to_hub()
 
 
 ## Progression grants abilities on top of the definitions' starters, now and

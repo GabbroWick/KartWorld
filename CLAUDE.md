@@ -428,9 +428,13 @@ Requests from the human (the 8-year-old designer), in the order we build
 them, one commit + suite + screenshot each:
 
 1. **Horn** on the kart (action `horn`, key H / touch button) — DONE.
-2. **Character select**: play as leopard, fox or panda; the other two
-   become NPCs (the leopard is an NPC when not chosen). Pause menu →
-   "Personaggio"; saved in the progression file.
+2. **Character select — DONE**: `CharacterRoster` (leopard/fox/panda),
+   `ProgressionManager.character` saved; pause menu "Personaggio: X"
+   cycles and `Main.set_character()` swaps the hero
+   (`CharacterController.set_definition`, kart exited, hub reloaded).
+   NPCs never duplicate the hero: `CharacterRoster.for_npc()` re-casts
+   them as the leopard (controller `_ready`, NpcSpawner kart passengers).
+   Hub suite 34 checks.
 3. **Doors instead of portals**: a level entrance is a door that opens
    when the player comes close and is entered by walking through.
 4. **The house is enterable**: kitchen, bed (sleep = night skip / heal),

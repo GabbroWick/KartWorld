@@ -76,6 +76,11 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "Riprendi"
 
+[node name="Character" type="Button" parent="Root/Panel/Margin/Rows"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Personaggio: Leopardo"
+
 [node name="Hub" type="Button" parent="Root/Panel/Margin/Rows"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22

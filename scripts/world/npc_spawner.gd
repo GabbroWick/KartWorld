@@ -108,7 +108,7 @@ func _spawn_karts(rng: RandomNumberGenerator, terrain: IslandTerrain) -> void:
 			add_child(kart)
 			# A passenger: the NPC's visual on the seat (no character body).
 			if not definitions.is_empty():
-				var definition := definitions[index % definitions.size()]
+				var definition := CharacterRoster.for_npc(definitions[index % definitions.size()])
 				if definition.visual_scene:
 					var visual := definition.visual_scene.instantiate() as Node3D
 					visual.scale = Vector3.ONE * definition.visual_scale

@@ -40,6 +40,8 @@ func _ready() -> void:
 		set_physics_process(false)
 		return
 
+	if not is_player_controlled:
+		definition = CharacterRoster.for_npc(definition)
 	_apply_definition()
 	spawn_transform = global_transform
 	health.died.connect(_on_died)
@@ -86,11 +88,21 @@ func _apply_definition() -> void:
 		collision.position.y = definition.capsule_height * 0.5
 
 	_spawn_visual()
-	combat.attacked.connect(_on_attacked)
-	hurt.connect(_on_hurt_visual)
+	if not combat.attacked.is_connected(_on_attacked):
+		combat.attacked.connect(_on_attacked)
+	if not hurt.is_connected(_on_hurt_visual):
+		hurt.connect(_on_hurt_visual)
 	if is_player_controlled and not motor.jumped.is_connected(_on_jumped_sound):
 		motor.jumped.connect(_on_jumped_sound)
 		motor.landed.connect(_on_landed_sound)
+
+
+## Swap to another character at runtime (character select): new stats,
+## capsule and model; position and spawn point are kept.
+func set_definition(new_definition: CharacterDefinition) -> void:
+	definition = new_definition
+	_apply_definition()
+	health.restore_full()
 
 
 ## The instanced visual (placeholder, Meshy or rigged), or null.

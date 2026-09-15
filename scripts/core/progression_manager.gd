@@ -20,6 +20,8 @@ var save_path := "user://save.json"
 var best_stars: Dictionary = {}
 ## Ability ids granted by progression (on top of the definitions' starters).
 var unlocked_abilities: Array[StringName] = []
+## The hero's character id (see CharacterRoster). Saved.
+var character: StringName = &"leopard"
 ## Persistent collectibles picked up, id -> {"kind": String, "amount": int}.
 var collected: Dictionary = {}
 
@@ -96,10 +98,19 @@ func apply_to(abilities: AbilityComponent) -> void:
 		abilities.unlock(id)
 
 
+func set_character(id: StringName) -> void:
+	if id == character:
+		return
+	character = id
+	save_to_disk()
+	changed.emit()
+
+
 func reset() -> void:
 	best_stars.clear()
 	unlocked_abilities.clear()
 	collected.clear()
+	character = &"leopard"
 	if FileAccess.file_exists(save_path):
 		DirAccess.remove_absolute(save_path)
 	changed.emit()
@@ -111,6 +122,7 @@ func save_to_disk() -> void:
 		"best_stars": best_stars,
 		"unlocked_abilities": Array(unlocked_abilities).map(func(id: StringName) -> String: return String(id)),
 		"collected": collected,
+		"character": String(character),
 	}
 	var file := FileAccess.open(save_path, FileAccess.WRITE)
 	if file == null:
@@ -140,6 +152,7 @@ func load_from_disk() -> void:
 		best_stars[String(key)] = int(data["best_stars"][key])
 	for id in data.get("unlocked_abilities", []):
 		unlocked_abilities.append(StringName(String(id)))
+	character = StringName(String(data.get("character", "leopard")))
 	for id in data.get("collected", {}):
 		var entry: Dictionary = data["collected"][id]
 		collected[String(id)] = {"kind": String(entry.get("kind", "item")), "amount": int(entry.get("amount", 1))}

@@ -44,6 +44,7 @@ CARD_STARS,Stars,Stelle
 CARD_REWARD,New ability: %s,Nuova abilità: %s
 CARD_RETURNING,Back to the island...,Si torna sull'isola...
 PAUSE_TITLE,Pause,Pausa
+PAUSE_CHARACTER,Character: %s,Personaggio: %s
 PAUSE_RESUME,Resume,Riprendi
 PAUSE_HUB,Back to the island,Torna sull'isola
 PAUSE_QUIT,Quit game,Esci dal gioco

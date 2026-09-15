@@ -32,6 +32,7 @@ func _run() -> void:
 
 	_test_hub_setup()
 	await _test_persistent_star()
+	await _test_character_select()
 	await _test_locked_portal()
 	await _test_unlock_and_enter()
 	await _test_cliff_steps()
@@ -66,6 +67,29 @@ func _test_translations() -> void:
 		elif tr(row[0]) != row[2]:
 			broken.append(row[0] + " (tr mismatch)")
 	_check(rows > 40 and broken.is_empty(), "every translation row has key/en/it and resolves in Italian (%d rows, broken: %s)" % [rows, ", ".join(broken)])
+
+
+func _test_character_select() -> void:
+	# The pause menu cycles the hero; NPCs never duplicate the hero.
+	var menu: PauseMenu = _scene.get_node("PauseMenu")
+	var main: Node = _scene
+	_check(_player.definition.id == &"leopard", "default hero is the leopard")
+	var fox_before := _manager.world.get_node("NPCs/Fox") as CharacterController
+	_check(fox_before and fox_before.definition.id == &"fox", "the hand-placed fox NPC is a fox while the hero is the leopard")
+	main.set_character(&"fox")
+	await _steps(15)
+	_player = GameManager.get_player(0) as CharacterController
+	_check(_player.definition.id == &"fox", "hero becomes the fox (%s)" % _player.definition.id)
+	_check(_player.get_visual() != null and _player.get_visual().scene_file_path.contains("fox"), "hero wears the fox model")
+	_check(ProgressionManager.character == &"fox" and FileAccess.get_file_as_string(SCRATCH_SAVE).contains("\"fox\""), "choice is saved")
+	var fox_after := _manager.world.get_node("NPCs/Fox") as CharacterController
+	_check(fox_after and fox_after.definition.id == &"leopard", "the fox NPC is re-cast as the leopard (%s)" % (fox_after.definition.id if fox_after else "-"))
+	_check(menu.character_button.text == tr(&"PAUSE_CHARACTER") % tr(&"CHAR_FOX"), "pause menu shows the current hero (%s)" % menu.character_button.text)
+	_check(CharacterRoster.next(&"panda") == &"leopard", "roster cycles back to the leopard")
+	main.set_character(&"leopard")
+	await _steps(15)
+	_player = GameManager.get_player(0) as CharacterController
+	_check(_player.definition.id == &"leopard", "back to the leopard")
 
 
 func _test_hub_setup() -> void:
