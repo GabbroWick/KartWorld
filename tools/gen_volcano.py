@@ -62,6 +62,13 @@ sky = SubResource("sky")
 ambient_light_source = 1
 reflected_light_source = 1
 tonemap_mode = 0
+fog_enabled = true
+fog_mode = 0
+fog_light_color = Color(0.85, 0.5, 0.35, 1)
+fog_sun_scatter = 0.0
+fog_density = 0.0025
+fog_aerial_perspective = 0.4
+fog_sky_affect = 0.0
 
 [node name="Volcano" type="Node3D"]
 

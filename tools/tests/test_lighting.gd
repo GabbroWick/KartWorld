@@ -42,8 +42,12 @@ func _run() -> void:
 	_check(sun.shadow_enabled, "sun casts shadows")
 	_check(sun.shadow_opacity < 1.0, "shadows are semi-transparent (that is the fill light)")
 
-	# Look straight down at a flat, sunlit, unoccluded patch of the house pad.
-	var probe := Vector3(14.0, terrain.sample_height(14.0, 21.0), 21.0)
+	# Look straight down at a flat, sunlit, unoccluded patch of the house pad
+	# (the flat zone around the house; the streamed tile must exist there,
+	# a far tile's coarse mesh would bury the probe quads).
+	terrain.set_focus(Vector3(60.0, 4.0, 70.0))
+	terrain.ensure_built_at(60.0, 70.0)
+	var probe := Vector3(60.0, terrain.sample_height(60.0, 70.0), 70.0)
 	var camera := Camera3D.new()
 	camera.position = probe + Vector3.UP * 8.0
 	camera.rotation_degrees = Vector3(-90, 0, 0)

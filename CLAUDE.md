@@ -361,9 +361,14 @@ Plan, one verifiable step at a time (commit + suites + screenshot each):
    `VehicleDefinition.launch_factor` (1.6) when the slope ends, snap off
    while rising. A parked kart on a streamed-out tile now waits for its
    ground (it used to fall out and drag the player back to spawn).
-4. **Graphics pass** — sky gradient + clouds, water with shader (waves,
-   foam line), grass patches, ambient particles, portal glow, camera
-   collision smoothing, HUD polish. Keep the lighting recipe (no ambient).
+4. **Graphics pass — first step DONE 2026-09-15**: `shaders/water.gdshader`
+   (vertex swell, deep/shallow blues, surf band at `shore_radius` around
+   `island_centre`, self-lit fill), procedural cloud cover on the hub sky
+   (NoiseTexture2D as `sky_cover`), exponential horizon fog on hub
+   (0.0009) and Vulcano (0.0025, reddish) so the streaming edge fades.
+   Lighting suite probe moved onto the house pad's built tile (the huge
+   island's far tiles buried it). Still open: grass patches, ambient
+   particles, portal glow, camera collision smoothing, HUD polish.
 
 Rules: nothing hand-placed that a scatter/path can do; every new mechanic
 is a component or scene; keep suites green; Italian strings in the CSV.
