@@ -17,6 +17,7 @@ extends CanvasLayer
 @onready var full_map_view: MapView = $Root/FullMap/Rows/View
 @onready var full_map_title: Label = $Root/FullMap/Rows/Title
 @onready var full_map_close: Button = $Root/FullMap/Rows/Close
+@onready var shop_menu: ShopMenu = $Root/ShopMenu
 @onready var star_row: HBoxContainer = $Root/TopRight/StarRow
 @onready var stars_label: Label = $Root/TopRight/StarRow/Stars
 @onready var objective_label: Label = $Root/TopCenter/Objective
@@ -111,6 +112,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed(InputActions.PAUSE) and full_map.visible:
 		set_full_map(false)
 		get_viewport().set_input_as_handled()
+
+
+func open_shop() -> void:
+	shop_menu.open()
 
 
 ## The whole island on screen (M). Only where a map exists (the hub).

@@ -43,6 +43,7 @@ func _run() -> void:
 
 	_test_setup()
 	await _test_attack_kills()
+	await _test_shop_weapons()
 	await _test_chase()
 	await _test_contact_damage()
 	await _test_death_by_damage()
@@ -185,6 +186,62 @@ func _test_kart_is_safe() -> void:
 	_check(_player.health.current_health == before, "damage is ignored while driving")
 	await _press(InputActions.INTERACT)
 	await _steps(5)
+
+
+func _test_shop_weapons() -> void:
+	# Stars are the currency; buying equips; the club doubles the damage,
+	# the boomerang flies, hits and comes back.
+	var enemy: Enemy = get_tree().get_nodes_in_group(Enemy.GROUP)[0]
+	var original_definition := enemy.definition
+	enemy.definition = enemy.definition.duplicate()
+	enemy.definition.chase_radius = 0.0
+	enemy.health.restore_full()
+	_check(ProgressionManager.get_available_stars() == 0, "no stars, no shopping")
+	_check(not ProgressionManager.buy_weapon(&"club"), "cannot buy the club without stars")
+	for i in 12:
+		ProgressionManager.record_collected(StringName("test_star_%d" % i), &"star", 1)
+	_check(ProgressionManager.get_available_stars() == 12, "wallet counts the stars (%d)" % ProgressionManager.get_available_stars())
+	_check(ProgressionManager.buy_weapon(&"club") and ProgressionManager.equipped_weapon == &"club", "buying the club equips it")
+	_check(ProgressionManager.get_available_stars() == 9, "the club cost 3 stars (%d left)" % ProgressionManager.get_available_stars())
+	_check(not ProgressionManager.buy_weapon(&"club"), "a weapon is bought once")
+	_check(_player.combat.weapon_damage == 2.0, "club doubles the melee damage (%.1f)" % _player.combat.weapon_damage)
+	var hud: GameHUD = _hud
+	hud.open_shop()
+	await get_tree().process_frame
+	_check(hud.shop_menu.visible and get_tree().paused, "the shop menu opens and freezes the world")
+	_check(hud.shop_menu.balance_label.text == tr(&"SHOP_BALANCE") % 9, "shop shows the balance (%s)" % hud.shop_menu.balance_label.text)
+	_check((hud.shop_menu._buttons[&"club"] as Button).text == tr(&"SHOP_IN_USE"), "club row says in use")
+	_check(not (hud.shop_menu._buttons[&"boomerang"] as Button).disabled, "boomerang is affordable")
+	(hud.shop_menu._buttons[&"boomerang"] as Button).pressed.emit()
+	_check(ProgressionManager.owns_weapon(&"boomerang") and ProgressionManager.equipped_weapon == &"boomerang" and ProgressionManager.get_available_stars() == 3,
+		"pressing Buy on the boomerang buys and equips it (%d stars left)" % ProgressionManager.get_available_stars())
+	_check((hud.shop_menu._buttons[&"sword"] as Button).disabled, "the sword is too expensive now")
+	hud.shop_menu.close()
+	await get_tree().process_frame
+	_check(not get_tree().paused, "closing the shop thaws the world")
+	# Throw: the boomerang crosses 6 m, hits the slime once and returns.
+	enemy.global_position = Vector3(0.0, 0.2, -10.0)
+	enemy.velocity = Vector3.ZERO
+	enemy.health.restore_full()
+	_player.global_position = Vector3(0.0, 0.2, -4.0)
+	_player.motor.reset()
+	_player.visual_root.rotation.y = 0.0
+	_camera_rig.set_yaw(0.0)
+	await _steps(10)
+	var hits := [0]
+	_player.combat.hit.connect(func(_t: Node) -> void: hits[0] += 1)
+	await _press(InputActions.ATTACK)
+	await _steps(2)
+	var thrown := get_tree().root.find_children("*", "Boomerang", true, false)
+	_check(thrown.size() == 1, "attacking with the boomerang throws it")
+	await _steps(120)
+	_check(hits[0] >= 1 and enemy.health.current_health <= 1.0, "the boomerang hits the slime (%d hits, %.0f hp)" % [hits[0], enemy.health.current_health])
+	_check(get_tree().root.find_children("*", "Boomerang", true, false).is_empty(), "the boomerang came back and vanished")
+	# Back to paws (and a chasing slime) for the remaining tests.
+	enemy.definition = original_definition
+	enemy.health.restore_full()
+	ProgressionManager.equip_weapon(&"")
+	_check(_player.combat.weapon_damage == 1.0 and not _player.combat.weapon_ranged, "paws again")
 
 
 func _steps(count: int) -> void:

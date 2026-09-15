@@ -24,6 +24,12 @@ var unlocked_abilities: Array[StringName] = []
 var character: StringName = &"leopard"
 ## Food and things carried: item id -> count (fruit, meat, meal). Saved.
 var inventory: Dictionary = {}
+## Stars spent in the shop (the total stars never go down; the wallet is
+## total - spent). Saved.
+var stars_spent := 0
+## Weapons bought (Weapons catalogue ids) and the one in the hand. Saved.
+var owned_weapons: Array[StringName] = []
+var equipped_weapon: StringName = &""
 ## Persistent collectibles picked up, id -> {"kind": String, "amount": int}.
 var collected: Dictionary = {}
 
@@ -100,6 +106,39 @@ func apply_to(abilities: AbilityComponent) -> void:
 		abilities.unlock(id)
 
 
+## Stars still in the wallet: everything earned minus what the shop took.
+func get_available_stars() -> int:
+	return maxi(get_total_stars() - stars_spent, 0)
+
+
+func owns_weapon(id: StringName) -> bool:
+	return id in owned_weapons
+
+
+## Buys and equips a weapon if the wallet allows; false otherwise.
+func buy_weapon(id: StringName) -> bool:
+	if not Weapons.exists(id) or owns_weapon(id):
+		return false
+	var cost := Weapons.price(id)
+	if get_available_stars() < cost:
+		return false
+	stars_spent += cost
+	owned_weapons.append(id)
+	equipped_weapon = id
+	save_to_disk()
+	changed.emit()
+	return true
+
+
+## Puts an owned weapon (or paws, `&""`) in the hand.
+func equip_weapon(id: StringName) -> void:
+	if id != &"" and not owns_weapon(id):
+		return
+	equipped_weapon = id
+	save_to_disk()
+	changed.emit()
+
+
 func add_item(item: StringName, amount: int = 1) -> void:
 	inventory[String(item)] = count_item(item) + amount
 	save_to_disk()
@@ -136,6 +175,9 @@ func reset() -> void:
 	collected.clear()
 	character = &"leopard"
 	inventory.clear()
+	stars_spent = 0
+	owned_weapons.clear()
+	equipped_weapon = &""
 	if FileAccess.file_exists(save_path):
 		DirAccess.remove_absolute(save_path)
 	changed.emit()
@@ -149,6 +191,9 @@ func save_to_disk() -> void:
 		"collected": collected,
 		"character": String(character),
 		"inventory": inventory,
+		"stars_spent": stars_spent,
+		"owned_weapons": Array(owned_weapons).map(func(id: StringName) -> String: return String(id)),
+		"equipped_weapon": String(equipped_weapon),
 	}
 	var file := FileAccess.open(save_path, FileAccess.WRITE)
 	if file == null:
@@ -163,6 +208,9 @@ func load_from_disk() -> void:
 	unlocked_abilities.clear()
 	collected.clear()
 	inventory.clear()
+	stars_spent = 0
+	owned_weapons.clear()
+	equipped_weapon = &""
 	if not FileAccess.file_exists(save_path):
 		return
 	var file := FileAccess.open(save_path, FileAccess.READ)
@@ -183,6 +231,11 @@ func load_from_disk() -> void:
 	inventory.clear()
 	for key in data.get("inventory", {}):
 		inventory[String(key)] = int(data["inventory"][key])
+	stars_spent = int(data.get("stars_spent", 0))
+	owned_weapons.clear()
+	for id in data.get("owned_weapons", []):
+		owned_weapons.append(StringName(String(id)))
+	equipped_weapon = StringName(String(data.get("equipped_weapon", "")))
 	for id in data.get("collected", {}):
 		var entry: Dictionary = data["collected"][id]
 		collected[String(id)] = {"kind": String(entry.get("kind", "item")), "amount": int(entry.get("amount", 1))}

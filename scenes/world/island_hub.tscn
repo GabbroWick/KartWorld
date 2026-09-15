@@ -1,4 +1,4 @@
-[gd_scene load_steps=65 format=3]
+[gd_scene load_steps=66 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/props/island_terrain.tscn" id="1_terrain"]
 [ext_resource type="PackedScene" path="res://scenes/world/props/house.tscn" id="2_house"]
@@ -63,6 +63,7 @@
 [ext_resource type="Script" path="res://scripts/world/animal_spawner.gd" id="42_animals"]
 [ext_resource type="PackedScene" path="res://scenes/enemies/animal.tscn" id="43_animal"]
 [ext_resource type="Resource" path="res://resources/enemies/chicken.tres" id="44_chicken"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/shop.tscn" id="45_shop"]
 
 [sub_resource type="FastNoiseLite" id="cloud_noise"]
 noise_type = 3
@@ -232,6 +233,10 @@ walk_radius = 12.0
 village_path = NodePath("../Porto")
 karts_per_road = 0
 spawn_seed = 12
+
+[node name="Shop" parent="." instance=ExtResource("45_shop")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72, 4, 92)
+rotation_degrees = Vector3(0, -40, 0)
 
 [node name="RoadJumps" type="Node3D" parent="."]
 script = ExtResource("30_dressing")

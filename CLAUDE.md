@@ -491,7 +491,15 @@ them, one commit + suite + screenshot each:
    `MapView` draws either the minimap (top-right, 160 m radius, north
    up, player triangle) or the full map (`M` / touch "Mappa", labels,
    `GameHUD.set_full_map`). Levels have no map. Hub suite 43 checks.
-7. **Shop**: buy weapons with stars — next.
+7. **Shop — DONE**: `Shop` stall at (72, 4, 92) (interactable, map
+   marker `map_shop`) opens `ShopMenu` (HUD panel, world frozen):
+   `Weapons` catalogue club 3★ (damage x2), boomerang 6★ (thrown
+   `Boomerang` Area3D, out and back, one hit per throw), sword 10★
+   (damage x3, reach x1.5). Wallet = `ProgressionManager.get_total_stars()
+   - stars_spent`; `buy_weapon` / `equip_weapon` / `owned_weapons` saved.
+   `CharacterCombat._apply_weapon` scales damage/reach or throws;
+   `RiggedCharacterVisual.set_weapon_visual` puts a primitive weapon in
+   the RightHand bone. Combat suite 55 checks.
 8. **Flying kart with wings** (human, 2026-09-15) — after the shop.
 
 ## Next step (Phase 8 — polish, continued)

@@ -138,6 +138,8 @@ func markers() -> Array[Dictionary]:
 		var key := StringName("PLACE_" + String(village.name).to_upper())
 		var label := tr(key) if TranslationServer.get_translation_object(TranslationServer.get_locale()) and tr(key) != String(key) else String(village.name)
 		out.append({"position": (village as Node3D).global_position, "kind": "village", "label": label})
+	for shop in tree.get_nodes_in_group(&"map_shop"):
+		out.append({"position": (shop as Node3D).global_position, "kind": "shop", "label": tr(&"SHOP_SIGN")})
 	for star in tree.get_nodes_in_group(&"star"):
 		var s := star as Collectible
 		if s and s.persistent_id.begins_with("hub_star_"):

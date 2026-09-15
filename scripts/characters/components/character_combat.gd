@@ -25,6 +25,9 @@ var _hit_this_swing: Array[Node] = []
 ## the world origin).
 @export var hitbox_path: NodePath = ^"../VisualRoot/Hitbox"
 
+var weapon_damage := 1.0
+var weapon_ranged := false
+
 @onready var hitbox: Area3D = get_node(hitbox_path)
 @onready var swipe: MeshInstance3D = hitbox.get_node("Swipe")
 
@@ -70,13 +73,28 @@ func _build_swipe_mesh() -> ArrayMesh:
 func setup(owner_character: CharacterController, character_definition: CharacterDefinition) -> void:
 	character = owner_character
 	definition = character_definition
+	if character.is_player_controlled and not ProgressionManager.changed.is_connected(_apply_weapon):
+		ProgressionManager.changed.connect(_apply_weapon)
+	_apply_weapon()
+
+
+## The shop weapon in the hand (players only): scales damage and reach,
+## or turns the swing into a boomerang throw.
+func _apply_weapon() -> void:
+	var stats := Weapons.stats(ProgressionManager.equipped_weapon if character.is_player_controlled else &"")
+	weapon_damage = definition.melee_damage * float(stats["damage"])
+	weapon_ranged = bool(stats["ranged"])
+	var reach := definition.melee_range * float(stats["reach"])
 	var shape := hitbox.get_node("Shape") as CollisionShape3D
 	var box := shape.shape as BoxShape3D
 	if box:
 		box = box.duplicate()
-		box.size = Vector3(definition.melee_width, 1.2, definition.melee_range)
+		box.size = Vector3(definition.melee_width, 1.2, reach)
 		shape.shape = box
-	hitbox.position = Vector3(0.0, definition.capsule_height * 0.55, -definition.melee_range * 0.5 - 0.2)
+	hitbox.position = Vector3(0.0, definition.capsule_height * 0.55, -reach * 0.5 - 0.2)
+	var visual := character.get_visual()
+	if visual and visual.has_method(&"set_weapon_visual"):
+		visual.call(&"set_weapon_visual", ProgressionManager.equipped_weapon if character.is_player_controlled else &"")
 
 
 ## Called by the character every physics tick.
@@ -98,6 +116,15 @@ func tick(delta: float, attack_requested: bool) -> void:
 func try_attack() -> bool:
 	if is_attacking or cooldown_left > 0.0 or definition == null:
 		return false
+	if weapon_ranged:
+		cooldown_left = definition.melee_cooldown * 1.5
+		var boomerang := Boomerang.new()
+		boomerang.damage = weapon_damage
+		character.get_parent().add_child(boomerang)
+		boomerang.launch(character, -character.visual_root.global_basis.z)
+		boomerang.hit.connect(func(body: Node) -> void: hit.emit(body))
+		attacked.emit()
+		return true
 	is_attacking = true
 	_active_left = definition.melee_active_time
 	cooldown_left = definition.melee_cooldown
@@ -130,5 +157,5 @@ func _try_hit(body: Node) -> void:
 	if not body.has_method(&"take_damage"):
 		return
 	_hit_this_swing.append(body)
-	body.call(&"take_damage", definition.melee_damage, character)
+	body.call(&"take_damage", weapon_damage, character)
 	hit.emit(body)

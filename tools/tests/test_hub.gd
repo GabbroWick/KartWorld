@@ -116,10 +116,11 @@ func _test_map() -> void:
 	_check(kinds.get("door", 0) == 3 and kinds.get("home", 0) == 1 and kinds.get("village", 0) == 3,
 		"map markers: 3 doors, the house, 3 villages (%s)" % str(kinds))
 	_press_action(InputActions.MAP)
-	await _steps(2)
+	await _steps(4)
 	_check(_hud.full_map.visible, "M opens the full map")
+	await _steps(4)
 	_press_action(InputActions.MAP)
-	await _steps(2)
+	await _steps(4)
 	_check(not _hud.full_map.visible, "M again closes it")
 
 

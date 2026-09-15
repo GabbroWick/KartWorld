@@ -122,6 +122,9 @@ func _draw_marker(at: Vector2, marker: Dictionary, scale: float) -> void:
 		"kart":
 			draw_circle(at, s * 0.9, Color(0.25, 0.55, 0.95))
 			draw_arc(at, s * 0.9, 0.0, TAU, 12, Color.WHITE, 1.5)
+		"shop":
+			draw_rect(Rect2(at - Vector2(s, s * 0.8), Vector2(s * 2.0, s * 1.6)), Color(0.95, 0.3, 0.3))
+			draw_rect(Rect2(at - Vector2(s, s * 0.8), Vector2(s * 2.0, s * 1.6)), Color.WHITE, false, 1.5)
 		"star":
 			var pts := PackedVector2Array()
 			for i in 10:

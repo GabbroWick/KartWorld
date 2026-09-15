@@ -38,6 +38,7 @@ var player: AnimationPlayer
 var _current := &""
 var _was_airborne := false
 var _seated_pose: SeatedPose
+var _weapon_mount: BoneAttachment3D
 var _action := &""
 
 
@@ -81,6 +82,35 @@ func _ready() -> void:
 
 
 ## One-shot clips (attack, hurt) take over until they finish.
+## Shop weapon in the right hand (BoneAttachment3D on the Mixamo hand).
+func set_weapon_visual(id: StringName) -> void:
+	if _weapon_mount == null:
+		var skeletons := _instance.find_children("*", "Skeleton3D", true, false) if _instance else []
+		if skeletons.is_empty():
+			return
+		var skeleton := skeletons[0] as Skeleton3D
+		var bone := -1
+		for i in skeleton.get_bone_count():
+			if skeleton.get_bone_name(i).ends_with("RightHand"):
+				bone = i
+		if bone < 0:
+			return
+		_weapon_mount = BoneAttachment3D.new()
+		_weapon_mount.bone_idx = bone
+		skeleton.add_child(_weapon_mount)
+	for child in _weapon_mount.get_children():
+		child.queue_free()
+	var mesh := Weapons.make_mesh(id)
+	if mesh == null:
+		return
+	var holder := MeshInstance3D.new()
+	holder.mesh = mesh
+	# Along the hand's bone (+X for Mixamo hands), a little forward.
+	holder.rotation_degrees = Vector3(0.0, 0.0, -90.0)
+	holder.position = Vector3(0.12, 0.0, 0.02)
+	_weapon_mount.add_child(holder)
+
+
 func set_seated(seated: bool) -> void:
 	super.set_seated(seated)
 	if _seated_pose:

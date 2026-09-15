@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/game_hud.gd" id="1_hud"]
 [ext_resource type="Script" path="res://scripts/ui/heart_bar.gd" id="2_hearts"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/ui/turbo_gauge.gd" id="9_turbo"]
 [ext_resource type="Script" path="res://scripts/ui/world_map.gd" id="20_worldmap"]
 [ext_resource type="Script" path="res://scripts/ui/map_view.gd" id="21_mapview"]
+[ext_resource type="Script" path="res://scripts/ui/shop_menu.gd" id="22_shop"]
 
 [sub_resource type="StyleBoxFlat" id="card_style"]
 bg_color = Color(0.12, 0.14, 0.24, 0.92)
@@ -121,6 +122,7 @@ offset_right = -60.0
 offset_bottom = -40.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("card_style")
 
 [node name="Rows" type="VBoxContainer" parent="Root/FullMap"]
 layout_mode = 2
@@ -144,6 +146,55 @@ show_labels = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Chiudi (M)"
+
+[node name="ShopMenu" type="PanelContainer" parent="Root"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -220.0
+offset_right = 300.0
+offset_bottom = 220.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("card_style")
+script = ExtResource("22_shop")
+
+[node name="Margin" type="MarginContainer" parent="Root/ShopMenu"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 16
+
+[node name="Rows" type="VBoxContainer" parent="Root/ShopMenu/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Root/ShopMenu/Margin/Rows"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+text = "Negozio"
+
+[node name="Balance" type="Label" parent="Root/ShopMenu/Margin/Rows"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+text = "Stelle: 0"
+
+[node name="Items" type="VBoxContainer" parent="Root/ShopMenu/Margin/Rows"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="Close" type="Button" parent="Root/ShopMenu/Margin/Rows"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Chiudi"
 
 [node name="TopCenter" type="MarginContainer" parent="Root"]
 anchors_preset = 5

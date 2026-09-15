@@ -93,3 +93,19 @@ TOUCH_MAP,Map,Mappa
 PLACE_VILLAGE,Village,Villaggio
 PLACE_HAMLET,Hamlet,Borgo
 PLACE_PORTO,Porto,Porto
+SHOP_SIGN,Shop,Negozio
+PROMPT_SHOP,E  shop,E  negozio
+SHOP_TITLE,Star Shop,Negozio delle Stelle
+SHOP_BALANCE,Your stars: %d,Le tue stelle: %d
+SHOP_BUY,Buy,Compra
+SHOP_USE,Use,Usa
+SHOP_IN_USE,In use,In uso
+SHOP_CLOSE,Close,Chiudi
+WEAPON_PAWS,Paws,Zampe
+WEAPON_PAWS_DESC,Your own claws.,I tuoi artigli.
+WEAPON_CLUB,Wooden club,Mazza di legno
+WEAPON_CLUB_DESC,Hits twice as hard.,Colpisce forte il doppio.
+WEAPON_BOOMERANG,Boomerang,Boomerang
+WEAPON_BOOMERANG_DESC,Throw it and it comes back!,Lancialo e torna indietro!
+WEAPON_SWORD,Golden sword,Spada d'oro
+WEAPON_SWORD_DESC,Three times the damage and a longer reach.,Danno triplo e portata più lunga.
