@@ -112,7 +112,9 @@ func _quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3, tint
 
 
 func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, tint: Color) -> void:
+	# Godot front faces: Plane(a, b, c).normal must point outward, which is
+	# (c - a) x (b - a) -- the reverse of the textbook cross product.
 	st.set_color(tint)
 	st.add_vertex(a)
-	st.add_vertex(b)
 	st.add_vertex(c)
+	st.add_vertex(b)

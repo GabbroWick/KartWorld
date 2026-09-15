@@ -1,4 +1,4 @@
-[gd_scene load_steps=56 format=3]
+[gd_scene load_steps=57 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/props/island_terrain.tscn" id="1_terrain"]
 [ext_resource type="PackedScene" path="res://scenes/world/props/house.tscn" id="2_house"]
@@ -56,6 +56,7 @@
 [ext_resource type="Resource" path="res://resources/vehicles/basic_kart.tres" id="34_kart"]
 [ext_resource type="Script" path="res://scripts/world/road_dressing.gd" id="30_dressing"]
 [ext_resource type="PackedScene" path="res://scenes/world/props/ramp.tscn" id="31_ramp"]
+[ext_resource type="Resource" path="res://resources/levels/level_03_volcano.tres" id="32_level3"]
 
 [sub_resource type="ProceduralSkyMaterial" id="sky_material"]
 sky_top_color = Color(0.2, 0.48, 0.86, 1)
@@ -102,7 +103,7 @@ beach_height = 0.5
 plateau_height = 4.0
 sea_floor_height = -60.0
 drop_width = 30.0
-flat_zones = Array[Vector4]([Vector4(60, 80, 12, 4), Vector4(20, 130, 16, 4), Vector4(-80, 110, 14, 4)])
+flat_zones = Array[Vector4]([Vector4(60, 80, 12, 4), Vector4(20, 130, 16, 4), Vector4(-80, 110, 14, 4), Vector4(130, 150, 14, 4)])
 mountain_center = Vector2(-150, -120)
 mountain_radius = 170.0
 mountain_height = 70.0
@@ -161,6 +162,18 @@ color = Color(0.6, 0.58, 0.62, 1)
 [node name="Portal" parent="PortalSite2" instance=ExtResource("10_portal")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
 level = ExtResource("14_level2")
+
+[node name="PortalSite3" type="Node3D" parent="."]
+transform = Transform3D(0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, 0.7071, 130, 4, 150)
+
+[node name="Plinth" parent="PortalSite3" instance=ExtResource("5_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+size = Vector3(6, 0.2, 6)
+color = Color(0.6, 0.58, 0.62, 1)
+
+[node name="Portal" parent="PortalSite3" instance=ExtResource("10_portal")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+level = ExtResource("32_level3")
 
 [node name="RoadJumps" type="Node3D" parent="."]
 script = ExtResource("30_dressing")

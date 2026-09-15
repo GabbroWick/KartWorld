@@ -108,6 +108,17 @@ func _try_jump() -> void:
 		_do_jump(definition.air_jump_scale, air_jumps_used)
 
 
+## Thrown upward by something in the world (a Spring): like a jump that
+## the player did not ask for. Air jumps are refreshed so the bounce feels
+## generous.
+func launch(vertical_speed: float) -> void:
+	body.velocity.y = vertical_speed
+	_jump_buffer = 0.0
+	_coyote_timer = 0.0
+	air_jumps_used = 0
+	jumped.emit(0)
+
+
 func _do_jump(scale: float, index: int) -> void:
 	body.velocity.y = get_jump_velocity(scale)
 	_jump_buffer = 0.0

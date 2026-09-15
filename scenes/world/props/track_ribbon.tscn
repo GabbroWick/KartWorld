@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/track_ribbon.gd" id="1_ribbon"]
+[ext_resource type="PackedScene" path="res://scenes/world/props/ramp.tscn" id="2_ramp"]
+
+[node name="TrackRibbon" type="StaticBody3D"]
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("1_ribbon")
+ramp_scene = ExtResource("2_ramp")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]

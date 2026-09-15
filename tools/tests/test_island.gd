@@ -156,8 +156,11 @@ func _test_road_jumps() -> void:
 	var passed := (kart.global_position - ramp.global_position).dot(forward)
 	_check(passed > 5.0, "kart drives over the ramp (%.1f m past it)" % passed)
 	_check(airborne >= 8 and top > 1.4, "kart jumps off the ramp (%d frames in the air, %.1f m high)" % [airborne, top])
+	await _hold(InputActions.BRAKE, 60)
+	await _steps(20)
 	await _hold(InputActions.INTERACT, 3)
 	await _steps(20)
+	_check(not _player.driver.is_driving, "out of the kart after the jump")
 
 
 func _test_npcs_alive() -> void:
@@ -431,11 +434,15 @@ func _test_sea() -> void:
 	_player.global_position = Vector3(0.0, 2.0, _terrain.shore_radius + 4.0)
 	_player.motor.reset()
 	var respawned := false
+	# Walk out to sea (+Z): the shore slope is gentle at first.
+	_camera_rig.set_yaw(PI)
+	Input.action_press(InputActions.MOVE_FORWARD)
 	for i in 600:
 		await _steps(1)
 		if _player.global_position.distance_to(spawn) < 2.0:
 			respawned = true
 			break
+	Input.action_release(InputActions.MOVE_FORWARD)
 	_check(respawned, "walking into the sea respawns the player")
 
 

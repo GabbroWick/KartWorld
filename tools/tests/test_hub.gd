@@ -51,7 +51,7 @@ func _portals() -> Array:
 
 func _test_hub_setup() -> void:
 	_check(_hub_stars().size() == 5, "island has five persistent stars (%d)" % _hub_stars().size())
-	_check(_portals().size() == 2, "island has two portals (%d)" % _portals().size())
+	_check(_portals().size() == 3, "island has three portals (%d)" % _portals().size())
 	var locked := _portals().filter(func(p: Portal) -> bool: return p.is_locked())
 	_check(locked.size() == 1, "exactly one portal is locked at the start")
 	if locked.size() == 1:

@@ -89,6 +89,13 @@ func _crest_launch() -> bool:
 	return launched
 
 
+## Thrown upward by a Spring; snapping is released so the kart really flies.
+func launch(vertical_speed: float) -> void:
+	body.velocity.y = vertical_speed
+	body.floor_snap_length = 0.0
+	jumped.emit()
+
+
 func get_gravity_strength() -> float:
 	return _base_gravity * definition.gravity_scale
 

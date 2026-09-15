@@ -29,6 +29,9 @@ OBJ_REACH_CLEARING,Reach the far clearing,Raggiungi la radura
 OBJ_COLLECT_STARS,Collect stars,Raccogli le stelle
 OBJ_DEFEAT_SLIMES,Defeat the slimes,Sconfiggi gli slime
 OBJ_CLIMB_CLIFF,Climb to the top of the cliff,Arriva in cima alla rupe
+LEVEL_VOLCANO_NAME,Volcano,Vulcano
+LEVEL_VOLCANO_DESC,Race up the volcano by kart then climb to the crater on foot.,Sali sul vulcano in kart e poi arrampicati fino al cratere a piedi.
+OBJ_REACH_CRATER,Reach the crater portal,Raggiungi il portale del cratere
 NPC_FOX_1,Hi! The portal is over by the beach.,Ciao! Il portale è laggiù vicino alla spiaggia.
 NPC_FOX_2,Press K to call your kart. It goes anywhere!,Premi K per chiamare il kart. Va dappertutto!
 NPC_FOX_3,I saw a star up on the mountain...,Ho visto una stella su in montagna...
