@@ -111,9 +111,9 @@ shader_parameter/island_centre = Vector2(0, 0)
 
 [sub_resource type="PlaneMesh" id="water_mesh"]
 material = SubResource("water_material")
-size = Vector2(1800, 1800)
-subdivide_width = 90
-subdivide_depth = 90
+size = Vector2(5200, 5200)
+subdivide_width = 120
+subdivide_depth = 120
 
 [node name="IslandHub" type="Node3D"]
 
@@ -136,6 +136,8 @@ plateau_height = 4.0
 sea_floor_height = -60.0
 drop_width = 30.0
 flat_zones = Array[Vector4]([Vector4(60, 80, 12, 4), Vector4(20, 130, 16, 4), Vector4(-80, 110, 14, 4), Vector4(130, 150, 14, 4)])
+extra_islands = Array[Vector4]([Vector4(1500, -350, 200, 260)])
+water_level = 0.3
 mountain_center = Vector2(-150, -120)
 mountain_radius = 170.0
 mountain_height = 70.0
@@ -210,6 +212,27 @@ color = Color(0.6, 0.58, 0.62, 1)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
 level = ExtResource("32_level3")
 
+[node name="Porto" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1500, 4, -350)
+script = ExtResource("30_village")
+models = Array[PackedScene]([ExtResource("32_h1"), ExtResource("32_h2"), ExtResource("32_h3")])
+plots = 5
+radius = 15.0
+village_seed = 11
+terrain_path = NodePath("../IslandTerrain")
+
+[node name="PortoFolk" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1500, 4, -350)
+script = ExtResource("31_spawner")
+character_scene = ExtResource("7_character")
+definitions = Array[CharacterDefinition]([ExtResource("8_fox"), ExtResource("9_panda")])
+dialogue_pool = PackedStringArray("NPC_P_1", "NPC_P_2", "NPC_P_3")
+walkers = 4
+walk_radius = 12.0
+village_path = NodePath("../Porto")
+karts_per_road = 0
+spawn_seed = 12
+
 [node name="RoadJumps" type="Node3D" parent="."]
 script = ExtResource("30_dressing")
 ramp_scene = ExtResource("31_ramp")
@@ -237,6 +260,10 @@ persistent_id = &"hub_star_beach"
 [node name="StarRoadEast" parent="HubStars" instance=ExtResource("13_star")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 570, 3.0, 0)
 persistent_id = &"hub_star_road_east"
+
+[node name="StarPorto" parent="HubStars" instance=ExtResource("13_star")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1500, 5.5, -350)
+persistent_id = &"hub_star_porto"
 
 [node name="StarRoadWest" parent="HubStars" instance=ExtResource("13_star")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -215, 4.5, 0)
@@ -360,7 +387,7 @@ is_player_controlled = false
 [node name="Behaviour" type="Node" parent="NPCs/Fox"]
 script = ExtResource("12_npc")
 wander_radius = 4.0
-dialogue_lines = PackedStringArray("NPC_FOX_1", "NPC_FOX_2", "NPC_FOX_3")
+dialogue_lines = PackedStringArray("NPC_FOX_1", "NPC_FOX_2", "NPC_V_10", "NPC_FOX_3")
 
 [node name="Panda" parent="NPCs" instance=ExtResource("7_character")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 120)
@@ -430,7 +457,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 4, 60)
 script = ExtResource("31_spawner")
 character_scene = ExtResource("7_character")
 definitions = Array[CharacterDefinition]([ExtResource("8_fox"), ExtResource("9_panda")])
-dialogue_pool = PackedStringArray("NPC_V_1", "NPC_V_2", "NPC_V_3", "NPC_V_4", "NPC_V_5", "NPC_V_6", "NPC_V_7", "NPC_V_8", "NPC_V_9")
+dialogue_pool = PackedStringArray("NPC_V_1", "NPC_V_2", "NPC_V_3", "NPC_V_4", "NPC_V_5", "NPC_V_6", "NPC_V_7", "NPC_V_8", "NPC_V_9", "NPC_V_10")
 walkers = 7
 walk_radius = 18.0
 village_path = NodePath("../Village")

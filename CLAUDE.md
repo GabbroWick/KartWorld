@@ -461,8 +461,20 @@ them, one commit + suite + screenshot each:
    Inventory lives in `ProgressionManager.inventory` (saved; `add_item`
    / `take_item` / `count_item`), shown under the hearts. Island suite
    139 checks.
-5. **More islands**: the kart turns into a submarine on the water
-   (cockpit closes, propellers out) to reach them.
+5. **More islands + submarine — DONE**: `IslandTerrain.extra_islands`
+   (x, z, plateau r, shore r; same profile, max of the islands, the sea
+   between drops to `sea_floor_height`), `water_level`, `is_water()`.
+   Hub: island "Porto" at (1500, -350) r 200/260 with a Village (5),
+   walkers, a persistent star; water plane 5200 m; the fox and villagers
+   hint at it (`NPC_V_10`). Kart at sea: `VehicleController._check_water`
+   flips `set_submarine()` when the ground is > 1.2 m under the surface
+   (`VehicleMotor` floats at `water_level - 0.45`, no gravity/snap, 80%
+   speed; visual bobs); `AiVehicleVisual.set_submarine` closes a glass
+   canopy over the seat, slides two propellers out of the back and blows
+   bubbles; no getting out at sea (DriverComponent + HUD prompt). Island
+   suite 164 checks (submarine round trip from the beach).
+   The `picker` screenshot arg only opens the panel: an earlier version
+   cycled the hero and changed the human's real save (restored).
 
 ## Next step (Phase 8 — polish, continued)
 

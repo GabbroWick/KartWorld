@@ -41,6 +41,12 @@ const MIN_LAUNCH_SPEED := 6.0
 var _uphill_tangent := 0.0
 var _shove := Vector3.ZERO
 
+## Submarine: floating at `surface_y`, no gravity, no floor.
+var is_submarine := false
+var surface_y := 0.0
+const SUB_SINK := 0.45        # hull below the surface (m)
+const SUB_SPEED_FACTOR := 0.8
+
 const SHOVE_DECAY := 12.0   # m/s^2 fade of a knock
 const SHOVE_MAX := 14.0
 
@@ -49,14 +55,20 @@ func drive(delta: float, throttle: float, steer: float, jump_requested: bool,
 		speed_multiplier: float = 1.0, acceleration_multiplier: float = 1.0) -> void:
 	var was_on_floor := body.is_on_floor()
 
-	_apply_throttle(delta, throttle, speed_multiplier, acceleration_multiplier)
-	_apply_steering(delta, steer, was_on_floor)
-	_apply_vertical(delta, was_on_floor, jump_requested)
+	_apply_throttle(delta, throttle, speed_multiplier * (SUB_SPEED_FACTOR if is_submarine else 1.0), acceleration_multiplier)
+	_apply_steering(delta, steer, was_on_floor or is_submarine)
+	if is_submarine:
+		# Bob up to the surface and stay there; waves are cosmetic.
+		var target := surface_y - SUB_SINK
+		body.velocity.y = (target - body.global_position.y) * 4.0
+		body.floor_snap_length = 0.0
+	else:
+		_apply_vertical(delta, was_on_floor, jump_requested)
 
 	var forward := -body.global_basis.z
 	body.velocity.x = forward.x * speed + _shove.x
 	body.velocity.z = forward.z * speed + _shove.z
-	if body.velocity.y <= 0.0:
+	if body.velocity.y <= 0.0 and not is_submarine:
 		StepUp.try_step(body, Vector3(body.velocity.x, 0.0, body.velocity.z) * delta,
 			definition.max_step_height)
 	body.move_and_slide()
@@ -97,6 +109,15 @@ func _bump_other_karts(forward: Vector3) -> void:
 		other.motor.shove(along * strength)
 		_shove -= along * strength * 0.25
 		bumped.emit(other)
+
+
+## Switch between wheels and propellers. `surface` is the water level.
+func set_submarine(on: bool, surface: float = 0.0) -> void:
+	is_submarine = on
+	surface_y = surface
+	_uphill_tangent = 0.0
+	if not on:
+		body.floor_snap_length = 0.8
 
 
 func reset() -> void:

@@ -58,6 +58,7 @@ func _run() -> void:
 	await _test_kart_climbs_mountain()
 	await _test_road_jumps()
 	await _test_npcs_alive()
+	await _test_submarine()
 	await _test_sea()
 	_finish()
 
@@ -524,6 +525,67 @@ func _test_home_life() -> void:
 	_check(_player.health.current_health == _player.health.max_health, "sleeping refills the hearts")
 	_check(not cycle.is_night() and cycle.time_of_day < 0.4, "sleeping brings the morning (%.2f)" % cycle.time_of_day)
 	ProgressionManager.inventory.clear()
+
+
+func _test_submarine() -> void:
+	# A second island far out at sea, reached by kart: in deep water the
+	# kart becomes a submarine and floats; on the beach it is a kart again.
+	_check(_terrain.extra_islands.size() >= 1, "terrain has an extra island")
+	var far := Vector2(1500.0, -350.0)
+	_check(_terrain.sample_height(far.x, far.y) > 3.0 and _terrain.is_on_land(far.x, far.y), "second island has land at Porto (h %.1f)" % _terrain.sample_height(far.x, far.y))
+	_check(_terrain.is_water(1000.0, -200.0) and _terrain.sample_height(1000.0, -200.0) < -20.0, "the sea between the islands is deep")
+	var porto := _scene.get("world").get_node_or_null("Porto") as Village
+	_check(porto != null and porto.plot_positions.size() == 5, "Porto village has five plots")
+	# Drive off the main beach straight out to sea (+Z at x=0).
+	var kart := _player.driver.vehicle
+	var start := Vector3(0.0, _terrain.sample_height(0.0, 585.0) + 0.3, 585.0)
+	_ensure_ground(start)
+	_ensure_ground(Vector3(0.0, 0.0, 650.0))
+	kart.place(Transform3D(Basis.looking_at(Vector3.BACK, Vector3.UP), start))
+	_player.global_position = start + Vector3(2.0, 0.5, 0.0)
+	_player.motor.reset()
+	await _steps(10)
+	await _hold(InputActions.INTERACT, 3)
+	await _steps(3)
+	_check(_player.driver.is_driving, "in the kart on the beach")
+	_check(not kart.is_submarine, "on the beach it is a kart")
+	Input.action_press(InputActions.ACCELERATE)
+	var became := -1
+	for i in 300:
+		await _steps(1)
+		if kart.is_submarine and became < 0:
+			became = i
+	Input.action_release(InputActions.ACCELERATE)
+	_check(became >= 0, "driving into the sea turns the kart into a submarine (frame %d)" % became)
+	_check(kart.global_position.z > 640.0, "the submarine keeps going out to sea (z %.0f)" % kart.global_position.z)
+	var surface := _terrain.water_level
+	_check(absf(kart.global_position.y - (surface - 0.45)) < 0.4, "the submarine floats at the surface (y %.2f)" % kart.global_position.y)
+	var visual := kart.visual_root.get_children().filter(func(c: Node) -> bool: return c is AiVehicleVisual)
+	if visual.size() == 1:
+		_check((visual[0] as AiVehicleVisual).is_submarine() and (visual[0] as AiVehicleVisual)._canopy.visible, "canopy closed and propellers out")
+	await _hold(InputActions.INTERACT, 3)
+	await _steps(3)
+	_check(_player.driver.is_driving, "you cannot get out at sea")
+	# Turn round and drive back onto the beach.
+	var back := kart.global_position
+	kart.place(Transform3D(Basis.looking_at(Vector3.FORWARD, Vector3.UP), Vector3(back.x, back.y, back.z)))
+	Input.action_press(InputActions.ACCELERATE)
+	var landed := -1
+	for i in 420:
+		await _steps(1)
+		if not kart.is_submarine and landed < 0:
+			landed = i
+	Input.action_release(InputActions.ACCELERATE)
+	_check(landed >= 0 and kart.is_on_floor(), "back on the beach it is a kart again (frame %d, on floor %s)" % [landed, kart.is_on_floor()])
+	await _hold(InputActions.BRAKE, 30)
+	await _hold(InputActions.INTERACT, 3)
+	await _steps(20)
+	_check(not _player.driver.is_driving, "out of the kart on land")
+	# Back home for the next test.
+	_player.global_position = _player.spawn_transform.origin
+	_player.motor.reset()
+	_ensure_ground(_player.global_position)
+	await _steps(10)
 
 
 func _test_sea() -> void:

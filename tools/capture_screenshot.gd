@@ -1,7 +1,7 @@
 extends Node
 ## Loads the main scene, lets it settle, saves a PNG and quits.
 ##
-## Run:  godot --path <project> res://tools/capture_screenshot.tscn -- <out.png> [frames] [drive] [turbo] [talk] [picker] [level=<.tres>] [at=x,y,z] [yaw=deg] [zoom=m]
+## Run:  godot --path <project> res://tools/capture_screenshot.tscn -- <out.png> [frames] [drive] [turbo] [talk] [picker] [face=deg] [level=<.tres>] [at=x,y,z] [yaw=deg] [zoom=m]
 ##
 ## With the optional "drive" word the player summons the kart, gets in and
 ## holds the accelerator for the given frames, so the shot shows driving.
@@ -68,11 +68,18 @@ func _run() -> void:
 	if user_args.has("picker"):
 		GameManager.set_paused(true)
 		await _wait(2)
-		(scene.get_node("PauseMenu") as PauseMenu).character_button.pressed.emit()
+		(scene.get_node("PauseMenu") as PauseMenu)._show_picker(true)   # never picks: the real save stays
 		await _wait(2)
 	if user_args.has("talk"):
 		await _press(InputActions.INTERACT)
 		await _wait(5)
+	for arg in user_args:
+		if arg.begins_with("face="):
+			# Turn the player (and the summoned kart) before driving.
+			var player := GameManager.get_player(0) as CharacterController
+			player.visual_root.global_rotation.y = deg_to_rad(float(arg.trim_prefix("face=")))
+			for cam in scene.find_children("*", "ThirdPersonCamera", true, false):
+				(cam as ThirdPersonCamera).set_yaw(deg_to_rad(float(arg.trim_prefix("face="))))
 	if drive:
 		await _press(InputActions.SUMMON_KART)
 		await _wait(15)

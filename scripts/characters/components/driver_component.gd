@@ -33,7 +33,7 @@ func _physics_process(_delta: float) -> void:
 		return
 	if is_driving:
 		_character.global_position = vehicle.global_position
-		if vehicle.input.interact_pressed:
+		if vehicle.input.interact_pressed and not vehicle.is_submarine:
 			exit_vehicle()
 	else:
 		if _character.input.summon_pressed:

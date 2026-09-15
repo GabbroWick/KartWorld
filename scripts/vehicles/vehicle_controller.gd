@@ -11,6 +11,7 @@ signal driver_entered(driver: Node)
 signal driver_exited(driver: Node)
 signal fell_out_of_world
 signal honked
+signal submarine_changed(on: bool)
 
 @export var definition: VehicleDefinition
 ## Below this height the vehicle is considered fallen out of the world.
@@ -32,6 +33,7 @@ var _seated: Node3D
 var _visual_instance: Node3D
 var _camera_reversed := false
 var _terrain: IslandTerrain
+var is_submarine := false
 
 
 func _ready() -> void:
@@ -62,6 +64,7 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector3.ZERO
 		return
 	input.poll()
+	_check_water()
 
 	var speed_multiplier := 1.0
 	var acceleration_multiplier := 1.0
@@ -135,6 +138,37 @@ func _bump_bodies() -> void:
 			motor.shove(push * BUMPER_PUSH)
 
 
+## Water: over deep ground below the surface the kart becomes a
+## submarine (cockpit closes, propellers out); back over the beach it is
+## a kart again. NPC karts on gliding tiles never get here.
+func _check_water() -> void:
+	if _terrain == null or not is_instance_valid(_terrain):
+		_terrain = get_tree().get_first_node_in_group(IslandTerrain.GROUP) as IslandTerrain
+		if _terrain == null:
+			return
+	var ground := _terrain.sample_height(global_position.x, global_position.z)
+	var surface := _terrain.water_level
+	var want := ground < surface - 1.2 and global_position.y < surface + 0.6 if not is_submarine \
+		else ground < surface - 0.4
+	if want != is_submarine:
+		set_submarine(want)
+
+
+func set_submarine(on: bool) -> void:
+	if on == is_submarine:
+		return
+	is_submarine = on
+	motor.set_submarine(on, _terrain.water_level if _terrain else 0.0)
+	if _visual_instance and _visual_instance.has_method(&"set_submarine"):
+		_visual_instance.call(&"set_submarine", on)
+	if on:
+		Sfx.play(&"portal", -6.0)
+		var hud := get_tree().get_first_node_in_group(&"hud")
+		if hud and driver != null and hud.has_method(&"show_notice"):
+			hud.call(&"show_notice", tr(&"HUD_SUBMARINE"))
+	submarine_changed.emit(on)
+
+
 func _is_ground_unloaded() -> bool:
 	if _terrain == null or not is_instance_valid(_terrain):
 		_terrain = get_tree().get_first_node_in_group(IslandTerrain.GROUP) as IslandTerrain
@@ -149,6 +183,13 @@ func _is_ground_unloaded() -> bool:
 ## height, so the wheels sit on the terrain even where the box rests on an
 ## edge (crests, slope changes).
 func _tilt_to_ground(delta: float) -> void:
+	if is_submarine:
+		# Afloat: a gentle bob and roll with the waves instead of the rays.
+		var t := Time.get_ticks_msec() / 1000.0
+		var bob := Basis.from_euler(Vector3(sin(t * 1.3) * 0.03, 0.0, sin(t * 0.9) * 0.04))
+		visual_root.basis = visual_root.basis.slerp(bob, minf(3.0 * delta, 1.0))
+		visual_root.position.y = lerpf(visual_root.position.y, sin(t * 1.1) * 0.06, minf(3.0 * delta, 1.0))
+		return
 	var size := definition.collision_size
 	var half_w := size.x * 0.45
 	var half_l := size.z * 0.42

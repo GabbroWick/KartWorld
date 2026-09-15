@@ -57,6 +57,14 @@ const ROAD_GRID := 32.0   # metres per bucket of the road spatial hash
 		drop_width = value
 		_request_rebuild()
 ## Areas forced flat for buildings and spawn points: (x, z, radius, height).
+## More islands: (x, z, plateau radius, shore radius), same heights as the
+## main one. The sea between them is `sea_floor_height` deep.
+@export var extra_islands: Array[Vector4] = []:
+	set(value):
+		extra_islands = value
+		_request_rebuild()
+## Height of the water surface (the Water plane), for boats and submarines.
+@export_range(-5.0, 5.0, 0.05) var water_level := 0.3
 @export var flat_zones: Array[Vector4] = []:
 	set(value):
 		flat_zones = value
@@ -221,8 +229,17 @@ func sample_height(x: float, z: float) -> float:
 	var distance := Vector2(x, z).length()
 
 	# Radial island profile: plateau, then a beach easing down to the shore.
+	# Extra islands use the same profile; the highest one wins, so the sea
+	# floor between them stays deep.
 	var inland := 1.0 - smoothstep(plateau_radius, shore_radius, distance)
 	var height := beach_height + (plateau_height - beach_height) * pow(inland, 0.8)
+	var nearest_shore := distance - shore_radius
+	for island in extra_islands:
+		var d := Vector2(x, z).distance_to(Vector2(island.x, island.y))
+		var inland_i := 1.0 - smoothstep(island.z, island.w, d)
+		inland = maxf(inland, inland_i)
+		height = maxf(height, beach_height + (plateau_height - beach_height) * pow(inland_i, 0.8))
+		nearest_shore = minf(nearest_shore, d - island.w)
 
 	# Rounded mountains.
 	height += _mountain(x, z, mountain_center, mountain_radius, mountain_height)
@@ -237,9 +254,9 @@ func sample_height(x: float, z: float) -> float:
 		var l := 1.0 - smoothstep(lake.z * 0.4, lake.z, Vector2(x, z).distance_to(Vector2(lake.x, lake.y)))
 		height -= lake.w * l
 
-	# Past the shore, plunge to the sea floor.
-	if distance > shore_radius:
-		var t := clampf((distance - shore_radius) / drop_width, 0.0, 1.0)
+	# Past every shore, plunge to the sea floor.
+	if nearest_shore > 0.0:
+		var t := clampf(nearest_shore / drop_width, 0.0, 1.0)
 		height = lerpf(beach_height, sea_floor_height, t * t)
 
 	# Flatten pads for buildings; blended edge so there is no visible seam.
@@ -279,9 +296,19 @@ func sample_slope_degrees(x: float, z: float) -> float:
 	return rad_to_deg(acos(clampf(sample_normal(x, z).y, -1.0, 1.0)))
 
 
-## True when (x, z) is on the walkable island (not on the drop into the sea).
+## True when (x, z) is on a walkable island (not on the drop into the sea).
 func is_on_land(x: float, z: float) -> bool:
-	return Vector2(x, z).length() <= shore_radius
+	if Vector2(x, z).length() <= shore_radius:
+		return true
+	for island in extra_islands:
+		if Vector2(x, z).distance_to(Vector2(island.x, island.y)) <= island.w:
+			return true
+	return false
+
+
+## True when the ground at (x, z) lies under the water surface (sea).
+func is_water(x: float, z: float) -> bool:
+	return sample_height(x, z) < water_level - 0.6
 
 
 ## Distance (m) from (x, z) to the road centreline; INF without a road.

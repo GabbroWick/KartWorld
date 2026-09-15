@@ -80,3 +80,8 @@ NOTICE_SLEPT,Good morning!,Buongiorno!
 ITEM_FRUIT,Fruit,Frutta
 ITEM_MEAT,Meat,Carne
 ANIMAL_CHICKEN,Chicken,Gallina
+NPC_P_1,Welcome to Porto! You came by submarine?,Benvenuto a Porto! Sei arrivato col sottomarino?
+NPC_P_2,The sea between the islands is deep. Karts float though!,Il mare tra le isole è profondo. Ma i kart galleggiano!
+NPC_P_3,We wave at the big island every morning.,Ogni mattina salutiamo l'isola grande.
+NPC_V_10,There is another island far to the east. Drive the kart into the sea: it turns into a submarine!,C'è un'altra isola lontano a est. Guida il kart nel mare: diventa un sottomarino!
+HUD_SUBMARINE,Submarine mode!,Modalità sottomarino!
