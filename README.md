@@ -1,4 +1,6 @@
-# KartWorld
+# MegaAdventure
+
+Repository/folder name: `KartWorld` (the project's working name; the game is called **MegaAdventure**).
 
 3D cartoon adventure game (Godot 4 / GDScript).
 Design spec: [KARTWORLD_GAME_DESIGN.md](KARTWORLD_GAME_DESIGN.md) — development rules: [CLAUDE_CODE_MASTER_PROMPT.md](CLAUDE_CODE_MASTER_PROMPT.md).

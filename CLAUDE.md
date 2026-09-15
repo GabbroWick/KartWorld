@@ -1,5 +1,10 @@
 # KartWorld — working notes for Claude Code
 
+The game's public name is **MegaAdventure** (renamed by the human on
+2026-09-15; `project.godot` config/name, window title, Web page title).
+"KartWorld" stays as the repository, folder and user-data directory name
+(`config/custom_user_dir_name` keeps the existing save file).
+
 Read this first. Then `KARTWORLD_GAME_DESIGN.md` (what the game is) and
 `CLAUDE_CODE_MASTER_PROMPT.md` (how we work) only when a task touches design or
 process. `ARCHITECTURE.md` explains the code; `README.md` is for humans.
@@ -98,6 +103,9 @@ suites exit non-zero on failure.
   (`display_name`, objective `description`, `dialogue_lines`) hold keys.
   GameManager forces locale `it`. Tests compare with `tr(&"KEY")`. Adding
   text = add a CSV row; the `.translation` files regenerate on import.
+  **Quote any field that contains a comma** (`"Oh, you just did."`): an
+  unquoted comma shifts the columns and the Italian column becomes a
+  fragment of the English one (the hub suite now checks every row).
 * Character clips: `RiggedCharacterVisual` merges Mixamo "without skin" FBX
   clips into the rig at start-up; one-shots (`attack`, `hurt`) via
   `play_action()`; the controller routes `combat.attacked` / `hurt` to it and

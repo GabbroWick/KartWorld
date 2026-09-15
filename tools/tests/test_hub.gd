@@ -49,7 +49,27 @@ func _portals() -> Array:
 	return _manager.world.find_children("*", "Portal", true, false)
 
 
+func _test_translations() -> void:
+	# Every CSV row must have exactly key, en, it: an unquoted comma inside
+	# a sentence shifted the columns once ("you just did." showed up alone).
+	var file := FileAccess.open("res://translations/text.csv", FileAccess.READ)
+	file.get_csv_line()
+	var broken := PackedStringArray()
+	var rows := 0
+	while not file.eof_reached():
+		var row := file.get_csv_line()
+		if row.size() == 1 and row[0] == "":
+			continue
+		rows += 1
+		if row.size() != 3 or row[2].strip_edges() == "":
+			broken.append(row[0])
+		elif tr(row[0]) != row[2]:
+			broken.append(row[0] + " (tr mismatch)")
+	_check(rows > 40 and broken.is_empty(), "every translation row has key/en/it and resolves in Italian (%d rows, broken: %s)" % [rows, ", ".join(broken)])
+
+
 func _test_hub_setup() -> void:
+	_test_translations()
 	_check(_hub_stars().size() == 5, "island has five persistent stars (%d)" % _hub_stars().size())
 	_check(_portals().size() == 3, "island has three portals (%d)" % _portals().size())
 	var locked := _portals().filter(func(p: Portal) -> bool: return p.is_locked())
