@@ -153,14 +153,14 @@ theme_override_styles/pressed = SubResource("btn_pressed")
 text = "Balla"
 
 [node name="Map" type="Button" parent="Root/Buttons"]
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -160.0
-offset_top = 16.0
-offset_right = -96.0
-offset_bottom = 80.0
-grow_horizontal = 0
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 96.0
+offset_top = -80.0
+offset_right = 160.0
+offset_bottom = -16.0
+grow_vertical = 0
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("btn_style")
 theme_override_styles/hover = SubResource("btn_style")
@@ -168,14 +168,14 @@ theme_override_styles/pressed = SubResource("btn_pressed")
 text = "Mappa"
 
 [node name="Pause" type="Button" parent="Root/Buttons"]
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -80.0
-offset_top = 16.0
-offset_right = -16.0
-offset_bottom = 80.0
-grow_horizontal = 0
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -80.0
+offset_right = 80.0
+offset_bottom = -16.0
+grow_vertical = 0
 theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("btn_style")
 theme_override_styles/hover = SubResource("btn_style")

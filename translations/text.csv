@@ -110,6 +110,6 @@ WEAPON_BOOMERANG_DESC,Throw it and it comes back!,Lancialo e torna indietro!
 WEAPON_SWORD,Golden sword,Spada d'oro
 WEAPON_SWORD_DESC,Three times the damage and a longer reach.,Danno triplo e portata più lunga.
 UPGRADE_WINGS,Kart wings,Ali per il kart
-UPGRADE_WINGS_DESC,Jump at speed and fly! Gas to climb; brake to dive.,Salta a tutta velocità e vola! Gas per salire; freno per scendere.
+UPGRADE_WINGS_DESC,"Jump at speed and fly like a plane: gas climbs, brake dives.","Salta a tutta velocità e voli come un aereo: gas per salire, freno per scendere."
 SHOP_OWNED,Owned,Comprato
 HUD_FLYING,Wings out! Gas = up; brake = down.,Ali aperte! Gas = sali; freno = scendi.

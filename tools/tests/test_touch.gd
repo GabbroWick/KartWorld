@@ -43,12 +43,20 @@ func _run() -> void:
 	_check(not mouse_bound, "mouse bindings are stripped while touch controls are active")
 	var lowest := 0.0
 	for b in _touch.buttons.get_children():
-		if b is Control and b.name != "Pause":
+		if b is Control and b.name != "Pause" and b.name != "Map":
 			lowest = maxf(lowest, (b as Control).get_global_rect().end.y)
 	_check(lowest <= _viewport_size().y - 80.0, "buttons keep a margin from the bottom edge (%.0f of %.0f)" % [lowest, _viewport_size().y])
 	await _steps(2)
 	var hud: CanvasLayer = _scene.get_node("GameHUD")
 	_check(hud.controls_label.text == "", "keyboard hints hidden while touch controls are active")
+	await _steps(2)
+	_check(not hud.prompt_label.text.begins_with("K ") and not hud.prompt_label.text.begins_with("E "), "prompts drop the key letter on touch (%s)" % hud.prompt_label.text)
+	var pause_btn := _touch.buttons.get_node("Pause") as Control
+	var map_btn := _touch.buttons.get_node("Map") as Control
+	var size := _viewport_size()
+	_check(pause_btn.get_global_rect().position.y > size.y * 0.5 and map_btn.get_global_rect().position.y > size.y * 0.5,
+		"Pause and Map buttons sit at the bottom-left, away from the stars and the minimap")
+	_check(not pause_btn.get_global_rect().intersects(hud.minimap.get_global_rect()), "buttons do not overlap the minimap")
 
 	await _test_stick_walk()
 	await _test_look_drag()

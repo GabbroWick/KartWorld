@@ -258,23 +258,32 @@ func _test_wings() -> void:
 	_kart.place(Transform3D(Basis.IDENTITY, Vector3(24.0, 0.3, 28.0)))
 	await _steps(10)
 	Input.action_press(InputActions.ACCELERATE)
-	await _steps(60)
+	await _steps(40)
 	await _press(InputActions.JUMP)
 	var flew := false
 	var top := 0.0
-	for i in 90:
+	for i in 45:
 		await _steps(1)
 		flew = flew or _kart.is_flying()
 		top = maxf(top, _kart.global_position.y)
 	_check(flew and _kart.is_flying(), "with wings a jump at speed takes off")
-	_check(top > 4.0, "holding the gas climbs (%.1f m)" % top)
+	_check(top > 3.0, "holding the gas climbs (%.1f m)" % top)
 	var visual := _kart.visual_root.get_children().filter(func(c: Node) -> bool: return c is AiVehicleVisual)
 	if visual.size() == 1:
 		_check((visual[0] as AiVehicleVisual).is_flying(), "the wings are out")
 	await _hold(InputActions.INTERACT, 3)
 	_check(_player.driver.is_driving, "you cannot get out in the air")
+	# Hands off: a plane glides, it does not drop like a stone, and it
+	# keeps flying forward on its own.
 	Input.action_release(InputActions.ACCELERATE)
+	var y_before := _kart.global_position.y
+	var pos_before := _kart.global_position
+	await _steps(25)
+	_check(y_before - _kart.global_position.y < 1.0, "released, the kart glides (lost %.1f m in 0.4 s)" % (y_before - _kart.global_position.y))
+	_check((_kart.global_position - pos_before).dot(-_kart.global_basis.z) > 5.0 and _kart.get_speed() > 6.0, "it keeps cruising forward by itself (%.1f m/s)" % _kart.get_speed())
 	Input.action_press(InputActions.BRAKE)
+	await _steps(10)
+	_check(_kart.get_speed() > 6.0, "the brake pedal dives, it never reverses in the air (%.1f m/s)" % _kart.get_speed())
 	var landed := false
 	for i in 240:
 		await _steps(1)

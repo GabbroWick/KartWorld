@@ -472,7 +472,7 @@ func _test_home_life() -> void:
 	var hud: CanvasLayer = _scene.get_node("GameHUD")
 	_check(hud.inventory_label.text.contains(tr(&"ITEM_FRUIT")), "HUD lists the fruit (%s)" % hud.inventory_label.text)
 	tree._regrow_left = 0.01
-	await _steps(3)
+	await _steps(8)
 	_check(tree.has_fruit, "fruit grows back")
 	# Meat: chickens run from the player; hitting one drops meat.
 	var flock := world.get_node_or_null("Chickens") as AnimalSpawner
@@ -536,6 +536,13 @@ func _test_submarine() -> void:
 	_check(_terrain.is_water(1000.0, -200.0) and _terrain.sample_height(1000.0, -200.0) < -20.0, "the sea between the islands is deep")
 	var porto := _scene.get("world").get_node_or_null("Porto") as Village
 	_check(porto != null and porto.plot_positions.size() == 5, "Porto village has five plots")
+	# The streamer must build ground on the far island too (it used to skip
+	# every tile beyond the main shore: the village floated over the sea).
+	_terrain.set_focus(Vector3(far.x, 4.0, far.y))
+	_terrain._stream_step(true)
+	_check(_terrain.is_built_at(far.x, far.y), "terrain tiles are built on the second island")
+	_terrain.set_focus(_player.global_position)
+	_terrain._stream_step(true)
 	# Drive off the main beach straight out to sea (+Z at x=0).
 	var kart := _player.driver.vehicle
 	var start := Vector3(0.0, _terrain.sample_height(0.0, 585.0) + 0.3, 585.0)

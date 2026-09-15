@@ -508,8 +508,21 @@ them, one commit + suite + screenshot each:
    touching a floor lands; splashing into deep water becomes the
    submarine, and jumping from the submarine at speed takes off again.
    `AiVehicleVisual.set_flying` swings two wing panels out of the sides
-   (bank with the steering). No getting out in the air. Kart suite 80
+   (bank with the steering). No getting out in the air. Human's phone
+   feedback: it must fly like a plane — now the kart cruises forward on
+   its own (`FLY_CRUISE_FACTOR` 0.9 of max speed, never backwards),
+   gas = climb, brake = dive, hands off = slow glide. Kart suite 83
    checks; `capture_screenshot` `fly` arg.
+   Bug found on the phone: the streamer skipped every tile beyond the
+   main shore, so Porto's village floated over the sea and the kart fell
+   through — `_tile_touches_land()` now counts every island.
+9. **Logo — DONE**: `tools/ai3d/generate_logo.py` (SDXL Turbo, 6
+   candidates in `assets/ui/logo/_source/`, `--pick` writes `icon.png`
+   512 rounded, `icon_192/432/512` + adaptive background). Project icon,
+   Android launcher and PWA icons point at them.
+10. **Mobile HUD**: prompts drop the key letter on touch ("sali sul
+   kart"), Pause and Map buttons live bottom-left (they overlapped the
+   stars and the minimap). Touch suite 25 checks.
 
 ## Next step (Phase 8 — polish, continued)
 

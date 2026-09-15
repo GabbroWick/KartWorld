@@ -199,6 +199,14 @@ func _on_stars_changed(collected: int, total: int) -> void:
 
 
 func _prompt_text() -> String:
+	var text := _prompt_text_keys()
+	if TouchControls.active and text.length() > 3 and text[1] == " " and text[2] == " ":
+		# "E  parla con Volpe" -> "parla con Volpe": no keys on a phone.
+		return text.substr(3)
+	return text
+
+
+func _prompt_text_keys() -> String:
 	if not is_instance_valid(_player):
 		return ""
 	var driver := _player.driver

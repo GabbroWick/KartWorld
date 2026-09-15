@@ -410,6 +410,18 @@ func ensure_built_at(x: float, z: float) -> void:
 	_build_chunk(tile, true, true)
 
 
+## A tile centred at `c` has some land (main island or an extra one) or
+## its shore drop inside it; pure sea tiles are never built.
+func _tile_touches_land(c: Vector2) -> bool:
+	var slack := chunk_size * 0.75
+	if c.length() - slack <= shore_radius + drop_width:
+		return true
+	for island in extra_islands:
+		if c.distance_to(Vector2(island.x, island.y)) - slack <= island.w + drop_width:
+			return true
+	return false
+
+
 ## True when the terrain has a mesh (and collision) at this point right now.
 func is_built_at(x: float, z: float) -> bool:
 	if not streaming:
@@ -643,7 +655,6 @@ func _free_chunk(chunk: Dictionary) -> void:
 func _stream_step(all := false, near_only_now := false) -> void:
 	_collect_finished()
 	var focus_xz := Vector2(_focus.x, _focus.z)
-	var extent := shore_radius + drop_width
 	var reach := int(ceil(far_distance / chunk_size))
 	var centre_tile := _tile_of(_focus.x, _focus.z)
 	# 1. Free tiles out of range or with a stale LOD.
@@ -665,8 +676,8 @@ func _stream_step(all := false, near_only_now := false) -> void:
 				var c := _tile_centre(tile)
 				if c.distance_to(focus_xz) > far_distance:
 					continue
-				# Skip tiles entirely in deep sea.
-				if c.length() - chunk_size * 0.75 > extent:
+				# Skip tiles entirely in deep sea (any island counts).
+				if not _tile_touches_land(c):
 					continue
 				_pending.append(tile)
 		_pending.sort_custom(func(p: Vector2i, q: Vector2i) -> bool:

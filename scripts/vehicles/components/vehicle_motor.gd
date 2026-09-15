@@ -57,7 +57,8 @@ var _air_time := 0.0
 const FLY_MIN_SPEED := 6.0
 const FLY_CLIMB := 6.0
 const FLY_DIVE := -7.0
-const FLY_GLIDE := -1.2
+const FLY_GLIDE := -0.6
+const FLY_CRUISE_FACTOR := 0.9
 const FLY_TAKEOFF_AIR := 0.2
 const FLY_CEILING := 90.0   # metres above the ground
 
@@ -70,7 +71,13 @@ func drive(delta: float, throttle: float, steer: float, jump_requested: bool,
 	var was_on_floor := body.is_on_floor()
 	throttle_input = throttle
 
-	_apply_throttle(delta, throttle, speed_multiplier * (SUB_SPEED_FACTOR if is_submarine else 1.0), acceleration_multiplier)
+	if is_flying:
+		# A plane: it flies forward on its own at cruise speed (turbo still
+		# helps); the pedals only make it climb or dive. Never backwards.
+		var cruise := definition.max_speed * FLY_CRUISE_FACTOR * speed_multiplier
+		speed = move_toward(maxf(speed, 0.0), cruise, definition.acceleration * 0.6 * delta)
+	else:
+		_apply_throttle(delta, throttle, speed_multiplier * (SUB_SPEED_FACTOR if is_submarine else 1.0), acceleration_multiplier)
 	_apply_steering(delta, steer, was_on_floor or is_submarine or is_flying)
 	if is_submarine and jump_requested and has_wings and absf(speed) > FLY_MIN_SPEED:
 		# Take off from the water.
@@ -153,11 +160,10 @@ func _apply_flight(delta: float, throttle: float, was_on_floor: bool) -> void:
 		target = FLY_CLIMB
 	elif throttle < -0.2:
 		target = FLY_DIVE
-	if absf(speed) < FLY_MIN_SPEED * 0.7:
-		target = FLY_DIVE * 0.6   # too slow to fly: sink
+
 	if ground_height_hint != null and body.global_position.y - float(ground_height_hint) > FLY_CEILING and target > 0.0:
 		target = 0.0
-	body.velocity.y = move_toward(body.velocity.y, target, 14.0 * delta)
+	body.velocity.y = move_toward(body.velocity.y, target, 10.0 * delta)
 
 
 ## Set by the controller each tick (terrain height under the kart) so the
