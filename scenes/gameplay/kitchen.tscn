@@ -1,0 +1,88 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/kitchen.gd" id="1_kitchen"]
+
+[sub_resource type="StandardMaterial3D" id="mat_wood"]
+albedo_color = Color(0.8, 0.72, 0.6, 1)
+metallic_specular = 0.0
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="mat_stove"]
+albedo_color = Color(0.25, 0.25, 0.28, 1)
+metallic_specular = 0.0
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="mat_fire"]
+albedo_color = Color(1, 0.5, 0.1, 1)
+emission_enabled = true
+emission = Color(1, 0.5, 0.1, 1)
+emission_energy_multiplier = 1.5
+metallic_specular = 0.0
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="mat_smoke"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.9, 0.9, 0.9, 0.5)
+billboard_mode = 3
+
+[sub_resource type="BoxMesh" id="mesh_counter"]
+material = SubResource("mat_wood")
+size = Vector3(2.4, 0.9, 0.7)
+
+[sub_resource type="BoxMesh" id="mesh_stove"]
+material = SubResource("mat_stove")
+size = Vector3(0.9, 0.95, 0.72)
+
+[sub_resource type="CylinderMesh" id="mesh_fire"]
+material = SubResource("mat_fire")
+top_radius = 0.18
+bottom_radius = 0.18
+height = 0.04
+radial_segments = 10
+
+[sub_resource type="QuadMesh" id="mesh_smoke"]
+material = SubResource("mat_smoke")
+size = Vector2(0.25, 0.25)
+
+[sub_resource type="BoxShape3D" id="shape_counter"]
+size = Vector3(3.3, 0.95, 0.72)
+
+[node name="Kitchen" type="StaticBody3D"]
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("1_kitchen")
+
+[node name="Counter" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.45, 0.45, 0)
+mesh = SubResource("mesh_counter")
+
+[node name="Stove" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0.475, 0)
+mesh = SubResource("mesh_stove")
+
+[node name="Fire" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0.97, 0)
+mesh = SubResource("mesh_fire")
+
+[node name="Smoke" type="CPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 1.1, 0)
+emitting = false
+amount = 16
+lifetime = 1.4
+one_shot = true
+explosiveness = 0.3
+mesh = SubResource("mesh_smoke")
+direction = Vector3(0, 1, 0)
+spread = 15.0
+gravity = Vector3(0, 0.8, 0)
+initial_velocity_min = 0.4
+initial_velocity_max = 0.8
+scale_amount_min = 0.8
+scale_amount_max = 1.6
+color = Color(0.9, 0.9, 0.9, 0.6)
+
+[node name="Shape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.475, 0)
+shape = SubResource("shape_counter")

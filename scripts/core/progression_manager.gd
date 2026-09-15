@@ -22,6 +22,8 @@ var best_stars: Dictionary = {}
 var unlocked_abilities: Array[StringName] = []
 ## The hero's character id (see CharacterRoster). Saved.
 var character: StringName = &"leopard"
+## Food and things carried: item id -> count (fruit, meat, meal). Saved.
+var inventory: Dictionary = {}
 ## Persistent collectibles picked up, id -> {"kind": String, "amount": int}.
 var collected: Dictionary = {}
 
@@ -98,6 +100,28 @@ func apply_to(abilities: AbilityComponent) -> void:
 		abilities.unlock(id)
 
 
+func add_item(item: StringName, amount: int = 1) -> void:
+	inventory[String(item)] = count_item(item) + amount
+	save_to_disk()
+	changed.emit()
+
+
+## Takes `amount` of `item` if there is enough; false otherwise.
+func take_item(item: StringName, amount: int = 1) -> bool:
+	if count_item(item) < amount:
+		return false
+	inventory[String(item)] = count_item(item) - amount
+	if inventory[String(item)] <= 0:
+		inventory.erase(String(item))
+	save_to_disk()
+	changed.emit()
+	return true
+
+
+func count_item(item: StringName) -> int:
+	return int(inventory.get(String(item), 0))
+
+
 func set_character(id: StringName) -> void:
 	if id == character:
 		return
@@ -111,6 +135,7 @@ func reset() -> void:
 	unlocked_abilities.clear()
 	collected.clear()
 	character = &"leopard"
+	inventory.clear()
 	if FileAccess.file_exists(save_path):
 		DirAccess.remove_absolute(save_path)
 	changed.emit()
@@ -123,6 +148,7 @@ func save_to_disk() -> void:
 		"unlocked_abilities": Array(unlocked_abilities).map(func(id: StringName) -> String: return String(id)),
 		"collected": collected,
 		"character": String(character),
+		"inventory": inventory,
 	}
 	var file := FileAccess.open(save_path, FileAccess.WRITE)
 	if file == null:
@@ -136,6 +162,7 @@ func load_from_disk() -> void:
 	best_stars.clear()
 	unlocked_abilities.clear()
 	collected.clear()
+	inventory.clear()
 	if not FileAccess.file_exists(save_path):
 		return
 	var file := FileAccess.open(save_path, FileAccess.READ)
@@ -153,6 +180,9 @@ func load_from_disk() -> void:
 	for id in data.get("unlocked_abilities", []):
 		unlocked_abilities.append(StringName(String(id)))
 	character = StringName(String(data.get("character", "leopard")))
+	inventory.clear()
+	for key in data.get("inventory", {}):
+		inventory[String(key)] = int(data["inventory"][key])
 	for id in data.get("collected", {}):
 		var entry: Dictionary = data["collected"][id]
 		collected[String(id)] = {"kind": String(entry.get("kind", "item")), "amount": int(entry.get("amount", 1))}

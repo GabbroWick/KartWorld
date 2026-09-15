@@ -8,6 +8,8 @@ extends CanvasLayer
 
 @onready var hearts: HeartBar = $Root/TopLeft/TopLeftRows/Hearts
 @onready var turbo_gauge: TurboGauge = $Root/TopLeft/TopLeftRows/Turbo
+@onready var inventory_label: Label = $Root/TopLeft/TopLeftRows/Inventory
+@onready var fade_rect: ColorRect = $Root/Fade
 @onready var star_row: HBoxContainer = $Root/TopRight/StarRow
 @onready var stars_label: Label = $Root/TopRight/StarRow/Stars
 @onready var objective_label: Label = $Root/TopCenter/Objective
@@ -24,6 +26,12 @@ var _notice_left := 0.0
 var _player: CharacterController
 var _manager: LevelManager
 var _level: LevelController
+
+
+func _ready() -> void:
+	add_to_group(&"hud")
+	ProgressionManager.changed.connect(_refresh_inventory)
+	_refresh_inventory()
 
 
 func bind_player(player: CharacterController) -> void:
@@ -61,6 +69,26 @@ func _process(delta: float) -> void:
 		_notice_left -= delta
 		if _notice_left <= 0.0:
 			notice_label.text = ""
+
+
+func _refresh_inventory() -> void:
+	var parts := PackedStringArray()
+	for item in [&"fruit", &"meat"]:
+		var n := ProgressionManager.count_item(item)
+		if n > 0:
+			parts.append("%s %d" % [tr(&"ITEM_" + String(item).to_upper()), n])
+	inventory_label.text = " · ".join(parts)
+
+
+## Fade to black and back (sleeping). Awaitable.
+func fade(seconds: float) -> void:
+	fade_rect.visible = true
+	var tween := create_tween()
+	tween.tween_property(fade_rect, "color:a", 1.0, seconds * 0.4)
+	tween.tween_interval(seconds * 0.2)
+	tween.tween_property(fade_rect, "color:a", 0.0, seconds * 0.4)
+	await tween.finished
+	fade_rect.visible = false
 
 
 func show_notice(text: String) -> void:

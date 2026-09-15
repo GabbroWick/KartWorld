@@ -66,3 +66,17 @@ NPC_V_6,My cousin lives on the other side of the mountain.,Mio cugino abita dall
 NPC_V_7,Race you to the lighthouse!,Ti sfido fino al faro!
 NPC_V_8,"Press E to talk to me. Oh, you just did.","Premi E per parlarmi. Oh, l'hai appena fatto."
 NPC_V_9,The slimes hide in the forest level. Bonk them!,Gli slime si nascondono nel livello del bosco. Bastonali!
+PROMPT_PICK_FRUIT,E  pick fruit,E  raccogli la frutta
+PROMPT_COOK_STEW,E  cook a stew,E  cucina uno stufato
+PROMPT_COOK_SALAD,E  make a fruit salad,E  prepara una macedonia
+PROMPT_KITCHEN_EMPTY,E  cook (you need food),E  cucina (ti serve del cibo)
+PROMPT_SLEEP,E  sleep,E  dormi
+NOTICE_GOT_FRUIT,+%d fruit,+%d frutta
+NOTICE_GOT_MEAT,+%d meat,+%d carne
+NOTICE_ATE_STEW,Stew! Full hearts and quick legs.,Stufato! Cuori pieni e gambe veloci.
+NOTICE_ATE_SALAD,Fruit salad! +2 hearts.,Macedonia! +2 cuori.
+NOTICE_KITCHEN_EMPTY,Bring fruit from the orchard and meat from the chickens.,Porta frutta dal frutteto e carne dalle galline.
+NOTICE_SLEPT,Good morning!,Buongiorno!
+ITEM_FRUIT,Fruit,Frutta
+ITEM_MEAT,Meat,Carne
+ANIMAL_CHICKEN,Chicken,Gallina

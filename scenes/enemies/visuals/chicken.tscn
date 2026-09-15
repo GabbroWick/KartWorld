@@ -1,0 +1,99 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/chicken_visual.gd" id="1_chicken"]
+
+[sub_resource type="StandardMaterial3D" id="mat_white"]
+albedo_color = Color(0.97, 0.96, 0.9, 1)
+metallic_specular = 0.0
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="mat_red"]
+albedo_color = Color(0.9, 0.15, 0.12, 1)
+metallic_specular = 0.0
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="mat_yellow"]
+albedo_color = Color(0.95, 0.7, 0.15, 1)
+metallic_specular = 0.0
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="mat_black"]
+albedo_color = Color(0.1, 0.1, 0.12, 1)
+metallic_specular = 0.0
+roughness = 1.0
+
+[sub_resource type="SphereMesh" id="mesh_body"]
+material = SubResource("mat_white")
+radius = 0.3
+height = 0.5
+radial_segments = 12
+rings = 6
+
+[sub_resource type="SphereMesh" id="mesh_head"]
+material = SubResource("mat_white")
+radius = 0.16
+height = 0.32
+radial_segments = 10
+rings = 5
+
+[sub_resource type="BoxMesh" id="mesh_comb"]
+material = SubResource("mat_red")
+size = Vector3(0.06, 0.12, 0.18)
+
+[sub_resource type="PrismMesh" id="mesh_beak"]
+material = SubResource("mat_yellow")
+size = Vector3(0.1, 0.08, 0.14)
+
+[sub_resource type="SphereMesh" id="mesh_eye"]
+material = SubResource("mat_black")
+radius = 0.03
+height = 0.06
+radial_segments = 6
+rings = 3
+
+[sub_resource type="CylinderMesh" id="mesh_leg"]
+material = SubResource("mat_yellow")
+top_radius = 0.025
+bottom_radius = 0.025
+height = 0.22
+radial_segments = 6
+
+[node name="Chicken" type="Node3D"]
+script = ExtResource("1_chicken")
+
+[node name="Body" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.36, 0)
+mesh = SubResource("mesh_body")
+
+[node name="Head" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, -0.32)
+
+[node name="Skull" type="MeshInstance3D" parent="Head"]
+mesh = SubResource("mesh_head")
+
+[node name="Comb" type="MeshInstance3D" parent="Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.18, 0)
+mesh = SubResource("mesh_comb")
+
+[node name="Beak" type="MeshInstance3D" parent="Head"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, -0.02, -0.18)
+mesh = SubResource("mesh_beak")
+
+[node name="EyeL" type="MeshInstance3D" parent="Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.09, 0.04, -0.11)
+mesh = SubResource("mesh_eye")
+
+[node name="EyeR" type="MeshInstance3D" parent="Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.09, 0.04, -0.11)
+mesh = SubResource("mesh_eye")
+
+[node name="Legs" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.11, 0)
+
+[node name="LegL" type="MeshInstance3D" parent="Legs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.09, 0, 0)
+mesh = SubResource("mesh_leg")
+
+[node name="LegR" type="MeshInstance3D" parent="Legs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.09, 0, 0)
+mesh = SubResource("mesh_leg")

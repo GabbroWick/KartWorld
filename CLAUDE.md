@@ -447,8 +447,20 @@ them, one commit + suite + screenshot each:
    `capture_screenshot` args: `talk`, `picker`.
 3. **Doors instead of portals**: a level entrance is a door that opens
    when the player comes close and is entered by walking through.
-4. **The house is enterable**: kitchen, bed (sleep = night skip / heal),
-   food loop: fruit from trees, animals to hunt, cook in the kitchen.
+4. **Home life — DONE**: `house.tscn` is hollow (floor, walls with a
+   doorway, ceiling under the roof) with a `Kitchen` and a `Bed` inside
+   (`scripts/gameplay/`, interactables). Food loop: `FruitTree` prop
+   (E picks `fruit_count` fruit, regrows) scattered as the `Orchard`
+   (fixed-count PropScatter at (80,68)); `Animal` (extends Enemy: flees,
+   never hurts, drops `definition.drop_item`) — chickens from
+   `AnimalSpawner` "Chickens" at (44,72), respawn 60 s; Kitchen cooks
+   fruit+meat = stew (full heal + `CharacterMotor.set_well_fed` +15%
+   speed 60 s) or fruit = salad (+2). Bed: HUD `fade()`, full heal,
+   `DayCycle.set_morning()`. `DayCycle` (hub node, 10 min day) turns the
+   sun and dims it at night, tints fog and sky energy.
+   Inventory lives in `ProgressionManager.inventory` (saved; `add_item`
+   / `take_item` / `count_item`), shown under the hearts. Island suite
+   139 checks.
 5. **More islands**: the kart turns into a submarine on the water
    (cockpit closes, propellers out) to reach them.
 

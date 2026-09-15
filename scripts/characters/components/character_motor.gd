@@ -126,10 +126,22 @@ func _do_jump(scale: float, index: int) -> void:
 	jumped.emit(index)
 
 
+## A good meal: faster for a while (kitchen stew).
+var _well_fed_left := 0.0
+
+func set_well_fed(seconds: float) -> void:
+	_well_fed_left = seconds
+
+
+func is_well_fed() -> bool:
+	return _well_fed_left > 0.0
+
+
 func _apply_horizontal(delta: float, wish_dir: Vector3, want_run: bool) -> void:
+	_well_fed_left = maxf(_well_fed_left - delta, 0.0)
 	var on_floor := body.is_on_floor()
 	is_running = want_run and abilities.has(AbilityComponent.RUN)
-	var top_speed := definition.run_speed if is_running else definition.walk_speed
+	var top_speed := (definition.run_speed if is_running else definition.walk_speed) * (1.15 if is_well_fed() else 1.0)
 	var target := Vector3(wish_dir.x, 0.0, wish_dir.z) * top_speed
 
 	var rate: float

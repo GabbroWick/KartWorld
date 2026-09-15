@@ -1,4 +1,4 @@
-[gd_scene load_steps=60 format=3]
+[gd_scene load_steps=65 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/props/island_terrain.tscn" id="1_terrain"]
 [ext_resource type="PackedScene" path="res://scenes/world/props/house.tscn" id="2_house"]
@@ -58,6 +58,11 @@
 [ext_resource type="PackedScene" path="res://scenes/world/props/ramp.tscn" id="31_ramp"]
 [ext_resource type="Resource" path="res://resources/levels/level_03_volcano.tres" id="32_level3"]
 [ext_resource type="Shader" path="res://shaders/water.gdshader" id="33_water"]
+[ext_resource type="Script" path="res://scripts/world/day_cycle.gd" id="40_day"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/fruit_tree.tscn" id="41_fruit"]
+[ext_resource type="Script" path="res://scripts/world/animal_spawner.gd" id="42_animals"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/animal.tscn" id="43_animal"]
+[ext_resource type="Resource" path="res://resources/enemies/chicken.tres" id="44_chicken"]
 
 [sub_resource type="FastNoiseLite" id="cloud_noise"]
 noise_type = 3
@@ -388,6 +393,37 @@ village_seed = 8
 gap_direction = Vector2(1, 0)
 gap_degrees = 90.0
 terrain_path = NodePath("../IslandTerrain")
+
+[node name="DayCycle" type="Node" parent="."]
+script = ExtResource("40_day")
+sun_path = NodePath("../SunLight")
+environment_path = NodePath("../WorldEnvironment")
+day_length = 600.0
+time_of_day = 0.35
+
+[node name="Orchard" type="Node3D" parent="."]
+script = ExtResource("6_scatter")
+prop_scene = ExtResource("41_fruit")
+terrain_path = NodePath("../IslandTerrain")
+scatter_seed = 23
+count = 8
+center = Vector2(80, 68)
+radius = 11.0
+min_spacing = 4.0
+max_slope_degrees = 20.0
+scale_min = 0.9
+scale_max = 1.15
+sink = 0.05
+
+[node name="Chickens" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44, 4, 72)
+script = ExtResource("42_animals")
+animal_scene = ExtResource("43_animal")
+definition = ExtResource("44_chicken")
+count = 5
+radius = 7.0
+respawn_time = 60.0
+spawn_seed = 9
 
 [node name="Villagers" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 4, 60)

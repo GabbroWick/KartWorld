@@ -52,6 +52,7 @@ func _run() -> void:
 	_test_scatter(world)
 	await _test_walk()
 	await _test_house()
+	await _test_home_life()
 	await _test_kart_parked_still()
 	await _test_kart_on_terrain()
 	await _test_kart_climbs_mountain()
@@ -375,7 +376,9 @@ func _test_scatter(world: Node) -> void:
 				placed.append((child as Node3D).position)
 		scatter.placed_positions = placed
 		total += placed.size()
-		_check(scatter.density > 0.0, "'%s' is a streaming scatter (density %.1f)" % [scatter.name, scatter.density])
+		# The small orchard by the house is a fixed-count scatter (always
+		# built: the player lives there); the big forests stream per tile.
+		_check(scatter.density > 0.0 or scatter.name == "Orchard", "'%s' is a streaming scatter (density %.1f)" % [scatter.name, scatter.density])
 		var all_ok := true
 		for p in placed:
 			if not _terrain.is_on_land(p.x, p.z):
@@ -427,16 +430,100 @@ func _test_walk() -> void:
 
 
 func _test_house() -> void:
-	# Walk into the house front wall: it must block.
+	# Walk into the house front wall beside the door: it must block.
 	_camera_rig.set_yaw(0.0)
-	_player.global_position = Vector3(60.0, 4.5, 88.0)
+	_player.global_position = Vector3(57.5, 4.5, 88.0)
 	_player.motor.reset()
 	await _steps(20)
 	await _hold(&"move_forward", 120)
 	# Body is 6.5 deep centred at z=80 -> front face at z=83.25.
 	_check(_player.global_position.z > 83.4,
 		"house wall blocks the player (z %.2f)" % _player.global_position.z)
+	# Through the doorway the player gets inside.
+	_player.global_position = Vector3(60.0, 4.5, 88.0)
+	_player.motor.reset()
 	await _steps(10)
+	await _hold(&"move_forward", 90)
+	_check(_player.global_position.z < 82.0 and _player.global_position.z > 77.0 and _player.is_on_floor(),
+		"the doorway lets the player into the house (z %.2f)" % _player.global_position.z)
+	await _steps(10)
+
+
+func _test_home_life() -> void:
+	var world: Node = _scene.get("world")
+	ProgressionManager.inventory.clear()
+	# Fruit: an orchard tree gives fruit, then regrows.
+	var orchard := world.get_node_or_null("Orchard") as PropScatter
+	_check(orchard != null, "hub has an orchard scatter")
+	var trees := orchard.find_children("*", "FruitTree", false, false) if orchard else []
+	_check(trees.size() >= 5, "orchard has fruit trees (%d)" % trees.size())
+	if trees.is_empty():
+		return
+	var tree := trees[0] as FruitTree
+	_player.global_position = tree.global_position + Vector3(1.5, 0.3, 0.0)
+	_player.motor.reset()
+	await _steps(10)
+	_check(_player.interaction.get_prompt() == tr(&"PROMPT_PICK_FRUIT"), "prompt offers to pick fruit (%s)" % _player.interaction.get_prompt())
+	await _hold(InputActions.INTERACT, 3)
+	await _steps(3)
+	_check(ProgressionManager.count_item(&"fruit") == tree.fruit_count and not tree.has_fruit,
+		"picking adds fruit to the inventory (%d)" % ProgressionManager.count_item(&"fruit"))
+	var hud: CanvasLayer = _scene.get_node("GameHUD")
+	_check(hud.inventory_label.text.contains(tr(&"ITEM_FRUIT")), "HUD lists the fruit (%s)" % hud.inventory_label.text)
+	tree._regrow_left = 0.01
+	await _steps(3)
+	_check(tree.has_fruit, "fruit grows back")
+	# Meat: chickens run from the player; hitting one drops meat.
+	var flock := world.get_node_or_null("Chickens") as AnimalSpawner
+	_check(flock != null and flock.spawned.size() == 5, "five chickens near the house (%d)" % (flock.spawned.size() if flock else 0))
+	if flock and flock.spawned.size() > 0:
+		var chicken := flock.spawned[0] as Animal
+		_player.global_position = chicken.global_position + Vector3(2.0, 0.3, 0.0)
+		_player.motor.reset()
+		var start := chicken.global_position
+		await _steps(45)
+		_check(chicken.global_position.distance_to(start) > 1.0 and chicken.global_position.distance_to(_player.global_position) > 2.0,
+			"a chicken runs away from the player (%.1f m)" % chicken.global_position.distance_to(start))
+		var hearts := _player.health.current_health
+		chicken.take_damage(5.0, _player)
+		await _steps(3)
+		_check(ProgressionManager.count_item(&"meat") == 1, "a hit chicken drops meat (%d)" % ProgressionManager.count_item(&"meat"))
+		_check(_player.health.current_health == hearts, "chickens never hurt the player")
+		await _steps(40)
+		_check(flock.spawned.size() == 4, "the flock is one short until it respawns (%d)" % flock.spawned.size())
+	# Kitchen: fruit + meat = stew, heals and boosts.
+	var kitchen := world.find_children("*", "Kitchen", true, false)[0] as Kitchen
+	_player.health.take_damage(3.0)
+	_player.invulnerable_left = 0.0
+	_player.global_position = kitchen.global_position + Vector3(0.0, 0.3, 1.4)
+	_player.motor.reset()
+	await _steps(10)
+	_check(_player.interaction.get_prompt() == tr(&"PROMPT_COOK_STEW"), "kitchen offers a stew (%s)" % _player.interaction.get_prompt())
+	await _hold(InputActions.INTERACT, 3)
+	await _steps(3)
+	_check(_player.health.current_health == _player.health.max_health, "the stew fills the hearts")
+	_check(_player.motor.is_well_fed(), "the stew makes the character quick")
+	_check(ProgressionManager.count_item(&"meat") == 0 and ProgressionManager.count_item(&"fruit") == tree.fruit_count - 1, "cooking uses one fruit and one meat")
+	# Bed: sleep heals and brings the morning.
+	var bed := world.find_children("*", "Bed", true, false)[0] as Bed
+	var cycle := world.get_node("DayCycle") as DayCycle
+	cycle.time_of_day = 0.9
+	cycle._apply()
+	_check(cycle.is_night(), "day cycle knows the night")
+	_player.health.take_damage(2.0)
+	_player.invulnerable_left = 0.0
+	_player.global_position = bed.global_position + Vector3(1.4, 0.3, 0.0)
+	_player.motor.reset()
+	await _steps(10)
+	_check(_player.interaction.get_prompt() == tr(&"PROMPT_SLEEP"), "bed offers to sleep (%s)" % _player.interaction.get_prompt())
+	var slept := [false]
+	bed.slept.connect(func() -> void: slept[0] = true)
+	await _hold(InputActions.INTERACT, 3)
+	await _steps(60)
+	_check(slept[0], "sleeping in the bed works")
+	_check(_player.health.current_health == _player.health.max_health, "sleeping refills the hearts")
+	_check(not cycle.is_night() and cycle.time_of_day < 0.4, "sleeping brings the morning (%.2f)" % cycle.time_of_day)
+	ProgressionManager.inventory.clear()
 
 
 func _test_sea() -> void:

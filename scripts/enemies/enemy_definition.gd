@@ -26,6 +26,11 @@ extends Resource
 ## Gives up beyond this.
 @export_range(0.0, 60.0, 0.5) var lose_radius := 11.0
 
+@export_group("Drops")
+## Inventory item dropped on death (animals): empty = nothing.
+@export var drop_item: StringName = &""
+@export_range(1, 10, 1) var drop_amount := 1
+
 @export_group("Attack")
 @export_range(0.0, 20.0, 0.5) var contact_damage := 1.0
 @export_range(0.0, 30.0, 0.5) var knockback := 7.0
