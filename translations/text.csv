@@ -2,7 +2,7 @@ keys,en,it
 HUD_HUB_HINT,Explore the island. Find a portal!,Esplora l'isola. Trova un portale!
 HUD_LEVEL_COMPLETE,Level complete!,Livello completato!
 HUD_NEW_ABILITY,New ability: %s!,Nuova abilità: %s!
-HUD_CONTROLS_FOOT,WASD move · Shift run · Space jump · J attack · E use · K kart · right-click dance · Esc pause,WASD muovi · Shift corri · Spazio salta · J attacca · E usa · K kart · tasto dx balla · Esc pausa
+HUD_CONTROLS_FOOT,WASD move · Shift run · Space jump · J attack · E use · K kart · right-click dance · Esc pause,WASD muovi · Shift corri · Spazio salta · J attacca · E usa · K kart · M mappa · tasto dx balla · Esc pausa
 HUD_CONTROLS_KART,W/S gas/brake · A/D steer · Shift (hold) turbo · Space jump · H horn · E leave · Esc pause,W/S gas/freno · A/D sterza · Shift (tieni) turbo · Spazio salta · H clacson · E scendi · Esc pausa
 PROMPT_LEAVE_KART,E  leave kart,E  scendi dal kart
 PROMPT_ENTER_KART,E  enter kart,E  sali sul kart
@@ -85,3 +85,11 @@ NPC_P_2,The sea between the islands is deep. Karts float though!,Il mare tra le 
 NPC_P_3,We wave at the big island every morning.,Ogni mattina salutiamo l'isola grande.
 NPC_V_10,There is another island far to the east. Drive the kart into the sea: it turns into a submarine!,C'è un'altra isola lontano a est. Guida il kart nel mare: diventa un sottomarino!
 HUD_SUBMARINE,Submarine mode!,Modalità sottomarino!
+MAP_TITLE,Map,Mappa
+MAP_CLOSE,Close (M),Chiudi (M)
+MAP_HOME,Home,Casa
+MAP_KART,Kart,Kart
+TOUCH_MAP,Map,Mappa
+PLACE_VILLAGE,Village,Villaggio
+PLACE_HAMLET,Hamlet,Borgo
+PLACE_PORTO,Porto,Porto

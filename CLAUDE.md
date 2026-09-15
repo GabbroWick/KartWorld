@@ -484,6 +484,16 @@ them, one commit + suite + screenshot each:
    The `picker` screenshot arg only opens the panel: an earlier version
    cycled the hero and changed the human's real save (restored).
 
+6. **Map — DONE**: `WorldMap` (HUD child) paints the islands from
+   `IslandTerrain` on a worker thread (8 m/px, ~2.7 s; cancelled when
+   the terrain leaves the tree) and lists markers (doors, house group
+   `map_home`, villages group `map_village`, hub stars, parked kart).
+   `MapView` draws either the minimap (top-right, 160 m radius, north
+   up, player triangle) or the full map (`M` / touch "Mappa", labels,
+   `GameHUD.set_full_map`). Levels have no map. Hub suite 43 checks.
+7. **Shop**: buy weapons with stars — next.
+8. **Flying kart with wings** (human, 2026-09-15) — after the shop.
+
 ## Next step (Phase 8 — polish, continued)
 
 Decided with the human (2026-09-10): real models from **Kenney** (done for

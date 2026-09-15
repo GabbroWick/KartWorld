@@ -28,6 +28,7 @@ const CAMERA_UP := &"camera_up"
 const CAMERA_DOWN := &"camera_down"
 
 const PAUSE := &"pause"
+const MAP := &"map"
 const TOGGLE_MOUSE_CAPTURE := &"toggle_mouse_capture"
 const DEBUG_TOGGLE_HUD := &"debug_toggle_hud"
 
@@ -37,5 +38,5 @@ const ALL: Array[StringName] = [
 	JUMP, RUN, INTERACT, ATTACK, EMOTE,
 	ACCELERATE, BRAKE, TURBO, SUMMON_KART,
 	CAMERA_LEFT, CAMERA_RIGHT, CAMERA_UP, CAMERA_DOWN,
-	PAUSE, TOGGLE_MOUSE_CAPTURE, DEBUG_TOGGLE_HUD,
+	PAUSE, TOGGLE_MOUSE_CAPTURE, DEBUG_TOGGLE_HUD, MAP,
 ]

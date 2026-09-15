@@ -1,7 +1,7 @@
 extends Node
 ## Loads the main scene, lets it settle, saves a PNG and quits.
 ##
-## Run:  godot --path <project> res://tools/capture_screenshot.tscn -- <out.png> [frames] [drive] [turbo] [talk] [picker] [face=deg] [level=<.tres>] [at=x,y,z] [yaw=deg] [zoom=m]
+## Run:  godot --path <project> res://tools/capture_screenshot.tscn -- <out.png> [frames] [drive] [turbo] [talk] [picker] [map] [face=deg] [level=<.tres>] [at=x,y,z] [yaw=deg] [zoom=m]
 ##
 ## With the optional "drive" word the player summons the kart, gets in and
 ## holds the accelerator for the given frames, so the shot shows driving.
@@ -37,6 +37,11 @@ func _run() -> void:
 		elif arg.begins_with("at="):
 			at = arg.trim_prefix("at=")
 
+	# Never touch the human's real save: play on a scratch copy of it.
+	if FileAccess.file_exists(ProgressionManager.save_path):
+		DirAccess.copy_absolute(ProgressionManager.save_path, "user://screenshot_save.json")
+	ProgressionManager.save_path = "user://screenshot_save.json"
+	ProgressionManager.load_from_disk()
 	await get_tree().process_frame
 	var scene := (load(MAIN_SCENE) as PackedScene).instantiate()
 	get_tree().root.add_child(scene)
@@ -65,6 +70,9 @@ func _run() -> void:
 			(cam as ThirdPersonCamera).set_target(player, true)
 		await _wait(5)
 
+	if user_args.has("map"):
+		(scene.get_node("GameHUD") as CanvasLayer).call(&"set_full_map", true)
+		await _wait(2)
 	if user_args.has("picker"):
 		GameManager.set_paused(true)
 		await _wait(2)

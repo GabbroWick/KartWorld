@@ -1,3 +1,4 @@
+class_name GameHUD
 extends CanvasLayer
 ## The player-facing HUD: health, stars, current objective, interaction prompt.
 ##
@@ -10,6 +11,12 @@ extends CanvasLayer
 @onready var turbo_gauge: TurboGauge = $Root/TopLeft/TopLeftRows/Turbo
 @onready var inventory_label: Label = $Root/TopLeft/TopLeftRows/Inventory
 @onready var fade_rect: ColorRect = $Root/Fade
+@onready var world_map: WorldMap = $WorldMap
+@onready var minimap: MapView = $Root/Minimap
+@onready var full_map: PanelContainer = $Root/FullMap
+@onready var full_map_view: MapView = $Root/FullMap/Rows/View
+@onready var full_map_title: Label = $Root/FullMap/Rows/Title
+@onready var full_map_close: Button = $Root/FullMap/Rows/Close
 @onready var star_row: HBoxContainer = $Root/TopRight/StarRow
 @onready var stars_label: Label = $Root/TopRight/StarRow/Stars
 @onready var objective_label: Label = $Root/TopCenter/Objective
@@ -30,6 +37,12 @@ var _level: LevelController
 
 func _ready() -> void:
 	add_to_group(&"hud")
+	minimap.world_map = world_map
+	full_map_view.world_map = world_map
+	full_map_title.text = tr(&"MAP_TITLE")
+	full_map_close.text = tr(&"MAP_CLOSE")
+	full_map_close.pressed.connect(func() -> void: set_full_map(false))
+	full_map.process_mode = Node.PROCESS_MODE_ALWAYS
 	ProgressionManager.changed.connect(_refresh_inventory)
 	_refresh_inventory()
 
@@ -91,6 +104,22 @@ func fade(seconds: float) -> void:
 	fade_rect.visible = false
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(InputActions.MAP) and minimap.visible:
+		set_full_map(not full_map.visible)
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(InputActions.PAUSE) and full_map.visible:
+		set_full_map(false)
+		get_viewport().set_input_as_handled()
+
+
+## The whole island on screen (M). Only where a map exists (the hub).
+func set_full_map(show: bool) -> void:
+	full_map.visible = show and minimap.visible
+	if full_map.visible:
+		Sfx.play(&"ui", -8.0)
+
+
 func show_notice(text: String) -> void:
 	notice_label.text = text
 	_notice_left = NOTICE_TIME
@@ -119,6 +148,9 @@ func _set_stars_text(text: String) -> void:
 
 
 func _on_hub_loaded() -> void:
+	var terrain := get_tree().get_first_node_in_group(IslandTerrain.GROUP) as IslandTerrain
+	world_map.build_for(terrain)
+	minimap.visible = terrain != null
 	_level = null
 	card.dismiss()
 	objective_label.text = tr(&"HUD_HUB_HINT")
@@ -126,6 +158,8 @@ func _on_hub_loaded() -> void:
 
 
 func _on_level_loaded(_definition: LevelDefinition) -> void:
+	minimap.visible = false
+	full_map.visible = false
 	_level = get_tree().get_first_node_in_group(LevelController.GROUP) as LevelController
 	if _level == null:
 		objective_label.text = ""

@@ -47,6 +47,7 @@ var _rebuild_queued := false
 
 func _ready() -> void:
 	add_to_group(IslandTerrain.FLATTEN_GROUP)
+	add_to_group(&"map_village")
 	rebuild()
 
 

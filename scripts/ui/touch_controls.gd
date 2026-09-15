@@ -73,7 +73,7 @@ func _process(_delta: float) -> void:
 	# Only the pause button stays usable while paused.
 	var paused := GameManager.is_paused
 	for button in buttons.get_children():
-		if button is Control and button.name != "Pause":
+		if button is Control and button.name != "Pause" and button.name != "Map":
 			(button as Control).visible = not paused
 	if paused and (_stick_finger >= 0 or _look_finger >= 0):
 		_touch_ended(_stick_finger)
@@ -87,6 +87,7 @@ func _relabel() -> void:
 	_set_label("Kart", tr(&"TOUCH_KART"))
 	_set_label("Dance", tr(&"TOUCH_HORN") if _driving else tr(&"TOUCH_DANCE"))
 	_set_label("Pause", "II")
+	_set_label("Map", tr(&"TOUCH_MAP"))
 
 
 func _set_label(button_name: String, text: String) -> void:
@@ -184,6 +185,10 @@ func _on_button_down(button_name: String) -> void:
 		"Kart": Input.action_press(InputActions.SUMMON_KART)
 		"Dance": Input.action_press(InputActions.EMOTE)
 		"Pause": GameManager.set_paused(not GameManager.is_paused)
+		"Map":
+			var hud := get_tree().get_first_node_in_group(&"hud")
+			if hud and hud.has_method(&"set_full_map"):
+				hud.call(&"set_full_map", not hud.full_map.visible)
 
 
 func _on_button_up(button_name: String) -> void:

@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" path="res://scenes/gameplay/kitchen.tscn" id="3_kitchen"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/bed.tscn" id="4_bed"]
 
-[node name="House" type="Node3D"]
+[node name="House" type="Node3D" groups=["map_home"]]
 
 [node name="Floor" parent="." instance=ExtResource("1_block")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)

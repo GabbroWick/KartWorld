@@ -12,7 +12,7 @@ var _checks := 0
 var _scene: Node3D
 var _player: CharacterController
 var _manager: LevelManager
-var _hud: CanvasLayer
+var _hud: GameHUD
 
 
 func _ready() -> void:
@@ -32,6 +32,7 @@ func _run() -> void:
 
 	_test_hub_setup()
 	await _test_persistent_star()
+	await _test_map()
 	await _test_character_select()
 	await _test_locked_portal()
 	await _test_unlock_and_enter()
@@ -95,6 +96,42 @@ func _test_character_select() -> void:
 	await _steps(15)
 	_player = GameManager.get_player(0) as CharacterController
 	_check(_player.definition.id == &"leopard", "back to the leopard")
+
+
+func _test_map() -> void:
+	# Minimap in the hub, full map on M, painted from the terrain.
+	_check(_hud.minimap.visible, "minimap is shown in the hub")
+	var waited := 0
+	while not _hud.world_map.is_ready and waited < 900:
+		await _steps(1)
+		waited += 1
+	_check(_hud.world_map.is_ready and _hud.world_map.texture != null, "world map is painted (%d frames)" % waited)
+	var tex_size: Vector2i = _hud.world_map.texture.get_size()
+	_check(tex_size.x > 200 and tex_size.y > 100, "map covers both islands (%dx%d)" % [tex_size.x, tex_size.y])
+	var uv: Vector2 = _hud.world_map.to_uv(Vector3(1500.0, 0.0, -350.0))
+	_check(uv.x > 0.7 and uv.y > 0.1 and uv.y < 0.6, "Porto lands on the right of the map (%.2f, %.2f)" % [uv.x, uv.y])
+	var kinds := {}
+	for m in _hud.world_map.markers():
+		kinds[m["kind"]] = kinds.get(m["kind"], 0) + 1
+	_check(kinds.get("door", 0) == 3 and kinds.get("home", 0) == 1 and kinds.get("village", 0) == 3,
+		"map markers: 3 doors, the house, 3 villages (%s)" % str(kinds))
+	_press_action(InputActions.MAP)
+	await _steps(2)
+	_check(_hud.full_map.visible, "M opens the full map")
+	_press_action(InputActions.MAP)
+	await _steps(2)
+	_check(not _hud.full_map.visible, "M again closes it")
+
+
+func _press_action(action: StringName) -> void:
+	var press := InputEventAction.new()
+	press.action = action
+	press.pressed = true
+	Input.parse_input_event(press)
+	var release := InputEventAction.new()
+	release.action = action
+	release.pressed = false
+	Input.parse_input_event(release)
 
 
 func _test_hub_setup() -> void:

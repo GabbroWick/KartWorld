@@ -37,6 +37,7 @@ func _initialize() -> void:
 		"camera_down": [_key(KEY_DOWN), _axis(JOY_AXIS_RIGHT_Y, 1.0)],
 
 		"pause": [_key(KEY_ESCAPE), _button(JOY_BUTTON_START)],
+		"map": [_key(KEY_M), _button(JOY_BUTTON_BACK)],
 		"toggle_mouse_capture": [_key(KEY_F1)],
 		"debug_toggle_hud": [_key(KEY_F3)],
 	}
