@@ -1,6 +1,8 @@
 class_name Portal
 extends Area3D
-## Walk (or drive) in to travel: to a level from the hub, or back to the hub.
+## A door: it swings open when the player comes close (unless the level is
+## locked) and walking (or driving) through the doorway travels: to a level
+## from the hub, or back to the hub.
 ##
 ## Detection only; the LevelManager does the loading. The portal is inert for
 ## a short grace period after any load so the player never bounces.
@@ -14,11 +16,16 @@ signal activated(by: CharacterController)
 ## ReachDestinationObjective whose goal_zone is this portal) instead of
 ## travelling. The LevelController then shows the card and brings us home.
 @export var completes_level := false
-## Cosmetic ring spin, radians per second.
-@export var spin_speed := 0.6
+## The doors open when the player is closer than this (metres).
+@export_range(1.0, 20.0, 0.5) var open_radius := 6.0
+@export_range(30.0, 120.0, 1.0) var open_degrees := 100.0
 
-@onready var ring: Node3D = $Ring
+@onready var door_left: Node3D = $DoorLeft
+@onready var door_right: Node3D = $DoorRight
 @onready var label: Label3D = $Label
+
+## 0 = shut, 1 = wide open.
+var open_amount := 0.0
 
 var _used := false
 
@@ -70,8 +77,32 @@ func _refresh_label() -> void:
 
 
 func _process(delta: float) -> void:
-	if ring:
-		ring.rotate_y(spin_speed * delta)
+	var player := GameManager.get_player(0) as Node3D
+	var want_open := false
+	if player and not is_locked():
+		var focus := player
+		if player is CharacterController and player.driver.is_driving and player.driver.vehicle:
+			focus = player.driver.vehicle
+		want_open = focus.global_position.distance_to(global_position) < open_radius
+	var before := open_amount
+	open_amount = move_toward(open_amount, 1.0 if want_open else 0.0, delta * 2.5)
+	if open_amount != before:
+		var angle := deg_to_rad(open_degrees) * open_amount
+		door_left.rotation.y = -angle
+		door_right.rotation.y = angle
+		if before == 0.0:
+			Sfx.play(&"ui", -10.0)
+	# Label3D's billboard is a no-op on Compatibility: face the camera by hand.
+	var camera := get_viewport().get_camera_3d()
+	if camera and label:
+		var to_camera := camera.global_position - label.global_position
+		to_camera.y = 0.0
+		if to_camera.length_squared() > 0.001:
+			label.global_basis = Basis.looking_at(-to_camera.normalized(), Vector3.UP)
+
+
+func is_open() -> bool:
+	return open_amount > 0.5
 
 
 func _on_body_entered(body: Node3D) -> void:

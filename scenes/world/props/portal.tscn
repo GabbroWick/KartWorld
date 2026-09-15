@@ -4,47 +4,43 @@
 [ext_resource type="PackedScene" path="res://scenes/world/props/placeholder_block.tscn" id="2_block"]
 [ext_resource type="Shader" path="res://shaders/portal_swirl.gdshader" id="3_swirl"]
 
-[sub_resource type="StandardMaterial3D" id="mat_ring"]
-albedo_color = Color(0.85, 0.75, 0.3, 1)
-metallic_specular = 0.0
-roughness = 1.0
-
 [sub_resource type="ShaderMaterial" id="mat_surface"]
 shader = ExtResource("3_swirl")
 
-[sub_resource type="StandardMaterial3D" id="mat_spark"]
-shading_mode = 0
-vertex_color_use_as_albedo = true
-albedo_color = Color(1, 0.95, 0.7, 1)
-billboard_mode = 3
-particles_anim_h_frames = 1
-particles_anim_v_frames = 1
-particles_anim_loop = false
+[sub_resource type="StandardMaterial3D" id="mat_door"]
+albedo_color = Color(0.62, 0.4, 0.22, 1)
+metallic_specular = 0.0
+roughness = 1.0
+emission_enabled = true
+emission = Color(0.62, 0.4, 0.22, 1)
+emission_energy_multiplier = 0.28
 
-[sub_resource type="QuadMesh" id="mesh_spark"]
-material = SubResource("mat_spark")
-size = Vector2(0.12, 0.12)
+[sub_resource type="StandardMaterial3D" id="mat_knob"]
+albedo_color = Color(0.95, 0.8, 0.3, 1)
+metallic_specular = 0.0
+roughness = 1.0
+emission_enabled = true
+emission = Color(0.95, 0.8, 0.3, 1)
+emission_energy_multiplier = 0.28
 
-[sub_resource type="TorusMesh" id="mesh_ring"]
-material = SubResource("mat_ring")
-inner_radius = 1.7
-outer_radius = 2.1
-rings = 24
-ring_segments = 12
+[sub_resource type="BoxMesh" id="mesh_leaf"]
+material = SubResource("mat_door")
+size = Vector3(1.2, 3.2, 0.14)
 
-[sub_resource type="CylinderMesh" id="mesh_surface"]
+[sub_resource type="SphereMesh" id="mesh_knob"]
+material = SubResource("mat_knob")
+radius = 0.09
+height = 0.18
+
+[sub_resource type="QuadMesh" id="mesh_surface"]
 material = SubResource("mat_surface")
-top_radius = 1.7
-bottom_radius = 1.7
-height = 0.08
-radial_segments = 24
-rings = 1
+size = Vector2(2.4, 3.2)
 
 [sub_resource type="BoxShape3D" id="shape_trigger"]
-size = Vector3(3.2, 3.6, 1.2)
+size = Vector3(2.4, 3.6, 0.8)
 
-[sub_resource type="BoxShape3D" id="shape_frame"]
-size = Vector3(0.5, 4.2, 0.5)
+[sub_resource type="BoxShape3D" id="shape_leaf"]
+size = Vector3(1.2, 3.2, 0.14)
 
 [node name="Portal" type="Area3D" groups=["portal"]]
 collision_layer = 8
@@ -52,59 +48,78 @@ collision_mask = 18
 script = ExtResource("1_portal")
 
 [node name="Trigger" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, -0.3)
 shape = SubResource("shape_trigger")
 
-[node name="Ring" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0)
-
-[node name="Torus" type="MeshInstance3D" parent="Ring"]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0)
-mesh = SubResource("mesh_ring")
-
-[node name="Surface" type="MeshInstance3D" parent="Ring"]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0)
+[node name="Inside" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -0.35)
 mesh = SubResource("mesh_surface")
 
-[node name="Sparks" type="CPUParticles3D" parent="Ring"]
-amount = 24
-lifetime = 1.6
-mesh = SubResource("mesh_spark")
-emission_shape = 3
-emission_ring_axis = Vector3(0, 0, 1)
-emission_ring_height = 0.1
-emission_ring_radius = 1.9
-emission_ring_inner_radius = 1.6
-direction = Vector3(0, 1, 0)
-spread = 30.0
-gravity = Vector3(0, 0.6, 0)
-initial_velocity_min = 0.2
-initial_velocity_max = 0.6
-scale_amount_min = 0.6
-scale_amount_max = 1.4
-color = Color(1, 0.95, 0.7, 1)
+[node name="DoorLeft" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 1.6, 0)
 
-[node name="PillarLeft" type="StaticBody3D" parent="."]
+[node name="Leaf" type="StaticBody3D" parent="DoorLeft"]
 collision_layer = 1
 collision_mask = 0
 
-[node name="Mesh" parent="PillarLeft" instance=ExtResource("2_block")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 2.1, 0)
-size = Vector3(0.5, 4.2, 0.5)
-color = Color(0.6, 0.58, 0.62, 1)
+[node name="Mesh" type="MeshInstance3D" parent="DoorLeft/Leaf"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 0, 0)
+mesh = SubResource("mesh_leaf")
 
-[node name="PillarRight" type="StaticBody3D" parent="."]
+[node name="Knob" type="MeshInstance3D" parent="DoorLeft/Leaf"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.05, -0.1, 0.12)
+mesh = SubResource("mesh_knob")
+
+[node name="Shape" type="CollisionShape3D" parent="DoorLeft/Leaf"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 0, 0)
+shape = SubResource("shape_leaf")
+
+[node name="DoorRight" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 1.6, 0)
+
+[node name="Leaf" type="StaticBody3D" parent="DoorRight"]
 collision_layer = 1
 collision_mask = 0
 
-[node name="Mesh" parent="PillarRight" instance=ExtResource("2_block")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 2.1, 0)
-size = Vector3(0.5, 4.2, 0.5)
+[node name="Mesh" type="MeshInstance3D" parent="DoorRight/Leaf"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 0, 0)
+mesh = SubResource("mesh_leaf")
+
+[node name="Knob" type="MeshInstance3D" parent="DoorRight/Leaf"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.05, -0.1, 0.12)
+mesh = SubResource("mesh_knob")
+
+[node name="Shape" type="CollisionShape3D" parent="DoorRight/Leaf"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 0, 0)
+shape = SubResource("shape_leaf")
+
+[node name="Frame" type="StaticBody3D" parent="."]
+collision_layer = 1
+collision_mask = 0
+
+[node name="PostLeft" parent="Frame" instance=ExtResource("2_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.45, 1.7, 0)
+size = Vector3(0.5, 3.4, 0.6)
 color = Color(0.6, 0.58, 0.62, 1)
+
+[node name="PostRight" parent="Frame" instance=ExtResource("2_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.45, 1.7, 0)
+size = Vector3(0.5, 3.4, 0.6)
+color = Color(0.6, 0.58, 0.62, 1)
+
+[node name="Lintel" parent="Frame" instance=ExtResource("2_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.65, 0)
+size = Vector3(3.4, 0.5, 0.6)
+color = Color(0.6, 0.58, 0.62, 1)
+
+[node name="Back" parent="Frame" instance=ExtResource("2_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, -0.75)
+size = Vector3(3.4, 3.4, 0.3)
+color = Color(0.5, 0.48, 0.55, 1)
 
 [node name="Label" type="Label3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.7, 0)
-billboard = 1
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.4, 0)
 text = "?"
 font_size = 96
 outline_size = 16
+double_sided = false

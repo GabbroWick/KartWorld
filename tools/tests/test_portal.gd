@@ -69,9 +69,17 @@ func _test_grace() -> void:
 	_player.global_position = portal.global_position + Vector3.UP * 0.3
 	await _steps(10)
 	_check(_manager.is_in_hub(), "portal ignores the player during the grace period")
-	_player.global_position = portal.global_position + Vector3(0, 0.3, 6.0)
-	_player.motor.reset()
+	_stand_before(portal, 6.0)
 	await _steps(5)
+
+
+## Doors have a front: stand `distance` metres in front of it, camera
+## looking at it, so move_forward walks through the doorway.
+func _stand_before(portal: Portal, distance: float) -> void:
+	var front := portal.global_basis.z
+	_player.global_position = portal.global_position + front * distance + Vector3.UP * 0.3
+	_player.motor.reset()
+	_camera_rig.set_yaw(atan2(front.x, front.z))
 
 
 func _test_enter_level() -> void:
@@ -85,8 +93,7 @@ func _test_enter_level() -> void:
 		loaded[0] = d
 		arrival[0] = _player.global_position)
 
-	# Walk into it (camera facing -Z, portal is 6 m ahead at -Z).
-	_camera_rig.set_yaw(0.0)
+	# Walk into it (standing 6 m in front of the door, facing it).
 	await _hold(&"move_forward", 90)
 	await _steps(10)
 	_check(fired[0], "walking into the portal activates it")
@@ -125,9 +132,7 @@ func _test_return() -> void:
 	_manager._loaded_at = -1000.0
 	var arrival := [Vector3.ZERO]
 	_manager.hub_loaded.connect(func() -> void: arrival[0] = _player.global_position)
-	_player.global_position = portal.global_position + Vector3(0, 0.3, 5.0)
-	_player.motor.reset()
-	_camera_rig.set_yaw(0.0)
+	_stand_before(portal, 5.0)
 	await _steps(5)
 	await _hold(&"move_forward", 80)
 	await _steps(10)
@@ -149,8 +154,9 @@ func _test_drive_through() -> void:
 	var portal: Portal = _manager.world.find_children("*", "Portal", true, false)[0]
 	_manager._loaded_at = -1000.0
 	var kart := _player.driver.vehicle
-	kart.place(Transform3D(Basis.IDENTITY, portal.global_position + Vector3(0, 0.3, 8.0)))
-	_player.global_position = kart.global_position + Vector3(2.0, 0.3, 0.0)
+	var front := portal.global_basis.z
+	kart.place(Transform3D(Basis.looking_at(-front, Vector3.UP), portal.global_position + front * 8.0 + Vector3.UP * 0.3))
+	_player.global_position = kart.global_position + portal.global_basis.x * 2.0 + Vector3.UP * 0.3
 	_player.motor.reset()
 	await _steps(5)
 	await _press(InputActions.INTERACT)

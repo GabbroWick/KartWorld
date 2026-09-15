@@ -130,7 +130,8 @@ ramp_at = PackedFloat32Array(0.3, 0.55, 0.8)
 
 scene += block("StartPad", 135, 3.2, -172, 20, 1, 24, ROCK2)
 scene += '''[node name="ReturnPortal" parent="." instance=ExtResource("3_portal")]
-transform = Transform3D(0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, 0.7071, 142, 3.2, -180)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 142, 3.2, -182)
+rotation_degrees = Vector3(0, 30, 0)
 returns_to_hub = true
 
 [node name="StarTrack" parent="." instance=ExtResource("4_star")]
@@ -218,7 +219,8 @@ size = Vector3(6, 0.1, 6)
 color = Color(1, 0.85, 0.3, 1)
 
 [node name="GoalPortal" parent="." instance=ExtResource("3_portal")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -61, 33, -150)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -61, 33, -150)
+rotation_degrees = Vector3(0, 90, 0)
 completes_level = true
 '''
 open("scenes/levels/level_03_volcano.tscn", "w", encoding="utf-8", newline="\n").write(scene)

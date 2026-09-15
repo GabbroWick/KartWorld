@@ -212,6 +212,9 @@ func _test_finish() -> void:
 	_check(done[0] == -1, "level not complete before reaching the crater portal")
 	_check(_hud.objective_label.text == tr(&"OBJ_REACH_CRATER"), "HUD moves on to the portal objective (%s)" % _hud.objective_label.text)
 	_camera_rig.set_yaw(PI * 0.5)
+	var portal := _world.get_node("GoalPortal") as Portal
+	await _hold(InputActions.MOVE_FORWARD, 30)
+	_check(portal.is_open(), "the crater door opens as the player comes close (%.2f)" % portal.open_amount)
 	await _hold(InputActions.MOVE_FORWARD, 60)
 	await _steps(5)
 	_check(done[0] == 1, "entering the crater portal completes Vulcano with 1 star (got %d)" % done[0])

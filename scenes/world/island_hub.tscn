@@ -165,6 +165,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 4, 80)
 
 [node name="PortalSite" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 4, 130)
+rotation_degrees = Vector3(0, 134, 0)
 
 [node name="Plinth" parent="PortalSite" instance=ExtResource("5_block")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
@@ -179,7 +180,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
 level = ExtResource("11_level")
 
 [node name="PortalSite2" type="Node3D" parent="."]
-transform = Transform3D(0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, 0.7071, -80, 4, 110)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -80, 4, 110)
+rotation_degrees = Vector3(0, 97, 0)
 
 [node name="Plinth" parent="PortalSite2" instance=ExtResource("5_block")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
@@ -191,7 +193,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
 level = ExtResource("14_level2")
 
 [node name="PortalSite3" type="Node3D" parent="."]
-transform = Transform3D(0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, 0.7071, 130, 4, 150)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 130, 4, 150)
+rotation_degrees = Vector3(0, -130, 0)
 
 [node name="Plinth" parent="PortalSite3" instance=ExtResource("5_block")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
