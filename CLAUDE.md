@@ -378,8 +378,12 @@ Plan, one verifiable step at a time (commit + suites + screenshot each):
    (NoiseTexture2D as `sky_cover`), exponential horizon fog on hub
    (0.0009) and Vulcano (0.0025, reddish) so the streaming edge fades.
    Lighting suite probe moved onto the house pad's built tile (the huge
-   island's far tiles buried it). Still open: grass patches, ambient
-   particles, portal glow, camera collision smoothing, HUD polish.
+   island's far tiles buried it). Second step (same day): portal surface
+   is `shaders/portal_swirl.gdshader` (unshaded vortex) with a ring of
+   rising sparks (CPUParticles3D in portal.tscn); glowing Hazards (lava)
+   use `shaders/lava.gdshader` (drifting crust over a bright core, no
+   texture). Still open: grass patches, ambient particles, camera
+   collision smoothing, HUD polish, Android native export.
 
 Rules: nothing hand-placed that a scatter/path can do; every new mechanic
 is a component or scene; keep suites green; Italian strings in the CSV.

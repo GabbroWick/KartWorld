@@ -47,11 +47,15 @@ func _apply() -> void:
 		return
 	var box := BoxMesh.new()
 	box.size = size
-	var material := FlatMaterial.flat(color)
+	var material: Material
 	if glow > 0.0:
-		material.emission_enabled = true
-		material.emission = color
-		material.emission_energy_multiplier = glow
+		# Glowing = lava: the animated crust shader (top face reads best).
+		var lava := ShaderMaterial.new()
+		lava.shader = load("res://shaders/lava.gdshader")
+		lava.set_shader_parameter(&"core_color", color)
+		material = lava
+	else:
+		material = FlatMaterial.flat(color)
 	box.material = material
 	mesh_instance.mesh = box
 	var b := BoxShape3D.new()
