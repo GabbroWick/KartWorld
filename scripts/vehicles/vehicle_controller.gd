@@ -10,6 +10,7 @@ extends CharacterBody3D
 signal driver_entered(driver: Node)
 signal driver_exited(driver: Node)
 signal fell_out_of_world
+signal honked
 
 @export var definition: VehicleDefinition
 ## Below this height the vehicle is considered fallen out of the world.
@@ -43,6 +44,12 @@ func _ready() -> void:
 	_apply_definition()
 
 
+## Beep beep. NPC drivers may use it too.
+func honk() -> void:
+	Sfx.play(&"horn", -4.0)
+	honked.emit()
+
+
 func _on_bumped(_other: Node3D) -> void:
 	Sfx.play(&"hit", -8.0)
 
@@ -58,6 +65,8 @@ func _physics_process(delta: float) -> void:
 
 	var speed_multiplier := 1.0
 	var acceleration_multiplier := 1.0
+	if input.horn_pressed:
+		honk()
 	if turbo:
 		turbo.set_boosting(input.turbo_held)
 		speed_multiplier = turbo.get_speed_multiplier()

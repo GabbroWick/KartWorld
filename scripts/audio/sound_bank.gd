@@ -27,6 +27,8 @@ static func build(name: StringName) -> AudioStreamWAV:
 		&"portal": return _sweep(0.6, 200.0, 1400.0, 0.4)
 		&"turbo": return _mix([_sweep(0.5, 150.0, 900.0, 0.5), _noise(0.5, 0.25, 4000.0)])
 		&"ui": return _sweep(0.05, 900.0, 1200.0, 0.3)
+		# Two-tone car horn: a fifth, held.
+		&"horn": return _mix([_sweep(0.45, 440.0, 440.0, 0.45), _sweep(0.45, 660.0, 660.0, 0.35)])
 		&"engine": return _engine_loop()
 	return null
 

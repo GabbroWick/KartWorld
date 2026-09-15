@@ -422,6 +422,22 @@ Plan, one verifiable step at a time (commit + suites + screenshot each):
 Rules: nothing hand-placed that a scatter/path can do; every new mechanic
 is a component or scene; keep suites green; Italian strings in the CSV.
 
+## Phase 10 — the designer's wishlist (started 2026-09-15)
+
+Requests from the human (the 8-year-old designer), in the order we build
+them, one commit + suite + screenshot each:
+
+1. **Horn** on the kart (action `horn`, key H / touch button) — DONE.
+2. **Character select**: play as leopard, fox or panda; the other two
+   become NPCs (the leopard is an NPC when not chosen). Pause menu →
+   "Personaggio"; saved in the progression file.
+3. **Doors instead of portals**: a level entrance is a door that opens
+   when the player comes close and is entered by walking through.
+4. **The house is enterable**: kitchen, bed (sleep = night skip / heal),
+   food loop: fruit from trees, animals to hunt, cook in the kitchen.
+5. **More islands**: the kart turns into a submarine on the water
+   (cockpit closes, propellers out) to reach them.
+
 ## Next step (Phase 8 — polish, continued)
 
 Decided with the human (2026-09-10): real models from **Kenney** (done for

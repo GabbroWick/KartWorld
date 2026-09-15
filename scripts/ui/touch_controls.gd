@@ -85,7 +85,7 @@ func _relabel() -> void:
 	_set_label("Action", tr(&"TOUCH_TURBO") if _driving else tr(&"TOUCH_ATTACK"))
 	_set_label("Use", tr(&"TOUCH_USE"))
 	_set_label("Kart", tr(&"TOUCH_KART"))
-	_set_label("Dance", tr(&"TOUCH_DANCE"))
+	_set_label("Dance", tr(&"TOUCH_HORN") if _driving else tr(&"TOUCH_DANCE"))
 	_set_label("Pause", "II")
 
 

@@ -47,6 +47,7 @@ func _run() -> void:
 	await _test_brake_and_reverse()
 	await _test_camera_align()
 	await _test_turbo()
+	await _test_horn()
 	await _test_bump()
 	await _test_jump()
 	await _test_wall()
@@ -230,6 +231,15 @@ func _test_turbo() -> void:
 	await _steps(int(_kart.definition.turbo_cooldown * 60.0) + 10)
 	_check(_kart.turbo.charge > 0.95, "gauge refills to full (%.2f)" % _kart.turbo.charge)
 	await _steps(30)
+
+
+func _test_horn() -> void:
+	Sfx.clear_log()
+	var honks := [0]
+	_kart.honked.connect(func() -> void: honks[0] += 1)
+	await _press(InputActions.EMOTE)
+	await _steps(2)
+	_check(honks[0] == 1 and Sfx.played.has(&"horn"), "H at the wheel honks the horn")
 
 
 func _test_bump() -> void:
