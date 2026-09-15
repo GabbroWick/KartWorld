@@ -55,6 +55,7 @@ func _run() -> void:
 	await _test_kart_parked_still()
 	await _test_kart_on_terrain()
 	await _test_kart_climbs_mountain()
+	await _test_road_jumps()
 	await _test_npcs_alive()
 	await _test_sea()
 	_finish()
@@ -98,6 +99,63 @@ func _test_kart_climbs_mountain() -> void:
 	# flank it cannot match fully; it must still lean the right way.
 	_check(agreement > 0.85, "kart model's up follows the terrain normal (dot %.3f)" % agreement)
 	_check(kart.is_on_floor(), "kart still on the ground on the hillside")
+	await _hold(InputActions.INTERACT, 3)
+	await _steps(20)
+
+
+func _test_road_jumps() -> void:
+	# Ramps and star arcs along the road rings, placed by RoadDressing.
+	var dressing := (_scene.get("world") as Node).get_node_or_null("RoadJumps") as RoadDressing
+	_check(dressing != null, "hub has a RoadJumps dressing node")
+	if dressing == null:
+		return
+	_check(dressing.ramps.size() >= 12, "road dressing placed ramps (%d)" % dressing.ramps.size())
+	_check(dressing.stars.size() == dressing.ramps.size() * dressing.stars_per_ramp,
+		"every ramp has its star arc (%d stars)" % dressing.stars.size())
+	var on_road := 0
+	var level := 0
+	for ramp in dressing.ramps:
+		var p := ramp.global_position
+		if _terrain.is_on_road(p.x, p.z):
+			on_road += 1
+		var back := p + ramp.global_basis.z * 5.0
+		var front := p - ramp.global_basis.z * 5.0
+		if absf(_terrain.sample_height(back.x, back.z) - _terrain.sample_height(front.x, front.z)) < 2.0:
+			level += 1
+	_check(on_road == dressing.ramps.size(), "all ramps sit on the road (%d/%d)" % [on_road, dressing.ramps.size()])
+	_check(level == dressing.ramps.size(), "all ramps on level stretches (%d/%d)" % [level, dressing.ramps.size()])
+	var ids := {}
+	for star in dressing.stars:
+		ids[(star as Collectible).persistent_id] = true
+	_check(ids.size() == dressing.stars.size(), "road stars have unique persistent ids")
+	# Drive over the first ramp at speed: the kart must leave the ground.
+	var ramp: Node3D = dressing.ramps[0]
+	var forward := -ramp.global_basis.z
+	var start := ramp.global_position - forward * 40.0
+	start.y = _terrain.sample_height(start.x, start.z) + 0.3
+	_ensure_ground(ramp.global_position)
+	_ensure_ground(start)
+	var kart := _player.driver.vehicle
+	kart.place(Transform3D(Basis.looking_at(forward, Vector3.UP), start))
+	_player.global_position = start + Vector3(2.0, 0.5, 0.0)
+	_player.motor.reset()
+	await _steps(10)
+	await _hold(InputActions.INTERACT, 3)
+	await _steps(3)
+	_check(_player.driver.is_driving, "in the kart before the ramp")
+	var airborne := 0
+	var top := -INF
+	Input.action_press(InputActions.ACCELERATE)
+	for i in 240:
+		await _steps(1)
+		if not kart.is_on_floor():
+			airborne += 1
+		var h := kart.global_position.y - _terrain.sample_height(kart.global_position.x, kart.global_position.z)
+		top = maxf(top, h)
+	Input.action_release(InputActions.ACCELERATE)
+	var passed := (kart.global_position - ramp.global_position).dot(forward)
+	_check(passed > 5.0, "kart drives over the ramp (%.1f m past it)" % passed)
+	_check(airborne >= 8 and top > 1.4, "kart jumps off the ramp (%d frames in the air, %.1f m high)" % [airborne, top])
 	await _hold(InputActions.INTERACT, 3)
 	await _steps(20)
 

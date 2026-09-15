@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d1pi6erv64ymx"
-path="res://.godot/imported/kart_v2.png-903e53354bed874cbf7b34bdc15138d3.ctex"
+uid="uid://fgb5hmusbdug"
+path="res://.godot/imported/web_check.png-4bf9f939dcdb4f346189b03e7848525b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://kart_v2.png"
-dest_files=["res://.godot/imported/kart_v2.png-903e53354bed874cbf7b34bdc15138d3.ctex"]
+source_file="res://web_check.png"
+dest_files=["res://.godot/imported/web_check.png-4bf9f939dcdb4f346189b03e7848525b.ctex"]
 
 [params]
 

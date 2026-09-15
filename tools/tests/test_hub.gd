@@ -39,9 +39,10 @@ func _run() -> void:
 	_finish()
 
 
+## The five hand-placed hub stars (road-jump stars are RoadDressing's).
 func _hub_stars() -> Array:
 	return get_tree().get_nodes_in_group(&"star").filter(
-		func(s: Node) -> bool: return (s as Collectible).persistent_id != &"")
+		func(s: Node) -> bool: return (s as Collectible).persistent_id.begins_with("hub_star_"))
 
 
 func _portals() -> Array:

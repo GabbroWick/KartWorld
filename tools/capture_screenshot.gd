@@ -46,7 +46,15 @@ func _run() -> void:
 	if at != "":
 		var parts := at.split(",")
 		var player := GameManager.get_player(0) as CharacterController
-		player.global_position = Vector3(float(parts[0]), float(parts[1]), float(parts[2]))
+		var target := Vector3(float(parts[0]), float(parts[1]), float(parts[2]))
+		# Streaming terrain: build the tiles there first or the player falls.
+		var terrain := get_tree().get_first_node_in_group(IslandTerrain.GROUP) as IslandTerrain
+		if terrain and terrain.streaming:
+			terrain.set_focus(target)
+			for dx in [-1, 0, 1]:
+				for dz in [-1, 0, 1]:
+					terrain.ensure_built_at(target.x + dx * terrain.chunk_size, target.z + dz * terrain.chunk_size)
+		player.global_position = target
 		player.motor.reset()
 		player.visual_root.global_rotation.y = 0.0
 		for cam in scene.find_children("*", "ThirdPersonCamera", true, false):

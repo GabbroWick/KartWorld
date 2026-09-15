@@ -29,6 +29,7 @@ var turbo: TurboAbility
 var _seated: Node3D
 var _visual_instance: Node3D
 var _camera_reversed := false
+var _terrain: IslandTerrain
 
 
 func _ready() -> void:
@@ -40,6 +41,12 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	# Parked on a streamed-out tile (the player walked far away): wait for
+	# the ground to come back instead of falling through it, which would
+	# "lose" the kart and drag the player back to the spawn.
+	if driver == null and _is_ground_unloaded():
+		velocity = Vector3.ZERO
+		return
 	input.poll()
 
 	var speed_multiplier := 1.0
@@ -65,6 +72,14 @@ func _physics_process(delta: float) -> void:
 
 	if global_position.y < fall_limit:
 		fell_out_of_world.emit()
+
+
+func _is_ground_unloaded() -> bool:
+	if _terrain == null or not is_instance_valid(_terrain):
+		_terrain = get_tree().get_first_node_in_group(IslandTerrain.GROUP) as IslandTerrain
+		if _terrain == null:
+			return false
+	return _terrain.streaming and not _terrain.is_built_at(global_position.x, global_position.z)
 
 
 ## The physics body stays an upright box; the model is a visual suspension:

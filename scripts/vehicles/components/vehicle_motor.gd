@@ -33,6 +33,13 @@ func setup(vehicle_body: CharacterBody3D, vehicle_definition: VehicleDefinition,
 	body.floor_constant_speed = true
 
 
+## Slope needed (tan) before a crest counts as a jump; ~7 deg.
+const MIN_LAUNCH_TANGENT := 0.12
+const MIN_LAUNCH_SPEED := 6.0
+
+var _uphill_tangent := 0.0
+
+
 func drive(delta: float, throttle: float, steer: float, jump_requested: bool,
 		speed_multiplier: float = 1.0, acceleration_multiplier: float = 1.0) -> void:
 	var was_on_floor := body.is_on_floor()
@@ -60,8 +67,26 @@ func drive(delta: float, throttle: float, steer: float, jump_requested: bool,
 
 func reset() -> void:
 	speed = 0.0
+	_uphill_tangent = 0.0
 	if body:
 		body.velocity = Vector3.ZERO
+
+
+## Ramps and crests: driving up a slope carries vertical momentum; when the
+## ground flattens or drops away the kart keeps it and flies (arcade
+## `launch_factor` on top). Floor snapping is off while rising so
+## move_and_slide does not pull it back down. Returns true when launched.
+func _crest_launch() -> bool:
+	var forward := -body.global_basis.z
+	var normal := body.get_floor_normal()
+	var uphill := -forward.dot(normal) / maxf(normal.y, 0.2)   # tan(slope ahead)
+	var launched := false
+	if _uphill_tangent > MIN_LAUNCH_TANGENT and uphill < 0.04 \
+			and absf(speed) > MIN_LAUNCH_SPEED:
+		body.velocity.y = absf(speed) * minf(_uphill_tangent, 0.6) * definition.launch_factor
+		launched = true
+	_uphill_tangent = uphill if uphill > 0.0 else 0.0
+	return launched
 
 
 func get_gravity_strength() -> float:
@@ -106,8 +131,13 @@ func _apply_vertical(delta: float, on_floor: bool, jump_requested: bool) -> void
 		if jump_requested and abilities.has(&"vehicle_jump"):
 			body.velocity.y = get_jump_velocity()
 			jumped.emit()
+		elif _crest_launch():
+			pass
 		elif body.velocity.y < 0.0:
 			body.velocity.y = -2.0
+		# Floor snapping would glue a launched kart back to the slope.
+		body.floor_snap_length = 0.0 if body.velocity.y > 0.5 else 0.8
 		return
+	body.floor_snap_length = 0.8
 	body.velocity.y -= get_gravity_strength() * delta
 	body.velocity.y = maxf(body.velocity.y, -definition.terminal_velocity)

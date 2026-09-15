@@ -306,6 +306,55 @@ func road_length() -> float:
 	return total
 
 
+## Length of one road: -1 = main loop, 0.. = extra road index.
+func road_length_of(road: int) -> float:
+	var entry := _road_entry(road)
+	if entry.is_empty():
+		return 0.0
+	var pts: PackedVector2Array = entry[0]
+	var n := pts.size()
+	var total := 0.0
+	for i in (n if entry[1] else n - 1):
+		total += pts[i].distance_to(pts[(i + 1) % n])
+	return total
+
+
+## Pose `distance` metres along a road: origin on the (smoothed) road
+## surface, -Z along the driving direction, Y up. Wraps on loops.
+func road_pose(road: int, distance: float) -> Transform3D:
+	var entry := _road_entry(road)
+	if entry.is_empty():
+		return Transform3D.IDENTITY
+	var pts: PackedVector2Array = entry[0]
+	var closed: bool = entry[1]
+	var n := pts.size()
+	var segments := n if closed else n - 1
+	var total := road_length_of(road)
+	distance = fposmod(distance, total) if closed else clampf(distance, 0.0, total)
+	var walked := 0.0
+	for i in segments:
+		var a := pts[i]
+		var b := pts[(i + 1) % n]
+		var seg := a.distance_to(b)
+		if walked + seg >= distance or i == segments - 1:
+			var t := clampf((distance - walked) / maxf(seg, 0.001), 0.0, 1.0)
+			var q := a.lerp(b, t)
+			var dir := (b - a).normalized()
+			var forward := Vector3(dir.x, 0.0, dir.y)
+			var origin := Vector3(q.x, sample_height(q.x, q.y), q.y)
+			return Transform3D(Basis.looking_at(forward, Vector3.UP), origin)
+		walked += seg
+	return Transform3D.IDENTITY
+
+
+func _road_entry(road: int) -> Array:
+	if road < 0:
+		return [road_points, true] if road_points.size() >= 2 else []
+	if road < extra_roads.size() and extra_roads[road].size() >= 2:
+		return [extra_roads[road], extra_roads_closed[road] if road < extra_roads_closed.size() else true]
+	return []
+
+
 ## [[points, closed], ...] for the main loop and the extra roads.
 func _all_roads() -> Array:
 	var result := []

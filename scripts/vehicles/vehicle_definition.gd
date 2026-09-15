@@ -45,6 +45,9 @@ extends Resource
 
 @export_group("Jump")
 @export_range(0.2, 10.0, 0.1) var jump_height := 1.6
+## Vertical momentum kept when a slope ends (ramps, crests): 1 = physical,
+## more = bigger arcade jumps.
+@export_range(0.0, 4.0, 0.1) var launch_factor := 1.6
 @export_range(0.1, 5.0, 0.05) var gravity_scale := 1.0
 @export_range(1.0, 100.0, 1.0) var terminal_velocity := 40.0
 

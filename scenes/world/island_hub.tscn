@@ -1,4 +1,4 @@
-[gd_scene load_steps=54 format=3]
+[gd_scene load_steps=56 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/props/island_terrain.tscn" id="1_terrain"]
 [ext_resource type="PackedScene" path="res://scenes/world/props/house.tscn" id="2_house"]
@@ -54,6 +54,8 @@
 [ext_resource type="PackedScene" path="res://assets/models/kenney/modular-buildings/building-sample-tower-a.glb" id="32_t2"]
 [ext_resource type="PackedScene" path="res://scenes/vehicles/vehicle.tscn" id="33_vehicle"]
 [ext_resource type="Resource" path="res://resources/vehicles/basic_kart.tres" id="34_kart"]
+[ext_resource type="Script" path="res://scripts/world/road_dressing.gd" id="30_dressing"]
+[ext_resource type="PackedScene" path="res://scenes/world/props/ramp.tscn" id="31_ramp"]
 
 [sub_resource type="ProceduralSkyMaterial" id="sky_material"]
 sky_top_color = Color(0.2, 0.48, 0.86, 1)
@@ -159,6 +161,16 @@ color = Color(0.6, 0.58, 0.62, 1)
 [node name="Portal" parent="PortalSite2" instance=ExtResource("10_portal")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
 level = ExtResource("14_level2")
+
+[node name="RoadJumps" type="Node3D" parent="."]
+script = ExtResource("30_dressing")
+ramp_scene = ExtResource("31_ramp")
+star_scene = ExtResource("13_star")
+roads = Array[int]([-1, 0, 1])
+spacing = 450.0
+offset = 150.0
+stars_per_ramp = 3
+dressing_seed = 4
 
 [node name="HubStars" type="Node3D" parent="."]
 
