@@ -500,7 +500,16 @@ them, one commit + suite + screenshot each:
    `CharacterCombat._apply_weapon` scales damage/reach or throws;
    `RiggedCharacterVisual.set_weapon_visual` puts a primitive weapon in
    the RightHand bone. Combat suite 55 checks.
-8. **Flying kart with wings** (human, 2026-09-15) — after the shop.
+8. **Flying kart — DONE**: "Ali per il kart" is a shop upgrade (5★,
+   `Weapons.UPGRADES`, `ProgressionManager.owned_upgrades`). With wings,
+   a jump at speed (> 6 m/s, 0.2 s in the air) puts `VehicleMotor` in
+   flight: throttle climbs 6 m/s, brake dives, else a slow glide; ceiling
+   90 m over the ground (`ground_height_hint` from the controller);
+   touching a floor lands; splashing into deep water becomes the
+   submarine, and jumping from the submarine at speed takes off again.
+   `AiVehicleVisual.set_flying` swings two wing panels out of the sides
+   (bank with the steering). No getting out in the air. Kart suite 80
+   checks; `capture_screenshot` `fly` arg.
 
 ## Next step (Phase 8 — polish, continued)
 

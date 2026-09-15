@@ -30,6 +30,8 @@ var stars_spent := 0
 ## Weapons bought (Weapons catalogue ids) and the one in the hand. Saved.
 var owned_weapons: Array[StringName] = []
 var equipped_weapon: StringName = &""
+## Kart upgrades bought in the shop (wings...). Saved.
+var owned_upgrades: Array[StringName] = []
 ## Persistent collectibles picked up, id -> {"kind": String, "amount": int}.
 var collected: Dictionary = {}
 
@@ -130,6 +132,24 @@ func buy_weapon(id: StringName) -> bool:
 	return true
 
 
+func owns_upgrade(id: StringName) -> bool:
+	return id in owned_upgrades
+
+
+## Buys a kart upgrade (Weapons.UPGRADES) if the wallet allows.
+func buy_upgrade(id: StringName) -> bool:
+	if not Weapons.UPGRADES.has(id) or owns_upgrade(id):
+		return false
+	var cost := int(Weapons.UPGRADES[id]["price"])
+	if get_available_stars() < cost:
+		return false
+	stars_spent += cost
+	owned_upgrades.append(id)
+	save_to_disk()
+	changed.emit()
+	return true
+
+
 ## Puts an owned weapon (or paws, `&""`) in the hand.
 func equip_weapon(id: StringName) -> void:
 	if id != &"" and not owns_weapon(id):
@@ -178,6 +198,7 @@ func reset() -> void:
 	stars_spent = 0
 	owned_weapons.clear()
 	equipped_weapon = &""
+	owned_upgrades.clear()
 	if FileAccess.file_exists(save_path):
 		DirAccess.remove_absolute(save_path)
 	changed.emit()
@@ -194,6 +215,7 @@ func save_to_disk() -> void:
 		"stars_spent": stars_spent,
 		"owned_weapons": Array(owned_weapons).map(func(id: StringName) -> String: return String(id)),
 		"equipped_weapon": String(equipped_weapon),
+		"owned_upgrades": Array(owned_upgrades).map(func(id: StringName) -> String: return String(id)),
 	}
 	var file := FileAccess.open(save_path, FileAccess.WRITE)
 	if file == null:
@@ -211,6 +233,7 @@ func load_from_disk() -> void:
 	stars_spent = 0
 	owned_weapons.clear()
 	equipped_weapon = &""
+	owned_upgrades.clear()
 	if not FileAccess.file_exists(save_path):
 		return
 	var file := FileAccess.open(save_path, FileAccess.READ)
@@ -236,6 +259,8 @@ func load_from_disk() -> void:
 	for id in data.get("owned_weapons", []):
 		owned_weapons.append(StringName(String(id)))
 	equipped_weapon = StringName(String(data.get("equipped_weapon", "")))
+	for id in data.get("owned_upgrades", []):
+		owned_upgrades.append(StringName(String(id)))
 	for id in data.get("collected", {}):
 		var entry: Dictionary = data["collected"][id]
 		collected[String(id)] = {"kind": String(entry.get("kind", "item")), "amount": int(entry.get("amount", 1))}

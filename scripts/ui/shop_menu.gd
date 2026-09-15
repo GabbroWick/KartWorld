@@ -51,7 +51,13 @@ func _build_rows() -> void:
 		child.queue_free()
 	_buttons.clear()
 	for id in Weapons.ORDER:
-		var stats := Weapons.stats(id)
+		_add_row(id, Weapons.stats(id), false)
+	for id in Weapons.UPGRADE_ORDER:
+		_add_row(id, Weapons.UPGRADES[id], true)
+
+
+func _add_row(id: StringName, stats: Dictionary, upgrade: bool) -> void:
+	if true:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override(&"separation", 14)
 		var icon := Control.new()
@@ -74,7 +80,8 @@ func _build_rows() -> void:
 		var button := Button.new()
 		button.custom_minimum_size = Vector2(130.0, 44.0)
 		button.add_theme_font_size_override(&"font_size", 18)
-		button.pressed.connect(_on_item_pressed.bind(id))
+		button.pressed.connect(_on_upgrade_pressed.bind(id) if upgrade else _on_item_pressed.bind(id))
+		button.set_meta(&"upgrade", upgrade)
 		row.add_child(button)
 		_buttons[id] = button
 		rows.add_child(row)
@@ -84,7 +91,14 @@ func _refresh() -> void:
 	balance_label.text = tr(&"SHOP_BALANCE") % ProgressionManager.get_available_stars()
 	for id in _buttons:
 		var button: Button = _buttons[id]
-		if ProgressionManager.equipped_weapon == id:
+		if button.get_meta(&"upgrade", false):
+			if ProgressionManager.owns_upgrade(id):
+				button.text = tr(&"SHOP_OWNED")
+				button.disabled = true
+			else:
+				button.text = tr(&"SHOP_BUY")
+				button.disabled = ProgressionManager.get_available_stars() < int(Weapons.UPGRADES[id]["price"])
+		elif ProgressionManager.equipped_weapon == id:
 			button.text = tr(&"SHOP_IN_USE")
 			button.disabled = true
 		elif ProgressionManager.owns_weapon(id):
@@ -93,6 +107,14 @@ func _refresh() -> void:
 		else:
 			button.text = tr(&"SHOP_BUY")
 			button.disabled = ProgressionManager.get_available_stars() < Weapons.price(id)
+
+
+func _on_upgrade_pressed(id: StringName) -> void:
+	if ProgressionManager.buy_upgrade(id):
+		Sfx.play(&"unlock")
+	else:
+		Sfx.play(&"hurt", -10.0)
+	_refresh()
 
 
 func _on_item_pressed(id: StringName) -> void:

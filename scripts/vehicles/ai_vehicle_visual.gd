@@ -27,6 +27,11 @@ var _sub_amount := 0.0
 var _submarine := false
 var _speed := 0.0
 
+## Wings: two panels that swing out of the sides when flying.
+var _wings: Array[Node3D] = []
+var _fly_amount := 0.0
+var _flying := false
+
 
 func _ready() -> void:
 	super()
@@ -117,6 +122,27 @@ func _build_submarine_parts() -> void:
 		pivot.visible = false
 		_instance.add_child(pivot)
 		_props.append(pivot)
+	for side in [-1.0, 1.0]:
+		var pivot := Node3D.new()
+		pivot.position = Vector3(side * 0.42, 0.55, 0.1)
+		var wing := MeshInstance3D.new()
+		var wm := BoxMesh.new()
+		wm.size = Vector3(0.9, 0.03, 0.42)
+		wm.material = FlatMaterial.flat(Color(0.85, 0.9, 1.0))
+		wing.mesh = wm
+		wing.position = Vector3(side * 0.45, 0.0, 0.0)
+		pivot.add_child(wing)
+		var tip := MeshInstance3D.new()
+		var tm := BoxMesh.new()
+		tm.size = Vector3(0.06, 0.16, 0.3)
+		tm.material = FlatMaterial.flat(Color(0.95, 0.4, 0.3))
+		tip.mesh = tm
+		tip.position = Vector3(side * 0.88, 0.07, 0.0)
+		pivot.add_child(tip)
+		pivot.scale = Vector3(0.001, 1.0, 1.0)
+		pivot.visible = false
+		_instance.add_child(pivot)
+		_wings.append(pivot)
 	_bubbles = CPUParticles3D.new()
 	_bubbles.emitting = false
 	_bubbles.amount = 30
@@ -138,6 +164,17 @@ func _build_submarine_parts() -> void:
 	_bubbles.initial_velocity_min = 1.0
 	_bubbles.initial_velocity_max = 2.5
 	_instance.add_child(_bubbles)
+
+
+## Wings out (flying) or folded away.
+func set_flying(on: bool) -> void:
+	_flying = on
+	for wing in _wings:
+		wing.visible = true
+
+
+func is_flying() -> bool:
+	return _flying
 
 
 ## Kart <-> submarine. The parts animate in `_process`.
@@ -170,6 +207,20 @@ func _process(delta: float) -> void:
 				pivot.visible = false
 	if _bubbles:
 		_bubbles.emitting = _submarine and absf(_speed) > 1.0
+	var fly_before := _fly_amount
+	_fly_amount = move_toward(_fly_amount, 1.0 if _flying else 0.0, delta * 3.0)
+	if _fly_amount != fly_before or _flying:
+		var t := smoothstep(0.0, 1.0, _fly_amount)
+		var i := 0
+		for wing in _wings:
+			var side := -1.0 if i == 0 else 1.0
+			wing.scale = Vector3(maxf(t, 0.001), 1.0, 1.0)
+			# Bank into the steering, flap a little.
+			wing.rotation.z = side * (0.35 * (1.0 - t)) + _steer * 0.25 + sin(Time.get_ticks_msec() / 1000.0 * 6.0) * 0.05 * t
+			i += 1
+		if _fly_amount <= 0.0:
+			for wing in _wings:
+				wing.visible = false
 
 
 ## Steering input -1..1 from the controller (front wheels yaw with it).

@@ -12,6 +12,7 @@ signal driver_exited(driver: Node)
 signal fell_out_of_world
 signal honked
 signal submarine_changed(on: bool)
+signal flying_changed(on: bool)
 
 @export var definition: VehicleDefinition
 ## Below this height the vehicle is considered fallen out of the world.
@@ -34,6 +35,7 @@ var _visual_instance: Node3D
 var _camera_reversed := false
 var _terrain: IslandTerrain
 var is_submarine := false
+var _was_flying := false
 
 
 func _ready() -> void:
@@ -70,6 +72,17 @@ func _physics_process(delta: float) -> void:
 	var acceleration_multiplier := 1.0
 	if input.horn_pressed:
 		honk()
+	motor.has_wings = driver != null and driver is CharacterController and ProgressionManager.owns_upgrade(&"wings")
+	if motor.is_flying != _was_flying:
+		_was_flying = motor.is_flying
+		if _visual_instance and _visual_instance.has_method(&"set_flying"):
+			_visual_instance.call(&"set_flying", motor.is_flying)
+		if motor.is_flying:
+			Sfx.play(&"turbo", -10.0)
+			var hud := get_tree().get_first_node_in_group(&"hud")
+			if hud and hud.has_method(&"show_notice"):
+				hud.call(&"show_notice", tr(&"HUD_FLYING"))
+		flying_changed.emit(motor.is_flying)
 	if turbo:
 		turbo.set_boosting(input.turbo_held)
 		speed_multiplier = turbo.get_speed_multiplier()
@@ -148,16 +161,29 @@ func _check_water() -> void:
 			return
 	var ground := _terrain.sample_height(global_position.x, global_position.z)
 	var surface := _terrain.water_level
+	motor.ground_height_hint = maxf(ground, surface)
+	if motor.is_flying:
+		# Flying over the sea: only splash down when the hull touches it.
+		if ground < surface - 1.2 and global_position.y < surface - 0.2 and not is_submarine:
+			motor.is_flying = false
+			set_submarine(true)
+		return
 	var want := ground < surface - 1.2 and global_position.y < surface + 0.6 if not is_submarine \
 		else ground < surface - 0.4
 	if want != is_submarine:
 		set_submarine(want)
 
 
+func is_flying() -> bool:
+	return motor.is_flying
+
+
 func set_submarine(on: bool) -> void:
 	if on == is_submarine:
 		return
 	is_submarine = on
+	if on:
+		motor.is_flying = false
 	motor.set_submarine(on, _terrain.water_level if _terrain else 0.0)
 	if _visual_instance and _visual_instance.has_method(&"set_submarine"):
 		_visual_instance.call(&"set_submarine", on)

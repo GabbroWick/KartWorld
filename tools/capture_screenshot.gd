@@ -1,7 +1,7 @@
 extends Node
 ## Loads the main scene, lets it settle, saves a PNG and quits.
 ##
-## Run:  godot --path <project> res://tools/capture_screenshot.tscn -- <out.png> [frames] [drive] [turbo] [talk] [picker] [map] [face=deg] [level=<.tres>] [at=x,y,z] [yaw=deg] [zoom=m]
+## Run:  godot --path <project> res://tools/capture_screenshot.tscn -- <out.png> [frames] [drive] [turbo] [fly] [talk] [picker] [map] [face=deg] [level=<.tres>] [at=x,y,z] [yaw=deg] [zoom=m]
 ##
 ## With the optional "drive" word the player summons the kart, gets in and
 ## holds the accelerator for the given frames, so the shot shows driving.
@@ -62,6 +62,8 @@ func _run() -> void:
 			for dx in [-1, 0, 1]:
 				for dz in [-1, 0, 1]:
 					terrain.ensure_built_at(target.x + dx * terrain.chunk_size, target.z + dz * terrain.chunk_size)
+			# Never drop the player under the ground: lift to the surface.
+			target.y = maxf(target.y, terrain.sample_height(target.x, target.z) + 0.4)
 		player.global_position = target
 		player.motor.reset()
 		player.visual_root.global_rotation.y = 0.0
@@ -96,6 +98,12 @@ func _run() -> void:
 		Input.action_press(InputActions.ACCELERATE)
 		if user_args.has("turbo"):
 			Input.action_press(InputActions.TURBO)
+		if user_args.has("fly"):
+			# Wings from the shop (on the scratch save), then jump at speed.
+			if not ProgressionManager.owns_upgrade(&"wings"):
+				ProgressionManager.owned_upgrades.append(&"wings")
+			await _wait(50)
+			await _press(InputActions.JUMP)
 	for i in frames:
 		await get_tree().process_frame
 	Input.action_release(InputActions.ACCELERATE)

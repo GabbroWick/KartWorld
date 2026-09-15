@@ -203,7 +203,7 @@ func _prompt_text() -> String:
 		return ""
 	var driver := _player.driver
 	if driver.is_driving:
-		return "" if (driver.vehicle and driver.vehicle.is_submarine) else tr(&"PROMPT_LEAVE_KART")
+		return "" if (driver.vehicle and (driver.vehicle.is_submarine or driver.vehicle.is_flying())) else tr(&"PROMPT_LEAVE_KART")
 	var interaction := _player.interaction.get_prompt()
 	if interaction != "":
 		return interaction

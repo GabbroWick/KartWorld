@@ -48,6 +48,7 @@ func _run() -> void:
 	await _test_camera_align()
 	await _test_turbo()
 	await _test_horn()
+	await _test_wings()
 	await _test_bump()
 	await _test_jump()
 	await _test_wall()
@@ -240,6 +241,52 @@ func _test_horn() -> void:
 	await _press(InputActions.EMOTE)
 	await _steps(2)
 	_check(honks[0] == 1 and Sfx.played.has(&"horn"), "H at the wheel honks the horn")
+
+
+func _test_wings() -> void:
+	# Shop wings: jump at speed and the kart flies; gas climbs, brake dives.
+	_kart.place(Transform3D(Basis.IDENTITY, Vector3(24.0, 0.3, 28.0)))
+	await _steps(10)
+	Input.action_press(InputActions.ACCELERATE)
+	await _steps(60)
+	await _press(InputActions.JUMP)
+	await _steps(30)
+	_check(not _kart.is_flying(), "without wings a jump is just a hop")
+	Input.action_release(InputActions.ACCELERATE)
+	await _hold(InputActions.BRAKE, 60)
+	ProgressionManager.owned_upgrades.append(&"wings")
+	_kart.place(Transform3D(Basis.IDENTITY, Vector3(24.0, 0.3, 28.0)))
+	await _steps(10)
+	Input.action_press(InputActions.ACCELERATE)
+	await _steps(60)
+	await _press(InputActions.JUMP)
+	var flew := false
+	var top := 0.0
+	for i in 90:
+		await _steps(1)
+		flew = flew or _kart.is_flying()
+		top = maxf(top, _kart.global_position.y)
+	_check(flew and _kart.is_flying(), "with wings a jump at speed takes off")
+	_check(top > 4.0, "holding the gas climbs (%.1f m)" % top)
+	var visual := _kart.visual_root.get_children().filter(func(c: Node) -> bool: return c is AiVehicleVisual)
+	if visual.size() == 1:
+		_check((visual[0] as AiVehicleVisual).is_flying(), "the wings are out")
+	await _hold(InputActions.INTERACT, 3)
+	_check(_player.driver.is_driving, "you cannot get out in the air")
+	Input.action_release(InputActions.ACCELERATE)
+	Input.action_press(InputActions.BRAKE)
+	var landed := false
+	for i in 240:
+		await _steps(1)
+		if not _kart.is_flying() and _kart.is_on_floor():
+			landed = true
+			break
+	Input.action_release(InputActions.BRAKE)
+	_check(landed, "braking dives and the kart lands (y %.1f)" % _kart.global_position.y)
+	ProgressionManager.owned_upgrades.erase(&"wings")
+	await _steps(30)
+	_kart.place(Transform3D(Basis.IDENTITY, Vector3(24.0, 0.3, 20.0)))
+	await _steps(10)
 
 
 func _test_bump() -> void:

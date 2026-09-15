@@ -10,6 +10,7 @@ extends Node
 signal jumped
 signal landed(impact_speed: float)
 signal bumped(other: Node3D)
+signal took_off
 
 var body: CharacterBody3D
 var definition: VehicleDefinition
@@ -47,6 +48,19 @@ var surface_y := 0.0
 const SUB_SINK := 0.45        # hull below the surface (m)
 const SUB_SPEED_FACTOR := 0.8
 
+## Wings (shop): once airborne at speed the kart glides; throttle climbs,
+## brake dives, it lands on the first floor it meets.
+var has_wings := false
+var is_flying := false
+var throttle_input := 0.0
+var _air_time := 0.0
+const FLY_MIN_SPEED := 6.0
+const FLY_CLIMB := 6.0
+const FLY_DIVE := -7.0
+const FLY_GLIDE := -1.2
+const FLY_TAKEOFF_AIR := 0.2
+const FLY_CEILING := 90.0   # metres above the ground
+
 const SHOVE_DECAY := 12.0   # m/s^2 fade of a knock
 const SHOVE_MAX := 14.0
 
@@ -54,16 +68,31 @@ const SHOVE_MAX := 14.0
 func drive(delta: float, throttle: float, steer: float, jump_requested: bool,
 		speed_multiplier: float = 1.0, acceleration_multiplier: float = 1.0) -> void:
 	var was_on_floor := body.is_on_floor()
+	throttle_input = throttle
 
 	_apply_throttle(delta, throttle, speed_multiplier * (SUB_SPEED_FACTOR if is_submarine else 1.0), acceleration_multiplier)
-	_apply_steering(delta, steer, was_on_floor or is_submarine)
+	_apply_steering(delta, steer, was_on_floor or is_submarine or is_flying)
+	if is_submarine and jump_requested and has_wings and absf(speed) > FLY_MIN_SPEED:
+		# Take off from the water.
+		body.velocity.y = get_jump_velocity()
+		_air_time = FLY_TAKEOFF_AIR
+		is_submarine = false
+		body.floor_snap_length = 0.0
+		took_off.emit()
 	if is_submarine:
 		# Bob up to the surface and stay there; waves are cosmetic.
 		var target := surface_y - SUB_SINK
 		body.velocity.y = (target - body.global_position.y) * 4.0
 		body.floor_snap_length = 0.0
+	elif is_flying:
+		_apply_flight(delta, throttle, was_on_floor)
 	else:
 		_apply_vertical(delta, was_on_floor, jump_requested)
+		_air_time = 0.0 if was_on_floor else _air_time + delta
+		if has_wings and not was_on_floor and _air_time >= FLY_TAKEOFF_AIR and absf(speed) > FLY_MIN_SPEED:
+			is_flying = true
+			body.floor_snap_length = 0.0
+			took_off.emit()
 
 	var forward := -body.global_basis.z
 	body.velocity.x = forward.x * speed + _shove.x
@@ -111,6 +140,31 @@ func _bump_other_karts(forward: Vector3) -> void:
 		bumped.emit(other)
 
 
+## Airborne with wings: vertical speed follows the throttle, the rest is
+## the ground handling (speed and steering). Landing ends the flight.
+func _apply_flight(delta: float, throttle: float, was_on_floor: bool) -> void:
+	if was_on_floor:
+		is_flying = false
+		body.floor_snap_length = 0.8
+		landed.emit(absf(body.velocity.y))
+		return
+	var target := FLY_GLIDE
+	if throttle > 0.2:
+		target = FLY_CLIMB
+	elif throttle < -0.2:
+		target = FLY_DIVE
+	if absf(speed) < FLY_MIN_SPEED * 0.7:
+		target = FLY_DIVE * 0.6   # too slow to fly: sink
+	if ground_height_hint != null and body.global_position.y - float(ground_height_hint) > FLY_CEILING and target > 0.0:
+		target = 0.0
+	body.velocity.y = move_toward(body.velocity.y, target, 14.0 * delta)
+
+
+## Set by the controller each tick (terrain height under the kart) so the
+## flight ceiling and the sea are known; null when there is no terrain.
+var ground_height_hint: Variant = null
+
+
 ## Switch between wheels and propellers. `surface` is the water level.
 func set_submarine(on: bool, surface: float = 0.0) -> void:
 	is_submarine = on
@@ -122,6 +176,8 @@ func set_submarine(on: bool, surface: float = 0.0) -> void:
 
 func reset() -> void:
 	speed = 0.0
+	is_flying = false
+	_air_time = 0.0
 	_shove = Vector3.ZERO
 	_uphill_tangent = 0.0
 	if body:

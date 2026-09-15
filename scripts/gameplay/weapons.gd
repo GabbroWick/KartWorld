@@ -14,6 +14,11 @@ const CATALOGUE := {
 		"name": "WEAPON_SWORD", "desc": "WEAPON_SWORD_DESC", "color": Color(0.95, 0.8, 0.3)},
 }
 const ORDER: Array[StringName] = [&"club", &"boomerang", &"sword"]
+## Kart upgrades, also for stars (owned once, never equipped).
+const UPGRADES := {
+	&"wings": {"price": 5, "name": "UPGRADE_WINGS", "desc": "UPGRADE_WINGS_DESC", "color": Color(0.85, 0.9, 1.0)},
+}
+const UPGRADE_ORDER: Array[StringName] = [&"wings"]
 
 
 static func exists(id: StringName) -> bool:
