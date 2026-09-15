@@ -65,6 +65,8 @@ func _physics_process(delta: float) -> void:
 	_tilt_to_ground(delta)
 	if _visual_instance and _visual_instance.has_method(&"update_visual"):
 		_visual_instance.call(&"update_visual", motor.speed, delta)
+	if _visual_instance and _visual_instance.has_method(&"set_steer"):
+		_visual_instance.call(&"set_steer", input.steer)
 	# Seated driver leans into the steering and keeps its idle clip running.
 	seat.rotation.z = lerp_angle(seat.rotation.z, -input.steer * definition.seat_lean, 8.0 * delta)
 	if _seated and _seated.has_method(&"animate"):

@@ -314,9 +314,20 @@ Plan, one verifiable step at a time (commit + suites + screenshot each):
    split_wheels.py` (Body + Wheel_FL/FR/RL/RR, origin at the hub) →
    `assets/characters/_final/kart/kart.glb` → `scenes/vehicles/visuals/
    kart_ai.tscn` (`KenneyVehicleVisual`, `model_scale` 1.6) in
-   `basic_kart.tres`; `seat_offset` (0, 0.5, 0.35) so the driver's head
-   shows above the seat. Recipe in `tools/README_3D.md` §9. Screenshot
-   tool takes `yaw=<deg>` for side views.
+   `basic_kart.tres`. Human's phone feedback (2026-09-15): lumpy wheels
+   spinning backwards, driver sunk in the seat → `AiVehicleVisual`
+   (extends KenneyVehicleVisual) hides the split wheel chunks and builds
+   clean procedural tyres + hub caps at the hub nodes, rolls them the
+   right way (+X in the flipped model) and yaws `Wheel_F*` with the
+   steering (`set_steer` from VehicleController). Driver: `seat_scale`
+   1.0, `seat_offset` (0, 0.6, 0.12), `seat_sink` 0.3, and
+   `scripts/characters/seated_pose.gd` (late-process child of the
+   Skeleton3D; a SkeletonModifier3D ran before the FBX AnimationPlayer
+   and was overwritten) bends the Mixamo rig into a driving pose from the
+   rest pose: thighs/knees/arms toward the wheel. A real `drive_clip`
+   (Mixamo "Driving", without skin → `anim_drive.fbx`) wins over the
+   procedural pose when set on the visual. Screenshot tool takes
+   `yaw=<deg>` and `zoom=<m>` for close-ups.
 2. **Level 3 "Vulcano" — DONE 2026-09-15** (`resources/levels/
    level_03_volcano.tres`, third hub portal at (130, 4, 150)): a 710 m
    `TrackRibbon` spiral (Catmull-Rom road + kerbs + trimesh, 3 ramps at

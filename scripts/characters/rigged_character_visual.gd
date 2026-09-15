@@ -20,6 +20,9 @@ const MIXAMO_CLIP := &"mixamo_com"
 @export var hurt_clip: PackedScene
 ## Optional celebration / greeting, played on the emote action.
 @export var emote_clip: PackedScene
+## Sitting at the wheel (Mixamo "Driving"). Without it a procedural
+## SeatedPose bends the rig into the seat.
+@export var drive_clip: PackedScene
 ## The character's run speed (m/s) that `speed_ratio` = 1 stands for.
 @export_range(1.0, 30.0, 0.5) var reference_speed := 10.0
 ## Ground speed baked into the walk / run clips before root motion was
@@ -34,6 +37,7 @@ const MIXAMO_CLIP := &"mixamo_com"
 var player: AnimationPlayer
 var _current := &""
 var _was_airborne := false
+var _seated_pose: SeatedPose
 var _action := &""
 
 
@@ -59,17 +63,30 @@ func _ready() -> void:
 		return
 	if not library.has_animation(&"idle"):
 		_register(library, &"idle", idle_source, true)
-	for entry in [[&"walk", walk_clip, true], [&"run", run_clip, true], [&"jump", jump_clip, false], [&"fall", fall_clip, true], [&"attack", attack_clip, false], [&"hurt", hurt_clip, false], [&"emote", emote_clip, false]]:
+	for entry in [[&"walk", walk_clip, true], [&"run", run_clip, true], [&"jump", jump_clip, false], [&"fall", fall_clip, true], [&"attack", attack_clip, false], [&"hurt", hurt_clip, false], [&"emote", emote_clip, false], [&"drive", drive_clip, true]]:
 		var scene: PackedScene = entry[1]
 		if scene == null:
 			continue
 		var clip := _extract_clip(scene)
 		if clip:
 			_register(library, entry[0], clip, entry[2])
+	var skeletons := _instance.find_children("*", "Skeleton3D", true, false)
+	var skeleton := skeletons[0] as Skeleton3D if skeletons.size() > 0 else null
+	if skeleton:
+		_seated_pose = SeatedPose.new()
+		_seated_pose.name = "SeatedPose"
+		_seated_pose.active = false
+		skeleton.add_child(_seated_pose)
 	_play(&"idle", 1.0)
 
 
 ## One-shot clips (attack, hurt) take over until they finish.
+func set_seated(seated: bool) -> void:
+	super.set_seated(seated)
+	if _seated_pose:
+		_seated_pose.active = seated and not (player and player.has_animation(&"drive"))
+
+
 func play_action(action: StringName, speed_scale: float = 1.0) -> bool:
 	if player == null or not player.has_animation(action):
 		return false
@@ -91,7 +108,7 @@ func animate(delta: float, speed_ratio: float, grounded: bool) -> void:
 		return
 	if is_seated():
 		_action = &""
-		_play(&"idle", 1.0)
+		_play(&"drive" if player.has_animation(&"drive") else &"idle", 1.0)
 		return
 	if _action != &"":
 		var moving := speed_ratio > 0.1 or not grounded

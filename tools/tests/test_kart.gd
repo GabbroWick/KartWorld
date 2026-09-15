@@ -42,6 +42,7 @@ func _run() -> void:
 	await _test_summon()
 	await _test_enter()
 	await _test_drive()
+	await _test_wheels()
 	await _test_steer()
 	await _test_brake_and_reverse()
 	await _test_camera_align()
@@ -107,10 +108,37 @@ func _test_drive() -> void:
 	_check(_kart.is_on_floor(), "kart stays grounded on flat ground")
 
 
+func _test_wheels() -> void:
+	var visual := _kart.visual_root.get_children().filter(func(c: Node) -> bool: return c is AiVehicleVisual)
+	_check(visual.size() == 1, "kart uses the AI visual with procedural wheels")
+	if visual.is_empty():
+		return
+	var ai := visual[0] as AiVehicleVisual
+	_check(ai._spinners.size() == 4 and ai._steerers.size() == 2, "four rolling wheels, two steering (%d/%d)" % [ai._spinners.size(), ai._steerers.size()])
+	# Roll direction: a short forward push must rotate the tyres so the top
+	# moves forward (+X rotation inside the flipped model: y axis tips to +Z).
+	var spin := ai._spinners[0]
+	spin.basis = Basis.IDENTITY
+	await _hold(InputActions.ACCELERATE, 3)
+	_check(spin.basis.y.z > 0.0 and spin.basis.y.z < 0.99, "tyres roll forward when driving forward (y.z %.2f)" % spin.basis.y.z)
+	await _hold(InputActions.BRAKE, 40)
+	await _steps(10)
+	# Driver: seated pose reaches for the wheel (hands well ahead of hips).
+	var driver_visual := _kart.seat.get_children().filter(func(c: Node) -> bool: return c is RiggedCharacterVisual)
+	if driver_visual.size() == 1:
+		var skeleton: Skeleton3D = (driver_visual[0] as Node).find_children("*", "Skeleton3D", true, false)[0]
+		var hand := skeleton.get_bone_global_pose(skeleton.find_bone("mixamorig_LeftHand")).origin
+		var hips := skeleton.get_bone_global_pose(skeleton.find_bone("mixamorig_Hips")).origin
+		_check(hand.z - hips.z > 0.2 and hand.y > hips.y + 0.15, "driver's hands reach forward to the wheel (dz %.2f, dy %.2f)" % [hand.z - hips.z, hand.y - hips.y])
+
+
 func _test_steer() -> void:
 	var yaw_before := _kart.global_rotation.y
 	Input.action_press(InputActions.ACCELERATE)
 	await _hold(&"move_right", 30)
+	var ai := _kart.visual_root.get_children().filter(func(c: Node) -> bool: return c is AiVehicleVisual)
+	if ai.size() == 1:
+		_check((ai[0] as AiVehicleVisual)._steerers[0].rotation.y < -0.2, "front wheels yaw with the steering (%.2f rad)" % (ai[0] as AiVehicleVisual)._steerers[0].rotation.y)
 	Input.action_release(InputActions.ACCELERATE)
 	var turned := wrapf(_kart.global_rotation.y - yaw_before, -PI, PI)
 	_check(turned < -0.3, "steering right turns the kart clockwise (%.2f rad)" % turned)

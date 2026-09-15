@@ -23,9 +23,9 @@ extends Resource
 @export var exit_offset := Vector3(2.0, 0.5, 0.0)
 ## Where the driver's feet go, in vehicle space (the driver stays visible,
 ## sunk into the seat so the legs are hidden by the body).
-@export var seat_offset := Vector3(0.0, 0.5, 0.35)
+@export var seat_offset := Vector3(0.0, 0.6, 0.12)
 ## Driver visual scale at the wheel (1 = as on foot).
-@export_range(0.3, 1.5, 0.05) var seat_scale := 0.85
+@export_range(0.3, 1.5, 0.05) var seat_scale := 1.0
 ## Driver lean (radians) per unit of steer input.
 @export_range(0.0, 0.6, 0.01) var seat_lean := 0.18
 

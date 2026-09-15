@@ -1,7 +1,7 @@
 extends Node
 ## Loads the main scene, lets it settle, saves a PNG and quits.
 ##
-## Run:  godot --path <project> res://tools/capture_screenshot.tscn -- <out.png> [frames] [drive] [level=<.tres>] [at=x,y,z] [yaw=deg]
+## Run:  godot --path <project> res://tools/capture_screenshot.tscn -- <out.png> [frames] [drive] [level=<.tres>] [at=x,y,z] [yaw=deg] [zoom=m]
 ##
 ## With the optional "drive" word the player summons the kart, gets in and
 ## holds the accelerator for the given frames, so the shot shows driving.
@@ -26,9 +26,12 @@ func _run() -> void:
 	var level_path := ""
 	var at := ""
 	var yaw := ""
+	var zoom := ""
 	for arg in user_args:
 		if arg.begins_with("yaw="):
 			yaw = arg.trim_prefix("yaw=")
+		elif arg.begins_with("zoom="):
+			zoom = arg.trim_prefix("zoom=")
 		if arg.begins_with("level="):
 			level_path = arg.trim_prefix("level=")
 		elif arg.begins_with("at="):
@@ -71,6 +74,10 @@ func _run() -> void:
 	for i in frames:
 		await get_tree().process_frame
 	Input.action_release(InputActions.ACCELERATE)
+	if zoom != "":
+		# Camera distance in metres (close-ups of the kart / character).
+		for cam in scene.find_children("*", "ThirdPersonCamera", true, false):
+			(cam as ThirdPersonCamera).set_framing(float(zoom), (cam as ThirdPersonCamera).target_height)
 	if yaw != "":
 		# Camera heading in degrees (e.g. yaw=90 looks at the kart's side).
 		for cam in scene.find_children("*", "ThirdPersonCamera", true, false):

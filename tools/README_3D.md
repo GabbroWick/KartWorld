@@ -383,9 +383,12 @@ blender -b --python tools/blender/split_wheels.py --     --input assets/characte
 dietro), il baricentro dei vertici bassi ed esterni e separa quelli entro un
 cilindro orizzontale attorno al mozzo in `Wheel_FL/FR/RL/RR` (origine al
 mozzo); il resto e' `Body`. Il GLB finale ha 5 nodi. In Godot
-`scenes/vehicles/visuals/kart_ai.tscn` usa `KenneyVehicleVisual` (trova i
-nodi `wheel*`, qualsiasi maiuscola) con `model_scale 1.6`, `wheel_radius
-0.22`, `flip_forward` (il modello guarda +Z come le Kenney). Il pilota
+`scenes/vehicles/visuals/kart_ai.tscn` usa `AiVehicleVisual` (trova i
+nodi `wheel*`, nasconde i pezzi di mesh delle ruote e ci costruisce sopra
+pneumatici procedurali puliti che rotolano e sterzano) con `model_scale
+1.6`, `wheel_radius 0.22`, `flip_forward` (il modello guarda +Z come le
+Kenney). Il pilota usa `SeatedPose` (posa di guida procedurale) oppure la
+clip Mixamo "Driving" se `drive_clip` e' impostata sulla scena del visual. Il pilota
 siede su `VehicleDefinition.seat_offset` (0, 0.5, 0.35). Fatto il
 2026-09-15 (concept seed 62).
 

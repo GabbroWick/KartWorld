@@ -31,7 +31,7 @@ extends Node3D
 ## Procedural motion strength (0 = static model).
 @export_range(0.0, 2.0, 0.05) var motion := 1.0
 ## How far the model sinks when seated in a kart (legs hidden by the body).
-@export_range(0.0, 1.0, 0.05) var seat_sink := 0.45
+@export_range(0.0, 1.0, 0.05) var seat_sink := 0.3
 
 var _pivot: Node3D
 var _instance: Node3D
