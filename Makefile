@@ -43,6 +43,11 @@ help:
 run:
 	"$(GODOT)" --path .
 
+apk: import
+	@mkdir -p builds/android
+	"$(GODOT)" --headless --path . --export-debug "Android" builds/android/MegaAdventure.apk
+	@echo "APK in builds/android/MegaAdventure.apk (debug-signed: install with 'adb install -r' or copy to the phone)"
+
 web: import
 	@mkdir -p $(WEB_DIR)
 	"$(GODOT)" --headless --path . --export-release "Web" $(WEB_DIR)/index.html

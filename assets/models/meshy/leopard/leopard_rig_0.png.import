@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://ckfebijne35p6"
 path.s3tc="res://.godot/imported/leopard_rig_0.png-2d292439cf992327d63e719835d78462.s3tc.ctex"
+path.etc2="res://.godot/imported/leopard_rig_0.png-2d292439cf992327d63e719835d78462.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/meshy/leopard/leopard_rig_0.png"
-dest_files=["res://.godot/imported/leopard_rig_0.png-2d292439cf992327d63e719835d78462.s3tc.ctex"]
+dest_files=["res://.godot/imported/leopard_rig_0.png-2d292439cf992327d63e719835d78462.s3tc.ctex", "res://.godot/imported/leopard_rig_0.png-2d292439cf992327d63e719835d78462.etc2.ctex"]
 
 [params]
 

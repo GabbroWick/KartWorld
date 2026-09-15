@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://dxfn8xv4t5ibm"
 path.s3tc="res://.godot/imported/colormap.png-43b8542b46e153d1a50d6908d30633f8.s3tc.ctex"
+path.etc2="res://.godot/imported/colormap.png-43b8542b46e153d1a50d6908d30633f8.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/models/kenney/modular-buildings/Textures/colormap.png"
-dest_files=["res://.godot/imported/colormap.png-43b8542b46e153d1a50d6908d30633f8.s3tc.ctex"]
+dest_files=["res://.godot/imported/colormap.png-43b8542b46e153d1a50d6908d30633f8.s3tc.ctex", "res://.godot/imported/colormap.png-43b8542b46e153d1a50d6908d30633f8.etc2.ctex"]
 
 [params]
 
