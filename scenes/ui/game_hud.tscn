@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/game_hud.gd" id="1_hud"]
 [ext_resource type="Script" path="res://scripts/ui/heart_bar.gd" id="2_hearts"]
 [ext_resource type="Script" path="res://scripts/ui/star_icon.gd" id="3_star"]
 [ext_resource type="Script" path="res://scripts/ui/level_complete_card.gd" id="4_card"]
+[ext_resource type="Script" path="res://scripts/ui/turbo_gauge.gd" id="9_turbo"]
 
 [sub_resource type="StyleBoxFlat" id="card_style"]
 bg_color = Color(0.12, 0.14, 0.24, 0.92)
@@ -32,14 +33,22 @@ mouse_filter = 2
 [node name="TopLeft" type="MarginContainer" parent="Root"]
 anchors_preset = 0
 offset_right = 320.0
-offset_bottom = 60.0
+offset_bottom = 90.0
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 16
 
-[node name="Hearts" type="Control" parent="Root/TopLeft"]
+[node name="TopLeftRows" type="VBoxContainer" parent="Root/TopLeft"]
+theme_override_constants/separation = 6
+
+[node name="Hearts" type="Control" parent="Root/TopLeft/TopLeftRows"]
+custom_minimum_size = Vector2(0, 34)
 script = ExtResource("2_hearts")
 current = 5
 maximum = 5
+
+[node name="Turbo" type="Control" parent="Root/TopLeft/TopLeftRows"]
+visible = false
+script = ExtResource("9_turbo")
 
 [node name="TopRight" type="MarginContainer" parent="Root"]
 anchors_preset = 1

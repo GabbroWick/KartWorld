@@ -372,6 +372,19 @@ Plan, one verifiable step at a time (commit + suites + screenshot each):
    `VehicleDefinition.launch_factor` (1.6) when the slope ends, snap off
    while rising. A parked kart on a streamed-out tile now waits for its
    ground (it used to fall out and drag the player back to spawn).
+3b. **Turbo rework — DONE 2026-09-15** (human: "non capisco come funziona
+   il turbo"): hold-to-boost with a gauge. `TurboAbility.charge` drains
+   while the action is held (full gauge = `turbo_duration` s of boost)
+   and refills when released (empty→full in `turbo_cooldown` s); an
+   emptied gauge relights only after the button is released and 25% is
+   back. `VehicleInput.turbo_held`; `try_activate()` still gives a
+   one-shot burst (NPCs/tests). HUD: `TurboGauge` bar under the hearts
+   (`game_hud.tscn` TopLeft/TopLeftRows), visible at the wheel, blinks
+   while boosting. Flames: `VisualRoot/TurboFlames` CPUParticles3D in
+   vehicle.tscn, `emitting` = turbo active. Kart suite 69 checks.
+   Also fixed: NPCs walked backwards — spawners rotate the body, and the
+   face-direction code applied a world yaw as a local one; now
+   `target_yaw - global_rotation.y` (controller and NpcBehaviour).
 4. **Graphics pass — first step DONE 2026-09-15**: `shaders/water.gdshader`
    (vertex swell, deep/shallow blues, surf band at `shore_radius` around
    `island_centre`, self-lit fill), procedural cloud cover on the hub sky

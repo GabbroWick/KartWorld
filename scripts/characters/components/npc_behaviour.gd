@@ -162,7 +162,7 @@ func _face(point: Vector3, delta: float) -> void:
 	dir.y = 0.0
 	if dir.length_squared() < 0.01:
 		return
-	var target_yaw := atan2(-dir.x, -dir.z)
+	var target_yaw := atan2(-dir.x, -dir.z) - _character.global_rotation.y
 	_character.visual_root.rotation.y = lerp_angle(_character.visual_root.rotation.y, target_yaw, 8.0 * delta)
 
 

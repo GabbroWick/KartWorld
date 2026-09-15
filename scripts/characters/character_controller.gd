@@ -169,7 +169,9 @@ func _get_view_basis() -> Basis:
 func _face_direction(wish_dir: Vector3, delta: float) -> void:
 	if wish_dir.length_squared() < 0.0001:
 		return
-	var target_yaw := atan2(-wish_dir.x, -wish_dir.z)
+	# World heading, applied as a local yaw: the body itself may be rotated
+	# (NPC spawners do that), and the visual must still face where it walks.
+	var target_yaw := atan2(-wish_dir.x, -wish_dir.z) - global_rotation.y
 	visual_root.rotation.y = lerp_angle(
 		visual_root.rotation.y, target_yaw, minf(definition.turn_speed * delta, 1.0)
 	)

@@ -22,6 +22,7 @@ signal fell_out_of_world
 @onready var ability_nodes: Node = $AbilityNodes
 @onready var visual_root: Node3D = $VisualRoot
 @onready var seat: Node3D = $VisualRoot/Seat
+@onready var turbo_flames: CPUParticles3D = get_node_or_null("VisualRoot/TurboFlames")
 @onready var collision: CollisionShape3D = $Collision
 
 var driver: Node = null
@@ -52,8 +53,7 @@ func _physics_process(delta: float) -> void:
 	var speed_multiplier := 1.0
 	var acceleration_multiplier := 1.0
 	if turbo:
-		if input.turbo_pressed:
-			turbo.try_activate()
+		turbo.set_boosting(input.turbo_held)
 		speed_multiplier = turbo.get_speed_multiplier()
 		acceleration_multiplier = turbo.get_acceleration_multiplier()
 	for ability in ability_nodes.get_children():
@@ -65,6 +65,8 @@ func _physics_process(delta: float) -> void:
 	_tilt_to_ground(delta)
 	if _visual_instance and _visual_instance.has_method(&"update_visual"):
 		_visual_instance.call(&"update_visual", motor.speed, delta)
+	if turbo_flames:
+		turbo_flames.emitting = turbo != null and turbo.is_active
 	if _visual_instance and _visual_instance.has_method(&"set_steer"):
 		_visual_instance.call(&"set_steer", input.steer)
 	# Seated driver leans into the steering and keeps its idle clip running.

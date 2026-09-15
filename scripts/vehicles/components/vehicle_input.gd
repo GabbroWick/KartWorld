@@ -10,6 +10,7 @@ var reads_local_device := false
 var throttle := 0.0  ## -1 brake/reverse .. +1 accelerate
 var steer := 0.0     ## -1 left .. +1 right
 var turbo_pressed := false
+var turbo_held := false
 var jump_pressed := false
 var interact_pressed := false
 
@@ -26,6 +27,7 @@ func poll() -> void:
 		- Input.get_action_strength(InputActions.BRAKE)
 	steer = Input.get_axis(InputActions.MOVE_LEFT, InputActions.MOVE_RIGHT)
 	turbo_pressed = Input.is_action_just_pressed(InputActions.TURBO)
+	turbo_held = Input.is_action_pressed(InputActions.TURBO)
 	jump_pressed = Input.is_action_just_pressed(InputActions.JUMP)
 	interact_pressed = Input.is_action_just_pressed(InputActions.INTERACT)
 
@@ -34,5 +36,6 @@ func clear() -> void:
 	throttle = 0.0
 	steer = 0.0
 	turbo_pressed = false
+	turbo_held = false
 	jump_pressed = false
 	interact_pressed = false

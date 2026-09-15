@@ -175,12 +175,24 @@ func _test_npcs_alive() -> void:
 	# Stand far away so it wanders instead of staring at us.
 	_player.global_position = Vector3(60.0, 5.0, 98.0)
 	_player.motor.reset()
+	# Spawners rotate NPC bodies at random: the visual must still face the
+	# way it walks (villagers used to walk backwards).
+	fox.rotation.y = 2.4
 	var start := fox.global_position
 	var moved := 0.0
+	var facing_samples := 0
+	var facing_ok := 0
 	for i in 300:
 		await _steps(1)
 		moved = maxf(moved, fox.global_position.distance_to(start))
+		var v := Vector3(fox.velocity.x, 0.0, fox.velocity.z)
+		if v.length() > 1.0 and i > 30:
+			facing_samples += 1
+			if (-fox.visual_root.global_basis.z).dot(v.normalized()) > 0.6:
+				facing_ok += 1
 	_check(moved > 0.8, "fox wanders around on its own (%.1f m)" % moved)
+	_check(facing_samples > 0 and facing_ok >= facing_samples * 0.8,
+		"walking fox faces where it goes (%d/%d samples)" % [facing_ok, facing_samples])
 	_check(fox.global_position.distance_to(behaviour.home) < behaviour.wander_radius + 1.5,
 		"fox stays near its home (%.1f m)" % fox.global_position.distance_to(behaviour.home))
 

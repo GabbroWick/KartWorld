@@ -3,7 +3,7 @@ HUD_HUB_HINT,Explore the island. Find a portal!,Esplora l'isola. Trova un portal
 HUD_LEVEL_COMPLETE,Level complete!,Livello completato!
 HUD_NEW_ABILITY,New ability: %s!,Nuova abilità: %s!
 HUD_CONTROLS_FOOT,WASD move · Shift run · Space jump · J attack · E use · K kart · right-click dance · Esc pause,WASD muovi · Shift corri · Spazio salta · J attacca · E usa · K kart · tasto dx balla · Esc pausa
-HUD_CONTROLS_KART,W/S gas/brake · A/D steer · Shift turbo · Space jump · E leave · Esc pause,W/S gas/freno · A/D sterza · Shift turbo · Spazio salta · E scendi · Esc pausa
+HUD_CONTROLS_KART,W/S gas/brake · A/D steer · Shift (hold) turbo · Space jump · E leave · Esc pause,W/S gas/freno · A/D sterza · Shift (tieni) turbo · Spazio salta · E scendi · Esc pausa
 PROMPT_LEAVE_KART,E  leave kart,E  scendi dal kart
 PROMPT_ENTER_KART,E  enter kart,E  sali sul kart
 PROMPT_SUMMON_KART,K  summon kart,K  chiama il kart

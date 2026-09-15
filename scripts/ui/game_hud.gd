@@ -6,7 +6,8 @@ extends CanvasLayer
 ## the current LevelController; polls only the cheap "what can I do" prompt.
 
 
-@onready var hearts: HeartBar = $Root/TopLeft/Hearts
+@onready var hearts: HeartBar = $Root/TopLeft/TopLeftRows/Hearts
+@onready var turbo_gauge: TurboGauge = $Root/TopLeft/TopLeftRows/Turbo
 @onready var star_row: HBoxContainer = $Root/TopRight/StarRow
 @onready var stars_label: Label = $Root/TopRight/StarRow/Stars
 @onready var objective_label: Label = $Root/TopCenter/Objective
@@ -46,6 +47,12 @@ func bind_level_manager(manager: LevelManager) -> void:
 func _process(delta: float) -> void:
 	prompt_label.text = _prompt_text()
 	if is_instance_valid(_player):
+		var driving := _player.driver.is_driving
+		var turbo: TurboAbility = _player.driver.vehicle.turbo if driving and _player.driver.vehicle else null
+		turbo_gauge.visible = turbo != null
+		if turbo:
+			turbo_gauge.charge = turbo.charge
+			turbo_gauge.boosting = turbo.is_active
 		if TouchControls.active:
 			controls_label.text = ""
 		else:

@@ -1,7 +1,7 @@
 extends Node
 ## Loads the main scene, lets it settle, saves a PNG and quits.
 ##
-## Run:  godot --path <project> res://tools/capture_screenshot.tscn -- <out.png> [frames] [drive] [level=<.tres>] [at=x,y,z] [yaw=deg] [zoom=m]
+## Run:  godot --path <project> res://tools/capture_screenshot.tscn -- <out.png> [frames] [drive] [turbo] [level=<.tres>] [at=x,y,z] [yaw=deg] [zoom=m]
 ##
 ## With the optional "drive" word the player summons the kart, gets in and
 ## holds the accelerator for the given frames, so the shot shows driving.
@@ -71,9 +71,12 @@ func _run() -> void:
 		await _press(InputActions.INTERACT)
 		await _wait(5)
 		Input.action_press(InputActions.ACCELERATE)
+		if user_args.has("turbo"):
+			Input.action_press(InputActions.TURBO)
 	for i in frames:
 		await get_tree().process_frame
 	Input.action_release(InputActions.ACCELERATE)
+	Input.action_release(InputActions.TURBO)
 	if zoom != "":
 		# Camera distance in metres (close-ups of the kart / character).
 		for cam in scene.find_children("*", "ThirdPersonCamera", true, false):

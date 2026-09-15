@@ -58,7 +58,7 @@ func _run() -> void:
 func _test_setup() -> void:
 	_check(_kart.get_parent() != _player, "kart is not a child of the character")
 	_check(_kart.definition.display_name == "VEHICLE_KART", "kart uses the basic_kart definition")
-	_check(_kart.visual_root.get_children().filter(func(c: Node) -> bool: return c.name != "Seat").size() == 1, "kart visual instantiated")
+	_check(_kart.visual_root.get_children().filter(func(c: Node) -> bool: return c.name != "Seat" and c.name != "TurboFlames").size() == 1, "kart visual instantiated")
 	_check(_kart.abilities.has(&"turbo") and _kart.abilities.has(&"vehicle_jump"),
 		"kart starts with turbo and jump abilities")
 	_check(_kart.turbo != null, "turbo ability node is registered")
@@ -187,25 +187,48 @@ func _test_brake_and_reverse() -> void:
 
 func _test_turbo() -> void:
 	# Longest clear straight in the arena: along x=24 from z=28 to z=-28.
-	# Get up to normal top speed first, then fire turbo.
+	# Get up to normal top speed first, then hold the turbo.
 	_kart.place(Transform3D(Basis.IDENTITY, Vector3(24.0, 0.3, 28.0)))
 	await _steps(10)
+	var hud: CanvasLayer = get_tree().root.find_child("GameHUD", true, false)
+	if hud:
+		_check(hud.turbo_gauge.visible, "turbo gauge shown at the wheel")
+	_check(is_equal_approx(_kart.turbo.charge, 1.0), "turbo gauge starts full")
 	Input.action_press(InputActions.ACCELERATE)
-	await _steps(120)
+	await _steps(80)
 	var normal_top := _kart.get_speed()
-	await _press(InputActions.TURBO)
-	_check(_kart.turbo.is_active, "turbo activates")
-	await _steps(45)
+	Input.action_press(InputActions.TURBO)
+	await _steps(3)
+	_check(_kart.turbo.is_active, "holding turbo boosts")
+	_check(_kart.turbo_flames.emitting, "flames come out of the back while boosting")
+	await _steps(20)
 	var boosted := _kart.get_speed()
-	Input.action_release(InputActions.ACCELERATE)
 	_check(boosted > normal_top * 1.25,
 		"turbo raises speed clearly (%.1f -> %.1f m/s)" % [normal_top, boosted])
-	await _steps(60)
-	_check(not _kart.turbo.is_active, "turbo ends after its duration")
-	_check(_kart.turbo.cooldown_left > 0.0, "turbo is cooling down")
-	var again := _kart.turbo.try_activate()
-	_check(not again, "turbo refuses to fire during cooldown")
-	await _steps(60)
+	_check(_kart.turbo.charge < 0.85, "gauge drains while boosting (%.2f)" % _kart.turbo.charge)
+	if hud:
+		_check(hud.turbo_gauge.charge < 0.85 and hud.turbo_gauge.boosting, "HUD gauge follows the turbo")
+	Input.action_release(InputActions.TURBO)
+	Input.action_release(InputActions.ACCELERATE)
+	Input.action_press(InputActions.BRAKE)
+	await _steps(3)
+	_check(not _kart.turbo.is_active, "releasing turbo stops the boost")
+	_check(not _kart.turbo_flames.emitting, "flames stop with the boost")
+	var partial := _kart.turbo.charge
+	await _steps(40)
+	Input.action_release(InputActions.BRAKE)
+	_check(_kart.turbo.charge > partial, "gauge refills when released (%.2f -> %.2f)" % [partial, _kart.turbo.charge])
+	# Drain it completely (standing still, the gym is small): it must cut
+	# out and refuse to relight while the button stays held.
+	Input.action_press(InputActions.TURBO)
+	await _steps(int(_kart.definition.turbo_duration * 60.0) + 10)
+	_check(not _kart.turbo.is_active and _kart.turbo.charge < 0.1, "an emptied gauge ends the boost (%.2f)" % _kart.turbo.charge)
+	await _steps(int(_kart.definition.turbo_cooldown * 30.0))
+	_check(not _kart.turbo.is_active, "holding turbo on an empty gauge does not relight it")
+	Input.action_release(InputActions.TURBO)
+	await _steps(int(_kart.definition.turbo_cooldown * 60.0) + 10)
+	_check(_kart.turbo.charge > 0.95, "gauge refills to full (%.2f)" % _kart.turbo.charge)
+	await _steps(30)
 
 
 func _test_jump() -> void:
