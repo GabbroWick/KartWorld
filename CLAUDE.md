@@ -389,7 +389,12 @@ Plan, one verifiable step at a time (commit + suites + screenshot each):
    Human then asked for a longer boost: `turbo_duration` 4 s, refill 5 s.
    Karts are solid: `vehicle.tscn` mask 17, `VehicleMotor._bump_other_karts`
    shoves whoever was hit (fading planar velocity), NpcDriver then steers
-   back to its road on its own (`bumped` signal → hit sound).
+   back to its road on its own (`bumped` signal → hit sound). Because the
+   physics collider is the small sphere, karts also carry a soft bumper:
+   `VehicleController._bump_bodies()` repels two discs per kart (front /
+   rear axle, r 0.8) against every kart in group `vehicle` within 5 m,
+   moving itself out of the overlap (0.12 m per tick) plus a small shove,
+   so bodies meet at the bodywork instead of overlapping half a kart.
    Also fixed: NPCs walked backwards — spawners rotate the body, and the
    face-direction code applied a world yaw as a local one; now
    `target_yaw - global_rotation.y` (controller and NpcBehaviour).

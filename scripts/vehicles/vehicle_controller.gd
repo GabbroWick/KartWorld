@@ -34,6 +34,7 @@ var _terrain: IslandTerrain
 
 
 func _ready() -> void:
+	add_to_group(&"vehicle")
 	motor.bumped.connect(_on_bumped)
 	if definition == null:
 		push_error("VehicleController '%s' has no VehicleDefinition assigned." % name)
@@ -70,6 +71,7 @@ func _physics_process(delta: float) -> void:
 	_tilt_to_ground(delta)
 	if _visual_instance and _visual_instance.has_method(&"update_visual"):
 		_visual_instance.call(&"update_visual", motor.speed, delta)
+	_bump_bodies()
 	if turbo_flames:
 		turbo_flames.emitting = turbo != null and turbo.is_active
 	if _visual_instance and _visual_instance.has_method(&"set_steer"):
@@ -81,6 +83,47 @@ func _physics_process(delta: float) -> void:
 
 	if global_position.y < fall_limit:
 		fell_out_of_world.emit()
+
+
+## The physics collider is a small sphere (slopes); the body is a long
+## box. So karts push each other apart at the box, not at the sphere: two
+## discs per kart (front and rear axle) repel the discs of every kart in
+## the "npc_kart" / player group that overlaps them. Also keeps walkers
+## from being run through.
+const BUMPER_RADIUS := 0.8
+const BUMPER_AXLE := 0.7
+const BUMPER_PUSH := 0.6
+const BUMPER_STEP := 0.12
+
+func _bumper_points() -> Array[Vector3]:
+	var forward := -global_basis.z
+	return [global_position + forward * BUMPER_AXLE, global_position - forward * BUMPER_AXLE]
+
+
+func _bump_bodies() -> void:
+	var mine := _bumper_points()
+	for node in get_tree().get_nodes_in_group(&"vehicle"):
+		var other := node as VehicleController
+		if other == null or other == self or not other.is_physics_processing():
+			continue
+		if other.global_position.distance_squared_to(global_position) > 25.0:
+			continue
+		var theirs := other._bumper_points()
+		var push := Vector3.ZERO
+		for a in mine:
+			for b in theirs:
+				var d := a - b
+				d.y = 0.0
+				var dist := d.length()
+				var overlap := BUMPER_RADIUS * 2.0 - dist
+				if overlap > 0.0:
+					var dir := d.normalized() if dist > 0.001 else -global_basis.z
+					push += dir * overlap
+		if push.length_squared() > 0.0:
+			# Each kart moves itself out of the overlap (the other does the
+			# same in its own tick) plus a small knock so the hit is felt.
+			global_position += push.limit_length(BUMPER_STEP) * 0.5
+			motor.shove(push * BUMPER_PUSH)
 
 
 func _is_ground_unloaded() -> bool:
