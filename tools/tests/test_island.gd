@@ -646,8 +646,16 @@ func _test_race() -> void:
 	for r in line._racers:
 		slowest = minf(slowest, (r["kart"] as VehicleController).get_speed())
 	_check(slowest > 12.0, "every rival runs near the kart's top speed on the road (slowest %.1f m/s)" % slowest)
+	# Turbo must add speed for them too (the cruise logic used to brake it off).
+	var turbo_kart := line._racers[0]["kart"] as VehicleController
+	var fastest := 0.0
+	for i in 90:
+		await _steps(1)
+		if turbo_kart.turbo.is_active:
+			fastest = maxf(fastest, turbo_kart.get_speed())
+	_check(fastest > 16.5, "a rival's turbo pushes it past the plain top speed (%.1f m/s)" % fastest)
 	var rival_driver := (line._racers[0]["kart"] as Node).get_node("NpcDriver") as NpcDriver
-	_check(rival_driver.use_turbo and rival_driver.speed_factor >= 0.9, "rivals race at full speed with turbo allowed (%.2f)" % rival_driver.speed_factor)
+	_check(rival_driver.racing and rival_driver.speed_factor >= 0.9, "rivals race at full speed (%.2f)" % rival_driver.speed_factor)
 	# Skipping a checkpoint: the lap does not count.
 	var stars_before := ProgressionManager.get_total_stars()
 	line._player_last = line._length * 0.9

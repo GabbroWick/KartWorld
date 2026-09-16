@@ -197,6 +197,9 @@ func _physics_process(delta: float) -> void:
 		var rel := focus.global_position - pos
 		if rel.length() < caution_radius and forward.dot(rel.normalized()) > 0.3:
 			wanted = 0.0
+	# A boosting kart may go faster than its cruise speed: never brake it.
+	if vehicle.turbo and vehicle.turbo.is_active:
+		wanted *= vehicle.definition.turbo_speed_multiplier
 	var speed := vehicle.get_speed()
 	var throttle := clampf((wanted - speed) / (0.5 if racing else 4.0), -1.0, 1.0)
 	if wanted <= 0.01 and speed < 0.5:

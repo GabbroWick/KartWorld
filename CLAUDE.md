@@ -618,7 +618,10 @@ them, one commit + suite + screenshot each:
    `racing` (throttle floored below the wanted speed — a cruiser eased
    off near it and topped out ~12 m/s; the human beat them without
    turbo), speed factor 1.0 − 0.01·i with a ±5 % rubber band on the gap.
-   Suite checks every rival runs > 12 m/s (top speed 16). Lap: gates in
+   Suite checks every rival runs > 12 m/s (top speed 16) and that a
+   rival's turbo pushes it past 16 (the cruise throttle used to brake
+   any speed above the wanted one, so NPC turbo did nothing — now the
+   wanted speed scales by `turbo_speed_multiplier` while boosting). Lap: gates in
    order (`next_gate`), the wrap from > 75 % to < 25 % counts only with
    every gate taken, and nothing counts while > 10 m off the road; > 18 m
    off the road for `offroad_time` (3 s) = back to the last checkpoint
