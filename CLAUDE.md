@@ -703,9 +703,12 @@ them, one commit + suite + screenshot each:
    (`LevelManager._door_exit`: hub Portal whose `level.id` matches,
    4 m on its front side, tiles built there), not at the house spawn.
    Portal suite 36 checks.
-8. **Faster flight**: `FLY_CRUISE_FACTOR` 1.5 (24 m/s vs 16 on dirt);
-   the pitch rate scales with speed so loops keep their radius. Kart
-   suite 89 checks.
+8. **Faster flight**: `FLY_CRUISE_FACTOR` 1.5 (24 m/s vs 16 on dirt).
+   A speed-scaled pitch rate was tried and felt like stopping mid-air
+   (forward speed is speed·cos(pitch), so a fast nose-up kills it):
+   `FLY_PITCH_RATE` is now a gentle constant 1.2 rad/s, loops are wide
+   (~20 m) and need height first. Test arena floor grew to 400 m so the
+   flight test stays on it. Kart suite 90 checks.
 
 ## Next step (Phase 8 — polish, continued)
 

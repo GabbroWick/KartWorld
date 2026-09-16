@@ -273,10 +273,18 @@ func _test_wings() -> void:
 	_check(top > 3.0, "holding the gas climbs (%.1f m)" % top)
 	_check(_kart.motor.fly_pitch > 0.4, "the nose points up while climbing (%.2f rad)" % _kart.motor.fly_pitch)
 	_check(_kart.visual_root.basis.z.y < -0.2, "the kart model pitches up with the nose (z.y %.2f)" % _kart.visual_root.basis.z.y)
-	# Keep pulling: the pitch has no limit, so the kart loops the loop.
+	# Climb to a safe height first (hands off keeps the nose up), then
+	# keep pulling: the pitch has no limit, so the kart loops the loop.
+	Input.action_release(InputActions.ACCELERATE)
+	for i in 400:
+		await _steps(1)
+		if _kart.global_position.y > 50.0:
+			break
+	_check(_kart.global_position.y > 50.0, "hands off it keeps climbing at the set angle (y %.1f)" % _kart.global_position.y)
+	Input.action_press(InputActions.ACCELERATE)
 	var last_pitch := _kart.motor.fly_pitch
 	var looped := false
-	for i in 200:
+	for i in 360:
 		await _steps(1)
 		var pitch: float = _kart.motor.fly_pitch
 		if last_pitch > 2.5 and pitch < -2.5:
@@ -290,9 +298,9 @@ func _test_wings() -> void:
 	_check(_player.driver.is_driving, "you cannot get out in the air")
 	# Hands off: a plane glides, it does not drop like a stone, and it
 	# keeps flying forward on its own. Let go as the nose comes level.
-	for i in 200:
+	for i in 400:
 		await _steps(1)
-		if absf(_kart.motor.fly_pitch) < 0.25 and _kart.motor.fly_pitch > last_pitch:
+		if absf(_kart.motor.fly_pitch) < 0.1 and _kart.motor.fly_pitch > last_pitch:
 			break
 		last_pitch = _kart.motor.fly_pitch
 	Input.action_release(InputActions.ACCELERATE)
