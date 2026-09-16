@@ -534,6 +534,11 @@ them, one commit + suite + screenshot each:
    is `SwingPose` (late-process bone pose like SeatedPose: overhead chop
    for club/sword, whip for the boomerang) instead of the Mixamo kick
    clip; paws still kick. No Mixamo needed. Combat suite 61 checks.
+12. **Jet kit — DONE**: the wings are a small jet now (`AiVehicleVisual`
+   `_build_submarine_parts` tail): swept delta wings with red winglets,
+   a tail fin, two turbines under the wings (intake ring, glowing nozzle,
+   fire exhaust particles while flying); stowed panels fold up along the
+   body. `capture_screenshot` `fly` presses jump twice.
 
 ## Next step (Phase 8 — polish, continued)
 

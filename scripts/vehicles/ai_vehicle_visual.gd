@@ -29,8 +29,19 @@ var _speed := 0.0
 
 ## Wings: two panels that swing out of the sides when flying.
 var _wings: Array[Node3D] = []
+var _exhausts: Array[CPUParticles3D] = []
+var _fin: Node3D
 var _fly_amount := 0.0
 var _flying := false
+
+
+static func _jet_box(size: Vector3, color: Color) -> MeshInstance3D:
+	var m := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = size
+	box.material = FlatMaterial.flat(color)
+	m.mesh = box
+	return m
 
 
 func _ready() -> void:
@@ -122,27 +133,116 @@ func _build_submarine_parts() -> void:
 		pivot.visible = false
 		_instance.add_child(pivot)
 		_props.append(pivot)
+	# Jet kit: swept delta wings with red winglets, a tail fin, and two
+	# turbines under the wings whose nozzles glow and trail fire in flight.
+	var body_color := Color(0.85, 0.9, 1.0)
+	var accent := Color(0.95, 0.35, 0.28)
+	var dark := Color(0.28, 0.3, 0.36)
 	for side in [-1.0, 1.0]:
 		var pivot := Node3D.new()
-		pivot.position = Vector3(side * 0.42, 0.55, 0.1)
-		var wing := MeshInstance3D.new()
-		var wm := BoxMesh.new()
-		wm.size = Vector3(0.9, 0.03, 0.42)
-		wm.material = FlatMaterial.flat(Color(0.85, 0.9, 1.0))
-		wing.mesh = wm
-		wing.position = Vector3(side * 0.45, 0.0, 0.0)
-		pivot.add_child(wing)
-		var tip := MeshInstance3D.new()
-		var tm := BoxMesh.new()
-		tm.size = Vector3(0.06, 0.16, 0.3)
-		tm.material = FlatMaterial.flat(Color(0.95, 0.4, 0.3))
-		tip.mesh = tm
-		tip.position = Vector3(side * 0.88, 0.07, 0.0)
-		pivot.add_child(tip)
+		pivot.position = Vector3(side * 0.4, 0.5, 0.15)
+		# Swept wing: a wide root panel and a narrower, further-back tip panel.
+		var root_panel := _jet_box(Vector3(0.55, 0.035, 0.55), body_color)
+		root_panel.position = Vector3(side * 0.28, 0.0, 0.05)
+		root_panel.rotation.y = side * deg_to_rad(-18.0)
+		pivot.add_child(root_panel)
+		var tip_panel := _jet_box(Vector3(0.6, 0.03, 0.34), body_color)
+		tip_panel.position = Vector3(side * 0.8, 0.0, 0.2)
+		tip_panel.rotation.y = side * deg_to_rad(-24.0)
+		pivot.add_child(tip_panel)
+		var stripe := _jet_box(Vector3(0.62, 0.036, 0.06), accent)
+		stripe.position = Vector3(side * 0.8, 0.0, 0.05)
+		stripe.rotation.y = side * deg_to_rad(-24.0)
+		pivot.add_child(stripe)
+		var winglet := _jet_box(Vector3(0.04, 0.2, 0.26), accent)
+		winglet.position = Vector3(side * 1.1, 0.1, 0.32)
+		winglet.rotation.z = side * deg_to_rad(-15.0)
+		pivot.add_child(winglet)
+		# Turbine under the wing: casing, intake ring, glowing nozzle.
+		var engine := Node3D.new()
+		engine.position = Vector3(side * 0.55, -0.16, 0.25)
+		var casing := MeshInstance3D.new()
+		var cm := CylinderMesh.new()
+		cm.top_radius = 0.1
+		cm.bottom_radius = 0.12
+		cm.height = 0.5
+		cm.radial_segments = 12
+		cm.material = FlatMaterial.flat(dark)
+		casing.mesh = cm
+		casing.rotation_degrees = Vector3(90.0, 0.0, 0.0)
+		engine.add_child(casing)
+		var intake := MeshInstance3D.new()
+		var im := TorusMesh.new()
+		im.inner_radius = 0.09
+		im.outer_radius = 0.14
+		im.rings = 12
+		im.ring_segments = 8
+		im.material = FlatMaterial.flat(body_color)
+		intake.mesh = im
+		intake.rotation_degrees = Vector3(90.0, 0.0, 0.0)
+		intake.position.z = -0.25
+		engine.add_child(intake)
+		var nozzle := MeshInstance3D.new()
+		var nm := CylinderMesh.new()
+		nm.top_radius = 0.09
+		nm.bottom_radius = 0.07
+		nm.height = 0.08
+		nm.radial_segments = 12
+		var glow := FlatMaterial.flat(Color(1.0, 0.55, 0.15))
+		glow.emission_enabled = true
+		glow.emission = Color(1.0, 0.45, 0.1)
+		glow.emission_energy_multiplier = 1.6
+		nm.material = glow
+		nozzle.mesh = nm
+		nozzle.rotation_degrees = Vector3(90.0, 0.0, 0.0)
+		nozzle.position.z = 0.28
+		engine.add_child(nozzle)
+		var exhaust := CPUParticles3D.new()
+		exhaust.emitting = false
+		exhaust.amount = 40
+		exhaust.lifetime = 0.28
+		var em := QuadMesh.new()
+		em.size = Vector2(0.1, 0.1)
+		var flame := StandardMaterial3D.new()
+		flame.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		flame.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		flame.vertex_color_use_as_albedo = true
+		flame.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+		em.material = flame
+		exhaust.mesh = em
+		exhaust.position.z = 0.34
+		exhaust.direction = Vector3(0.0, 0.0, 1.0)
+		exhaust.spread = 8.0
+		exhaust.gravity = Vector3.ZERO
+		exhaust.initial_velocity_min = 4.0
+		exhaust.initial_velocity_max = 6.0
+		exhaust.scale_amount_min = 0.5
+		exhaust.scale_amount_max = 1.2
+		var ramp := Gradient.new()
+		ramp.offsets = PackedFloat32Array([0.0, 0.4, 1.0])
+		ramp.colors = PackedColorArray([Color(0.6, 0.85, 1.0, 1.0), Color(1.0, 0.6, 0.15, 0.9), Color(0.5, 0.1, 0.05, 0.0)])
+		exhaust.color_ramp = ramp
+		engine.add_child(exhaust)
+		_exhausts.append(exhaust)
+		pivot.add_child(engine)
 		pivot.scale = Vector3(0.001, 1.0, 1.0)
 		pivot.visible = false
 		_instance.add_child(pivot)
 		_wings.append(pivot)
+	# Tail fin behind the seat.
+	_fin = Node3D.new()
+	_fin.position = Vector3(0.0, 0.62, 0.72)
+	var fin_panel := _jet_box(Vector3(0.035, 0.34, 0.3), body_color)
+	fin_panel.position = Vector3(0.0, 0.17, 0.05)
+	fin_panel.rotation.x = deg_to_rad(-28.0)
+	_fin.add_child(fin_panel)
+	var fin_stripe := _jet_box(Vector3(0.04, 0.1, 0.32), accent)
+	fin_stripe.position = Vector3(0.0, 0.3, 0.05)
+	fin_stripe.rotation.x = deg_to_rad(-28.0)
+	_fin.add_child(fin_stripe)
+	_fin.scale = Vector3(1.0, 0.001, 1.0)
+	_fin.visible = false
+	_instance.add_child(_fin)
 	_bubbles = CPUParticles3D.new()
 	_bubbles.emitting = false
 	_bubbles.amount = 30
@@ -171,6 +271,8 @@ func set_flying(on: bool) -> void:
 	_flying = on
 	for wing in _wings:
 		wing.visible = true
+	if _fin:
+		_fin.visible = true
 
 
 func is_flying() -> bool:
@@ -215,12 +317,18 @@ func _process(delta: float) -> void:
 		for wing in _wings:
 			var side := -1.0 if i == 0 else 1.0
 			wing.scale = Vector3(maxf(t, 0.001), 1.0, 1.0)
-			# Bank into the steering, flap a little.
-			wing.rotation.z = side * (0.35 * (1.0 - t)) + _steer * 0.25 + sin(Time.get_ticks_msec() / 1000.0 * 6.0) * 0.05 * t
+			# Folded up along the body when stowed; bank into the steering.
+			wing.rotation.z = side * (1.2 * (1.0 - t)) + _steer * 0.2 * t
 			i += 1
+		if _fin:
+			_fin.scale = Vector3(1.0, maxf(t, 0.001), 1.0)
+		for exhaust in _exhausts:
+			exhaust.emitting = _flying and t > 0.6
 		if _fly_amount <= 0.0:
 			for wing in _wings:
 				wing.visible = false
+			if _fin:
+				_fin.visible = false
 
 
 ## Steering input -1..1 from the controller (front wheels yaw with it).

@@ -115,6 +115,8 @@ func _run() -> void:
 				ProgressionManager.owned_upgrades.append(&"wings")
 			await _wait(50)
 			await _press(InputActions.JUMP)
+			await _wait(10)
+			await _press(InputActions.JUMP)   # second press in the air opens the wings
 	for i in frames:
 		await get_tree().process_frame
 	Input.action_release(InputActions.ACCELERATE)
