@@ -304,9 +304,48 @@ Main
   loaded in `_ready()`. Tests point `save_path` at a scratch file and call
   `reset()`. The file carries a `version` for future migrations.
 
-Kept out on purpose: settings, character/kart selection and customisation
-(separate concerns, later phases), and any per-level checkpoint state (a
-level always restarts from its spawn).
+* **Profiles**: three save slots. `profile` (1..`PROFILES`) picks the file
+  (`save_path_for(n)`: slot 1 is `save.json`, the others `save_<n>.json`
+  under `profiles_root`); the active slot lives in `profiles.json`.
+  `switch_profile`, `delete_profile`, `profile_summary(n)` (hero + stars
+  read from the file without loading it). `Main.set_profile(n)` reloads
+  the island with the slot's hero; the pause menu's Profiles panel is the
+  UI. The shop wallet is `get_available_stars()` = total − `stars_spent`;
+  the HUD star counter shows the wallet.
+
+Kept out on purpose: any per-level checkpoint state (a level always
+restarts from its spawn). Settings live in the `Settings` autoload
+(`user://settings.json`).
+
+## Races and bosses
+
+* `RaceLine` (`scripts/gameplay/race_line.gd`): an Area3D arch snapped onto
+  a road ring. It is an interactable usable from the kart
+  (`can_use_from_kart()`; `InteractionComponent.get_target(true)` and
+  `DriverComponent` route the press before "leave kart"). It builds the
+  course itself in its parent: a checkered finish arch `finish_offset` m
+  down the ring and `gate_count` checkpoint gates. A race = countdown with
+  the world frozen (the node is PROCESS_MODE_ALWAYS), rival karts on a grid
+  (`NpcDriver` with `lane_offset`, `use_turbo`, `bend_speed`), other
+  `npc_kart` nodes hidden, `VehicleController.wings_locked`, gates in
+  order, off-road respawn at the last gate, one lap + finish. Progress is
+  `IslandTerrain.road_progress` relative to the start; nothing counts more
+  than 10 m off the road.
+* `BossSlime` (`scripts/enemies/boss_slime.gd`) extends `Enemy`: the base
+  brain plus a leap-and-slam attack, minions and an enraged half. The
+  HUD boss bar reads group `boss`. `DefeatEnemiesObjective.boss_only`
+  targets it; the plain objective ignores bosses.
+
+## Distance culling (phones)
+
+`Lod` (`scripts/world/lod.gd`) is the one place that knows about distance
+budgets: `register(node)` puts a node in group `lod_prop` and sets
+`visibility_range_end` on its meshes to `Settings.prop_range()` (low 130 m,
+medium 220 m, high unlimited; re-applied on a quality change). ModelProps,
+NPCs, stars, ramps, fruit trees and animals register at spawn. NPC rigs
+freeze beyond `NPC_ANIMATE_RANGE` (`NpcBehaviour._tick_lod`,
+`VehicleController.set_lod_far`). `tools/perf_probe.tscn` measures frame
+times and draw calls while driving.
 
 ## Combat
 

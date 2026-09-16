@@ -5,7 +5,14 @@ Repository/folder name: `KartWorld` (the project's working name; the game is cal
 3D cartoon adventure game (Godot 4 / GDScript).
 Design spec: [KARTWORLD_GAME_DESIGN.md](KARTWORLD_GAME_DESIGN.md) — development rules: [CLAUDE_CODE_MASTER_PROMPT.md](CLAUDE_CODE_MASTER_PROMPT.md).
 
-**Current state: Phase 7 — hub, kart, portal, a first level, combat and progression.**
+**Current state: Phase 11 — a playable game on PC, Web and Android.**
+Three islands (main, Porto, Giungla) with villages, NPCs on foot and in
+karts, a house to live in (kitchen, bed, food from trees and chickens),
+four levels (Forest Trail, Cliff Steps, Vulcano with the Slime King boss,
+Ponti della Giungla), a kart with turbo, submarine and jet wings, a star
+shop with weapons, a kart race with rivals and checkpoints, a map, three
+save profiles, settings, AI-generated music and sound effects, touch
+controls and an APK build. The original description of the early phases:
 A generic third-person character (configured as the leopard) walks, runs, jumps
 and double-jumps around a procedurally generated cartoon island: beach, forest,
 mountain, a house, two NPC placeholders (fox, panda). The player can summon a
@@ -217,6 +224,7 @@ time, each verified before the next starts.
 - [x] **Phase 5** — first level: objectives, stars, checkpoint, HUD
 - [x] **Phase 6** — combat: melee attack, enemies, damage, death, respawn
 - [x] **Phase 7** — progression: level results, first unlockable ability, save/load
+- [x] **Phase 9–11** — huge streamed island, villages, Vulcano and Giungla levels, touch controls, home life, more islands + submarine, map, shop, wings, races, Slime King boss, save profiles, AI audio, phone performance pass (see [CLAUDE.md](CLAUDE.md))
 - [ ] **Phase 8** — polish (in progress): Kenney props and kart, rigged Meshy/Mixamo leopard, Italian text, Web build, hit flash, star bursts, level-complete card, pause menu, synthesised placeholder sounds done; fox/panda/slime models, real sounds and music next (see [ASSET_GUIDE.md](ASSET_GUIDE.md))
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for how the pieces fit together and which
