@@ -84,7 +84,18 @@ func _ready() -> void:
 	_build_submarine_parts()
 
 
+## Everything bolted on (canopy, propellers, wings, fin, turbines) hangs
+## from `_kit`: the model instance is turned 180 deg (Kenney/AI karts face
+## +Z), so inside it +Z is the kart's FRONT. The kit is turned back, so
+## in kit space +Z is the rear again and the parts are designed naturally.
+var _kit: Node3D
+
+
 func _build_submarine_parts() -> void:
+	_kit = Node3D.new()
+	_kit.name = "Kit"
+	_kit.rotation.y = PI
+	_instance.add_child(_kit)
 	var canopy_mesh := SphereMesh.new()
 	canopy_mesh.radius = 0.55
 	canopy_mesh.height = 0.8
@@ -102,7 +113,7 @@ func _build_submarine_parts() -> void:
 	_canopy.position = Vector3(0.0, 0.62, 0.15)   # over the seat (model units)
 	_canopy.scale = Vector3(0.001, 0.001, 0.001)
 	_canopy.visible = false
-	_instance.add_child(_canopy)
+	_kit.add_child(_canopy)
 	for side in [-1.0, 1.0]:
 		var pivot := Node3D.new()
 		pivot.position = Vector3(side * 0.22, 0.22, 0.75)   # rear, retracted
@@ -132,7 +143,7 @@ func _build_submarine_parts() -> void:
 			blades.add_child(holder)
 		pivot.add_child(blades)
 		pivot.visible = false
-		_instance.add_child(pivot)
+		_kit.add_child(pivot)
 		_props.append(pivot)
 	# Jet kit: swept delta wings with red winglets, a tail fin, and two
 	# turbines under the wings whose nozzles glow and trail fire in flight.
@@ -144,7 +155,7 @@ func _build_submarine_parts() -> void:
 		var pylon := _jet_box(Vector3(0.14, 0.12, 0.7), dark)
 		pylon.position = Vector3(side * 0.47, 0.4, 0.15)
 		pylon.visible = false
-		_instance.add_child(pylon)
+		_kit.add_child(pylon)
 		_pylons.append(pylon)
 		var pivot := Node3D.new()
 		pivot.position = Vector3(side * 0.5, 0.42, 0.15)
@@ -234,7 +245,7 @@ func _build_submarine_parts() -> void:
 		pivot.add_child(engine)
 		pivot.scale = Vector3(0.001, 1.0, 1.0)
 		pivot.visible = false
-		_instance.add_child(pivot)
+		_kit.add_child(pivot)
 		_wings.append(pivot)
 	# Tail fin behind the seat.
 	_fin = Node3D.new()
@@ -249,7 +260,7 @@ func _build_submarine_parts() -> void:
 	_fin.add_child(fin_stripe)
 	_fin.scale = Vector3(1.0, 0.001, 1.0)
 	_fin.visible = false
-	_instance.add_child(_fin)
+	_kit.add_child(_fin)
 	_bubbles = CPUParticles3D.new()
 	_bubbles.emitting = false
 	_bubbles.amount = 30
@@ -270,7 +281,7 @@ func _build_submarine_parts() -> void:
 	_bubbles.gravity = Vector3(0.0, 1.5, 0.0)
 	_bubbles.initial_velocity_min = 1.0
 	_bubbles.initial_velocity_max = 2.5
-	_instance.add_child(_bubbles)
+	_kit.add_child(_bubbles)
 
 
 ## Wings out (flying) or folded away.
@@ -330,7 +341,7 @@ func _process(delta: float) -> void:
 			var side := -1.0 if i == 0 else 1.0
 			wing.scale = Vector3(maxf(t, 0.001), 1.0, 1.0)
 			# Folded up along the body when stowed; bank into the steering.
-			wing.rotation.z = side * (1.2 * (1.0 - t)) + _steer * 0.2 * t
+			wing.rotation.z = side * (1.2 * (1.0 - t)) - _steer * 0.2 * t
 			i += 1
 		if _fin:
 			_fin.scale = Vector3(1.0, maxf(t, 0.001), 1.0)

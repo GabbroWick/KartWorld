@@ -52,11 +52,14 @@ const SUB_SPEED_FACTOR := 0.8
 ## brake dives, it lands on the first floor it meets.
 var has_wings := false
 var is_flying := false
+## Nose angle in flight (radians, + = up), unlimited: loops allowed.
+var fly_pitch := 0.0
+var fly_planar := 1.0
 var throttle_input := 0.0
 var _air_time := 0.0
 const FLY_MIN_SPEED := 6.0
-const FLY_CLIMB := 11.0
-const FLY_DIVE := -12.0
+const FLY_PITCH_RATE := 1.7   # rad/s nose up/down
+const FLY_LEVEL_RATE := 1.2
 const FLY_GLIDE := -0.6
 const FLY_CRUISE_FACTOR := 0.9
 const FLY_TAKEOFF_AIR := 0.1
@@ -106,8 +109,9 @@ func drive(delta: float, throttle: float, steer: float, jump_requested: bool,
 		_air_time = 0.0 if was_on_floor else _air_time + delta
 
 	var forward := -body.global_basis.z
-	body.velocity.x = forward.x * speed + _shove.x
-	body.velocity.z = forward.z * speed + _shove.z
+	var planar := speed * (fly_planar if is_flying else 1.0)
+	body.velocity.x = forward.x * planar + _shove.x
+	body.velocity.z = forward.z * planar + _shove.z
 	if body.velocity.y <= 0.0 and not is_submarine:
 		StepUp.try_step(body, Vector3(body.velocity.x, 0.0, body.velocity.z) * delta,
 			definition.max_step_height)
@@ -117,8 +121,14 @@ func drive(delta: float, throttle: float, steer: float, jump_requested: bool,
 
 	# Whatever a wall or a bump took away is gone; this is what stops the kart
 	# when it drives into the house.
-	var planar := Vector3(body.velocity.x, 0.0, body.velocity.z) - _shove
-	speed = planar.dot(forward)
+	var planar_after := Vector3(body.velocity.x, 0.0, body.velocity.z) - _shove
+	if is_flying:
+		# The nose angle already scaled the ground speed; only a real wall
+		# (velocity killed) takes speed away in the air.
+		if planar_after.length() < 0.05 and absf(fly_planar) > 0.2:
+			speed = 0.0
+	else:
+		speed = planar_after.dot(forward)
 
 	if not was_on_floor and body.is_on_floor():
 		landed.emit(absf(body.velocity.y))
@@ -156,18 +166,30 @@ func _bump_other_karts(forward: Vector3) -> void:
 func _apply_flight(delta: float, throttle: float, was_on_floor: bool) -> void:
 	if was_on_floor:
 		is_flying = false
+		fly_pitch = 0.0
 		body.floor_snap_length = 0.8
 		landed.emit(absf(body.velocity.y))
 		return
-	var target := FLY_GLIDE
+	# Pitch is free: gas pulls the nose up, brake pushes it down, hands off
+	# eases it level. Keep pulling and the kart loops the loop; the height
+	# follows the nose (speed * sin), the ground speed shrinks (speed * cos).
 	if throttle > 0.2:
-		target = FLY_CLIMB
+		fly_pitch += FLY_PITCH_RATE * delta
 	elif throttle < -0.2:
-		target = FLY_DIVE
-
-	if ground_height_hint != null and body.global_position.y - float(ground_height_hint) > FLY_CEILING and target > 0.0:
-		target = 0.0
-	body.velocity.y = move_toward(body.velocity.y, target, 22.0 * delta)
+		fly_pitch -= FLY_PITCH_RATE * delta
+	else:
+		fly_pitch = move_toward(fly_pitch, 0.0 if absf(fly_pitch) < PI * 0.5 else signf(fly_pitch) * PI, FLY_LEVEL_RATE * delta)
+		if absf(absf(fly_pitch) - PI) < 0.001:
+			fly_pitch = 0.0   # over the top: back to level, nose forward
+	fly_pitch = wrapf(fly_pitch, -PI, PI)
+	var too_high := ground_height_hint != null and body.global_position.y - float(ground_height_hint) > FLY_CEILING
+	if too_high and sin(fly_pitch) > 0.0:
+		fly_pitch = move_toward(fly_pitch, 0.0, FLY_PITCH_RATE * 2.0 * delta)
+	var vertical := absf(speed) * sin(fly_pitch)
+	if absf(fly_pitch) < 0.15:
+		vertical += FLY_GLIDE
+	body.velocity.y = move_toward(body.velocity.y, vertical, 40.0 * delta)
+	fly_planar = cos(fly_pitch)
 
 
 ## Set by the controller each tick (terrain height under the kart) so the
@@ -187,6 +209,8 @@ func set_submarine(on: bool, surface: float = 0.0) -> void:
 func reset() -> void:
 	speed = 0.0
 	is_flying = false
+	fly_pitch = 0.0
+	fly_planar = 1.0
 	_air_time = 0.0
 	_shove = Vector3.ZERO
 	_uphill_tangent = 0.0

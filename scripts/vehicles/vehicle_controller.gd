@@ -209,6 +209,12 @@ func _is_ground_unloaded() -> bool:
 ## height, so the wheels sit on the terrain even where the box rests on an
 ## edge (crests, slope changes).
 func _tilt_to_ground(delta: float) -> void:
+	if motor.is_flying:
+		# Nose follows the flight pitch (loops included), bank with the steering.
+		var target := Basis.from_euler(Vector3(motor.fly_pitch, 0.0, -input.steer * 0.45))
+		visual_root.basis = visual_root.basis.slerp(target, minf(8.0 * delta, 1.0))
+		visual_root.position.y = lerpf(visual_root.position.y, 0.0, minf(4.0 * delta, 1.0))
+		return
 	if is_submarine:
 		# Afloat: a gentle bob and roll with the waves instead of the rays.
 		var t := Time.get_ticks_msec() / 1000.0

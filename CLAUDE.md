@@ -541,6 +541,15 @@ them, one commit + suite + screenshot each:
    body. Human: wings must be attached — pylons on the body sides carry
    the pivots, and the glass canopy closes in the air like at sea.
    `capture_screenshot` `fly` presses jump twice.
+   Wings were built mirrored: inside the 180°-turned model instance +Z is
+   the kart's front, so every bolt-on part now hangs from `_kit` (a node
+   turned back by PI) and is designed with +Z = rear.
+   Free pitch (human: "giri a 360"): `VehicleMotor.fly_pitch` has no
+   limit — gas raises the nose 1.7 rad/s, brake lowers it, hands off eases
+   level (over the top it completes the loop); height = speed·sin(pitch),
+   ground speed = speed·cos(pitch) (`fly_planar`), so holding the gas
+   loops the loop. `_tilt_to_ground` pitches the model with the nose and
+   banks with the steering. Kart suite 87 checks.
 13. **Loader on character change**: `GameHUD.show_loading()` (black
    Fade + "Caricamento..."); `Main.set_character` shows it two frames
    before the hub rebuild and hides it after.

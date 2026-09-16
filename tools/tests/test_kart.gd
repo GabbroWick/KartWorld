@@ -271,6 +271,18 @@ func _test_wings() -> void:
 		top = maxf(top, _kart.global_position.y)
 	_check(flew and _kart.is_flying(), "jump again in the air and the wings open")
 	_check(top > 3.0, "holding the gas climbs (%.1f m)" % top)
+	_check(_kart.motor.fly_pitch > 0.4, "the nose points up while climbing (%.2f rad)" % _kart.motor.fly_pitch)
+	_check(_kart.visual_root.basis.z.y < -0.2, "the kart model pitches up with the nose (z.y %.2f)" % _kart.visual_root.basis.z.y)
+	# Keep pulling: the pitch has no limit, so the kart loops the loop.
+	var last_pitch := _kart.motor.fly_pitch
+	var looped := false
+	for i in 200:
+		await _steps(1)
+		var pitch: float = _kart.motor.fly_pitch
+		if last_pitch > 2.5 and pitch < -2.5:
+			looped = true
+		last_pitch = pitch
+	_check(looped and _kart.is_flying(), "holding the gas loops the loop (pitch wrapped past 180 deg)")
 	var visual := _kart.visual_root.get_children().filter(func(c: Node) -> bool: return c is AiVehicleVisual)
 	if visual.size() == 1:
 		_check((visual[0] as AiVehicleVisual).is_flying(), "the wings are out")
