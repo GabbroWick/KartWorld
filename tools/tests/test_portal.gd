@@ -142,9 +142,14 @@ func _test_return() -> void:
 	_check(_manager.is_in_hub(), "finishing the level brings the hub back")
 	_check(_manager.world.name == "IslandHub", "world node is the island again")
 	await _steps(30)
-	var spawn := _manager.find_spawn_point()
-	_check(spawn and arrival[0].distance_to(spawn.global_position) < 1.0,
-		"player arrives back at the hub spawn")
+	# Back in front of the door that leads to this level, not at the spawn.
+	var door: Portal = null
+	for node in _manager.world.find_children("*", "Portal", true, false):
+		if (node as Portal).level and (node as Portal).level.id == &"forest_trail":
+			door = node
+	_check(door != null and arrival[0].distance_to(door.global_position) < 6.0 and arrival[0].distance_to(door.global_position) > 2.0,
+		"player arrives back in front of the Forest Trail door (%.1f m)" % (arrival[0].distance_to(door.global_position) if door else -1.0))
+	_check(door != null and (arrival[0] - door.global_position).normalized().dot(door.global_basis.z) > 0.8, "...on the door's front side")
 	_check(_player.is_on_floor(), "player stands on the island")
 	_check(_player.driver.vehicle.get_parent() == _scene, "kart survived the round trip")
 

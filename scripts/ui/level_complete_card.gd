@@ -13,8 +13,12 @@ const MISSED := Color(0.35, 0.35, 0.4)
 @onready var title_label: Label = $Margin/Rows/Title
 @onready var footer_label: Label = $Margin/Rows/Footer
 
+## Emitted when the countdown ends or the player presses a button/touches.
+signal done
+
 var shown_stars := 0
 var shown_total := 0
+var _left := -1.0
 
 
 func _ready() -> void:
@@ -52,5 +56,34 @@ func show_result(definition: LevelDefinition, stars: int, total: int, first_time
 	tween.tween_property(self, "modulate:a", 1.0, 0.2)
 
 
+## Counts down `seconds` on the footer; any jump/use/attack press, click
+## or touch ends it early. Emits `done`.
+func wait(seconds: float) -> void:
+	_left = seconds
+
+
+func _process(delta: float) -> void:
+	if _left < 0.0:
+		return
+	_left -= delta
+	footer_label.text = tr(&"CARD_RETURNING") % ceili(maxf(_left, 0.0))
+	var pressed := Input.is_action_just_pressed(InputActions.JUMP) 		or Input.is_action_just_pressed(InputActions.INTERACT) 		or Input.is_action_just_pressed(InputActions.ATTACK)
+	if _left <= 0.0 or pressed:
+		_finish_wait()
+
+
+func _input(event: InputEvent) -> void:
+	if _left < 0.0 or not visible:
+		return
+	if (event is InputEventScreenTouch and event.pressed) 			or (event is InputEventMouseButton and event.pressed):
+		_finish_wait()
+
+
+func _finish_wait() -> void:
+	_left = -1.0
+	done.emit()
+
+
 func dismiss() -> void:
+	_left = -1.0
 	visible = false

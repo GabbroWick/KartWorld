@@ -693,6 +693,20 @@ them, one commit + suite + screenshot each:
    Phone default stays quality `low` (0.7 render scale, no shadows, far
    tiles to 400 m).
 
+7. **Level exit feedback (2026-09-16, human)**: the level-complete card
+   counts down (`CARD_RETURNING` "Si torna sull'isola tra N…"), any
+   jump/use/attack press, click or touch skips it (`LevelCompleteCard.
+   wait` / `done`), then the black "Caricamento..." shows while the hub
+   rebuilds (`LevelController._return_home` keeps the SceneTree in a
+   local: `complete_level` frees the level and `get_tree()` goes null).
+   The party comes back **in front of the door it went through**
+   (`LevelManager._door_exit`: hub Portal whose `level.id` matches,
+   4 m on its front side, tiles built there), not at the house spawn.
+   Portal suite 36 checks.
+8. **Faster flight**: `FLY_CRUISE_FACTOR` 1.5 (24 m/s vs 16 on dirt);
+   the pitch rate scales with speed so loops keep their radius. Kart
+   suite 89 checks.
+
 ## Next step (Phase 8 — polish, continued)
 
 Decided with the human (2026-09-10): real models from **Kenney** (done for

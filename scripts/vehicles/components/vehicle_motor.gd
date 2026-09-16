@@ -60,7 +60,8 @@ var _air_time := 0.0
 const FLY_MIN_SPEED := 6.0
 const FLY_PITCH_RATE := 1.7   # rad/s nose up/down
 const FLY_GLIDE := -0.6
-const FLY_CRUISE_FACTOR := 0.9
+## A jet is faster than a kart on dirt (human's request: 1.5x top speed).
+const FLY_CRUISE_FACTOR := 1.5
 const FLY_TAKEOFF_AIR := 0.1
 const FLY_CEILING := 90.0   # metres above the ground
 
@@ -175,10 +176,13 @@ func _apply_flight(delta: float, throttle: float, was_on_floor: bool) -> void:
 	# Hands off keeps the nose where it is (human: "deve rimanere con
 	# l'inclinazione che gli ho dato"); only the pedals move it.
 	var stick := -throttle if Settings.invert_fly_y else throttle
+	# Pitch rate grows with the speed so a loop keeps the same radius
+	# (a faster jet would otherwise dip into the ground on the way round).
+	var rate := FLY_PITCH_RATE * maxf(absf(speed) / maxf(definition.max_speed * 0.9, 1.0), 1.0)
 	if stick > 0.2:
-		fly_pitch += FLY_PITCH_RATE * delta
+		fly_pitch += rate * delta
 	elif stick < -0.2:
-		fly_pitch -= FLY_PITCH_RATE * delta
+		fly_pitch -= rate * delta
 	fly_pitch = wrapf(fly_pitch, -PI, PI)
 	var too_high := ground_height_hint != null and body.global_position.y - float(ground_height_hint) > FLY_CEILING
 	if too_high and sin(fly_pitch) > 0.0:

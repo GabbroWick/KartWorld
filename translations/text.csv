@@ -42,7 +42,7 @@ HUD_CONTROLS_PAUSE,Esc pause,Esc pausa
 CARD_LEVEL_COMPLETE,Level complete!,Livello completato!
 CARD_STARS,Stars,Stelle
 CARD_REWARD,New ability: %s,Nuova abilità: %s
-CARD_RETURNING,Back to the island...,Si torna sull'isola...
+CARD_RETURNING,"Back to the island in %d… (press a button to go now)","Si torna sull'isola tra %d… (premi un tasto per andare subito)"
 PAUSE_TITLE,Pause,Pausa
 PAUSE_CHARACTER,Character: %s,Personaggio: %s
 PICK_TITLE,Choose your character,Scegli il personaggio

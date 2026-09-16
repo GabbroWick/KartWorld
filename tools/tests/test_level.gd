@@ -227,6 +227,7 @@ func _test_goal() -> void:
 	await _steps(30)
 	_check(_player.health.current_health == hearts_before, "frozen enemies deal no damage (%.0f -> %.0f)" % [hearts_before, _player.health.current_health])
 	_check(_player.global_position.distance_to(Vector3(20.0, _player.global_position.y, -49.0)) < 3.0, "the player stays put while frozen")
+	_check(_hud.card.footer_label.text.begins_with(tr(&"CARD_RETURNING").substr(0, 8)), "card counts down the return (%s)" % _hud.card.footer_label.text)
 	await _steps(210)
 	_check(_manager.is_in_hub(), "party is back in the hub after the delay")
 	_check(not get_tree().paused and not GameManager.is_frozen, "the world thaws back in the hub")

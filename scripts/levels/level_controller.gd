@@ -101,10 +101,29 @@ func _on_objective_completed(_objective: Objective) -> void:
 
 
 func _return_home() -> void:
+	var hud := get_tree().get_first_node_in_group(&"hud")
+	var card: LevelCompleteCard = hud.get(&"card") if hud else null
 	if completion_delay > 0.0:
-		# process_always: the timer must run while the world is frozen.
-		await get_tree().create_timer(completion_delay, true).timeout
+		if card:
+			# The card counts down and lets the player skip with any button.
+			card.wait(completion_delay)
+			await card.done
+		else:
+			# process_always: the timer must run while the world is frozen.
+			await get_tree().create_timer(completion_delay, true).timeout
+	# Black "Caricamento..." while the island rebuilds (it looked like a hang).
+	# `complete_level` frees this level (and us): keep the tree in a local.
+	var tree := get_tree()
+	if hud and hud.has_method(&"show_loading"):
+		hud.call(&"show_loading", true)
+		await tree.process_frame
+		await tree.process_frame
 	GameManager.set_frozen(false)
-	var manager := get_tree().get_first_node_in_group(LevelManager.GROUP) as LevelManager
+	var manager := tree.get_first_node_in_group(LevelManager.GROUP) as LevelManager
+	var stars := stars_collected
 	if manager:
-		manager.complete_level(stars_collected)
+		manager.complete_level(stars)
+	if hud and hud.has_method(&"show_loading"):
+		await tree.process_frame
+		await tree.process_frame
+		hud.call(&"show_loading", false)

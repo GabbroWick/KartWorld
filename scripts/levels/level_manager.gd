@@ -71,10 +71,35 @@ func load_level(definition: LevelDefinition) -> void:
 
 
 func return_to_hub() -> void:
+	var came_from := current_level
 	current_level = null
 	_swap_world(hub_scene)
-	_relocate_party()
+	_relocate_party(_door_exit(came_from))
 	hub_loaded.emit()
+
+
+## Where the party reappears after a level: in front of the hub door that
+## leads to it (facing away from it), or the spawn when there is none.
+func _door_exit(definition: LevelDefinition) -> Transform3D:
+	if definition == null or world == null:
+		return Transform3D.IDENTITY
+	for node in world.find_children("*", "Portal", true, false):
+		var portal := node as Portal
+		if portal and portal.level and portal.level.id == definition.id:
+			var front: Vector3 = portal.global_basis.z
+			front.y = 0.0
+			front = front.normalized() if front.length_squared() > 0.001 else Vector3.BACK
+			var at := Transform3D(Basis.looking_at(front, Vector3.UP), portal.global_position + front * 4.0)
+			var terrain := world.find_children("*", "IslandTerrain", true, false)
+			if terrain.size() > 0:
+				var t := terrain[0] as IslandTerrain
+				at.origin.y = t.sample_height(at.origin.x, at.origin.z) + 0.3
+				t.set_focus(at.origin)
+				for dx in [-1, 0, 1]:
+					for dz in [-1, 0, 1]:
+						t.ensure_built_at(at.origin.x + dx * t.chunk_size, at.origin.z + dz * t.chunk_size)
+			return at
+	return Transform3D.IDENTITY
 
 
 ## Called by a level when its objectives are done. Records the result and
@@ -113,9 +138,11 @@ func _swap_world(scene: PackedScene) -> void:
 	_loaded_at = Time.get_ticks_msec() / 1000.0
 
 
-func _relocate_party() -> void:
+func _relocate_party(override := Transform3D.IDENTITY) -> void:
 	var spawn := find_spawn_point()
 	var at := spawn.global_transform if spawn else Transform3D.IDENTITY
+	if override != Transform3D.IDENTITY:
+		at = override
 	if _player.driver.is_driving:
 		_player.driver.exit_vehicle()
 	_player.set_spawn_transform(at, true)
