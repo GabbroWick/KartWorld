@@ -10,6 +10,7 @@ extends CanvasLayer
 @onready var hearts: HeartBar = $Root/TopLeft/TopLeftRows/Hearts
 @onready var turbo_gauge: TurboGauge = $Root/TopLeft/TopLeftRows/Turbo
 @onready var inventory_label: Label = $Root/TopLeft/TopLeftRows/Inventory
+@onready var race_label: Label = $Root/TopLeft/TopLeftRows/Race
 @onready var fade_rect: ColorRect = $Root/Fade
 @onready var world_map: WorldMap = $WorldMap
 @onready var minimap: MapView = $Root/Minimap
@@ -70,6 +71,7 @@ func bind_level_manager(manager: LevelManager) -> void:
 
 func _process(delta: float) -> void:
 	prompt_label.text = _prompt_text()
+	_refresh_race()
 	if is_instance_valid(_player):
 		var driving := _player.driver.is_driving
 		var turbo: TurboAbility = _player.driver.vehicle.turbo if driving and _player.driver.vehicle else null
@@ -85,6 +87,18 @@ func _process(delta: float) -> void:
 		_notice_left -= delta
 		if _notice_left <= 0.0:
 			notice_label.text = ""
+
+
+## Race in progress: time, place and lap percentage.
+func _refresh_race() -> void:
+	var line: RaceLine = null
+	for node in get_tree().get_nodes_in_group(RaceLine.GROUP):
+		if (node as RaceLine).is_racing:
+			line = node
+			break
+	race_label.visible = line != null
+	if line:
+		race_label.text = tr(&"RACE_HUD") % [line.place, line.opponents + 1, line.elapsed, int(line.lap_progress * 100.0)]
 
 
 func _refresh_inventory() -> void:

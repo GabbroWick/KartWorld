@@ -1,0 +1,62 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/race_line.gd" id="1_race"]
+[ext_resource type="PackedScene" path="res://scenes/vehicles/vehicle.tscn" id="2_vehicle"]
+[ext_resource type="Resource" path="res://resources/vehicles/basic_kart.tres" id="3_kart"]
+[ext_resource type="Resource" path="res://resources/characters/fox.tres" id="4_fox"]
+[ext_resource type="Resource" path="res://resources/characters/panda.tres" id="5_panda"]
+[ext_resource type="Resource" path="res://resources/characters/leopard.tres" id="6_leopard"]
+
+[sub_resource type="BoxShape3D" id="shape_line"]
+size = Vector3(10, 4, 1.5)
+
+[sub_resource type="StandardMaterial3D" id="mat_pole"]
+albedo_color = Color(0.95, 0.95, 0.97, 1)
+metallic_specular = 0.0
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="mat_banner"]
+albedo_color = Color(0.9, 0.25, 0.25, 1)
+metallic_specular = 0.0
+roughness = 1.0
+
+[sub_resource type="CylinderMesh" id="mesh_pole"]
+material = SubResource("mat_pole")
+top_radius = 0.12
+bottom_radius = 0.12
+height = 4.5
+
+[sub_resource type="BoxMesh" id="mesh_banner"]
+material = SubResource("mat_banner")
+size = Vector3(10.4, 0.9, 0.2)
+
+[node name="RaceLine" type="Area3D"]
+script = ExtResource("1_race")
+road_index = 1
+opponents = 3
+vehicle_scene = ExtResource("2_vehicle")
+vehicle_definition = ExtResource("3_kart")
+opponent_definitions = Array[CharacterDefinition]([ExtResource("4_fox"), ExtResource("5_panda"), ExtResource("6_leopard")])
+
+[node name="Shape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+shape = SubResource("shape_line")
+
+[node name="PoleL" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.2, 2.25, 0)
+mesh = SubResource("mesh_pole")
+
+[node name="PoleR" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2, 2.25, 0)
+mesh = SubResource("mesh_pole")
+
+[node name="Top" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.4, 0)
+mesh = SubResource("mesh_banner")
+
+[node name="Banner" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.3, 0)
+text = "GARA"
+font_size = 96
+outline_size = 16
+double_sided = false

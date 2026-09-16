@@ -58,6 +58,7 @@ func _run() -> void:
 	await _test_kart_climbs_mountain()
 	await _test_road_jumps()
 	await _test_npcs_alive()
+	await _test_race()
 	await _test_submarine()
 	await _test_sea()
 	_finish()
@@ -592,6 +593,67 @@ func _test_submarine() -> void:
 	_player.global_position = _player.spawn_transform.origin
 	_player.motor.reset()
 	_ensure_ground(_player.global_position)
+	await _steps(10)
+
+
+func _test_race() -> void:
+	# The GARA arch sits on road ring 1 near the house; driving through it
+	# starts a one-lap race against NPC karts, the HUD shows place and
+	# time, and finishing pays stars once per place.
+	var line := _scene.get("world").get_node_or_null("Race") as RaceLine
+	_check(line != null, "hub has a race line")
+	if line == null:
+		return
+	await _steps(5)
+	_check(_terrain.is_on_road(line.global_position.x, line.global_position.z), "the arch snapped onto the road (%s)" % line.global_position)
+	var kart := _player.driver.vehicle
+	var pose := line.global_transform
+	var start := pose.origin + pose.basis.z * 8.0 + Vector3.UP * 0.3   # 8 m before the line, facing it
+	_ensure_ground(start)
+	kart.place(Transform3D(Basis.looking_at(-pose.basis.z, Vector3.UP), start))
+	_player.global_position = start + pose.basis.x * 2.0 + Vector3.UP * 0.3
+	_player.motor.reset()
+	await _steps(10)
+	await _hold(InputActions.INTERACT, 3)
+	await _steps(3)
+	_check(_player.driver.is_driving, "in the kart before the arch")
+	Input.action_press(InputActions.ACCELERATE)
+	var started := false
+	for i in 90:
+		await _steps(1)
+		if line.is_racing:
+			started = true
+			break
+	_check(started, "driving through the arch starts the race")
+	_check(line._racers.size() == 3 and get_tree().get_nodes_in_group(&"npc_kart").size() >= 3, "three rival karts spawn (%d)" % line._racers.size())
+	await _steps(30)
+	var hud: GameHUD = _scene.get_node("GameHUD")
+	_check(hud.race_label.visible and hud.race_label.text.begins_with(tr(&"RACE_HUD").substr(0, 5)), "HUD shows the race (%s)" % hud.race_label.text)
+	_check(line.elapsed > 0.4 and line.place >= 1 and line.place <= 4, "timer runs, place is 1-4 (%d, %.1f s)" % [line.place, line.elapsed])
+	Input.action_release(InputActions.ACCELERATE)
+	# Fake the lap: pretend the player was near the end of the ring, then
+	# put the kart just past the line.
+	var stars_before := ProgressionManager.get_total_stars()
+	line._player_last = line._length * 0.9
+	line._player_mid = true
+	for racer in line._racers:
+		racer["finished"] = true
+	var finished := [-1]
+	line.race_finished.connect(func(place: int, _t: float) -> void: finished[0] = place)
+	kart.place(Transform3D(Basis.looking_at(-pose.basis.z, Vector3.UP), pose.origin - pose.basis.z * 3.0 + Vector3.UP * 0.3))
+	await _steps(5)
+	_check(finished[0] == 4 and not line.is_racing, "crossing the line after a lap finishes the race (place %d)" % finished[0])
+	_check(get_tree().get_nodes_in_group(&"npc_kart").filter(func(k: Node) -> bool: return line.is_ancestor_of(k)).is_empty(), "rival karts are cleared")
+	_check(ProgressionManager.get_total_stars() == stars_before, "4th place pays nothing")
+	# A podium finish pays once.
+	line._start(kart)
+	await _steps(2)
+	line._player_last = line._length * 0.9
+	line._player_mid = true
+	kart.place(Transform3D(Basis.looking_at(-pose.basis.z, Vector3.UP), pose.origin - pose.basis.z * 3.0 + Vector3.UP * 0.3))
+	await _steps(5)
+	_check(ProgressionManager.get_total_stars() == stars_before + 5, "first place pays 5 stars (%d)" % (ProgressionManager.get_total_stars() - stars_before))
+	await _hold(InputActions.INTERACT, 3)
 	await _steps(10)
 
 

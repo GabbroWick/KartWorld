@@ -146,3 +146,9 @@ LEVEL_JUNGLE_DESC,"Cross the river on planks, logs and vines.","Attraversa il fi
 OBJ_CROSS_JUNGLE,Reach the door across the jungle,Raggiungi la porta oltre la giungla
 PLACE_GIUNGLA,Jungle,Giungla
 NPC_V_11,Far to the south-west there is a jungle island. Fly there!,Lontano a sud-ovest c'è un'isola con la giungla. Volaci!
+RACE_BANNER,RACE,GARA
+RACE_GO,Race! One lap of the road. Go!,Gara! Un giro della strada. Via!
+RACE_HUD,"Place %d/%d · %.1f s · lap %d%%","Posizione %d/%d · %.1f s · giro %d%%"
+RACE_RESULT,"Finished %d° in %.1f s","Arrivato %d° in %.1f s"
+RACE_REWARD,+%d stars!,+%d stelle!
+NPC_V_12,Drive through the GARA arch by the house to race the others!,Passa con il kart sotto l'arco GARA vicino a casa per sfidare gli altri!

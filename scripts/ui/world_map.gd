@@ -140,6 +140,8 @@ func markers() -> Array[Dictionary]:
 		out.append({"position": (village as Node3D).global_position, "kind": "village", "label": label})
 	for shop in tree.get_nodes_in_group(&"map_shop"):
 		out.append({"position": (shop as Node3D).global_position, "kind": "shop", "label": tr(&"SHOP_SIGN")})
+	for race in tree.get_nodes_in_group(&"map_race"):
+		out.append({"position": (race as Node3D).global_position, "kind": "race", "label": tr(&"RACE_BANNER")})
 	for star in tree.get_nodes_in_group(&"star"):
 		var s := star as Collectible
 		if s and s.persistent_id.begins_with("hub_star_"):

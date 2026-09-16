@@ -1,4 +1,4 @@
-[gd_scene load_steps=67 format=3]
+[gd_scene load_steps=68 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/props/island_terrain.tscn" id="1_terrain"]
 [ext_resource type="PackedScene" path="res://scenes/world/props/house.tscn" id="2_house"]
@@ -65,6 +65,7 @@
 [ext_resource type="Resource" path="res://resources/enemies/chicken.tres" id="44_chicken"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/shop.tscn" id="45_shop"]
 [ext_resource type="Resource" path="res://resources/levels/level_04_jungle.tres" id="46_level4"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/race_line.tscn" id="47_race"]
 
 [sub_resource type="FastNoiseLite" id="cloud_noise"]
 noise_type = 3
@@ -265,6 +266,10 @@ color = Color(0.6, 0.58, 0.62, 1)
 [node name="Portal" parent="PortalSite4" instance=ExtResource("10_portal")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
 level = ExtResource("46_level4")
+
+[node name="Race" parent="." instance=ExtResource("47_race")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88, 4, 92)
+race_name = &"island"
 
 [node name="RoadJumps" type="Node3D" parent="."]
 script = ExtResource("30_dressing")
@@ -494,7 +499,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 4, 60)
 script = ExtResource("31_spawner")
 character_scene = ExtResource("7_character")
 definitions = Array[CharacterDefinition]([ExtResource("8_fox"), ExtResource("9_panda")])
-dialogue_pool = PackedStringArray("NPC_V_1", "NPC_V_2", "NPC_V_3", "NPC_V_4", "NPC_V_5", "NPC_V_6", "NPC_V_7", "NPC_V_8", "NPC_V_9", "NPC_V_10", "NPC_V_11")
+dialogue_pool = PackedStringArray("NPC_V_1", "NPC_V_2", "NPC_V_3", "NPC_V_4", "NPC_V_5", "NPC_V_6", "NPC_V_7", "NPC_V_8", "NPC_V_9", "NPC_V_10", "NPC_V_11", "NPC_V_12")
 walkers = 7
 walk_radius = 18.0
 village_path = NodePath("../Village")

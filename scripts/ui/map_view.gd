@@ -125,6 +125,12 @@ func _draw_marker(at: Vector2, marker: Dictionary, scale: float) -> void:
 		"shop":
 			draw_rect(Rect2(at - Vector2(s, s * 0.8), Vector2(s * 2.0, s * 1.6)), Color(0.95, 0.3, 0.3))
 			draw_rect(Rect2(at - Vector2(s, s * 0.8), Vector2(s * 2.0, s * 1.6)), Color.WHITE, false, 1.5)
+		"race":
+			draw_rect(Rect2(at - Vector2(s, s), Vector2(s * 2.0, s * 2.0)), Color.WHITE)
+			for cy in 2:
+				for cx in 2:
+					if (cx + cy) % 2 == 0:
+						draw_rect(Rect2(at - Vector2(s, s) + Vector2(cx * s, cy * s), Vector2(s, s)), Color.BLACK)
 		"star":
 			var pts := PackedVector2Array()
 			for i in 10:

@@ -589,6 +589,23 @@ them, one commit + suite + screenshot each:
    3 stars, 3 slimes (optional), goal door; palms as ModelProps. Music
    `jungle.wav`. Suite `test_jungle_runner.tscn` 17 checks.
 
+3. **Island race — DONE**: `RaceLine` (`scenes/gameplay/race_line.tscn`,
+   Area3D arch "GARA" with poles, banner and Label3D turned to the camera)
+   snaps itself onto road ring `road_index` (`IslandTerrain.road_progress`
+   + `road_pose`); hub instance `Race` at (88, 4, 92) on ring 1, map
+   marker group `map_race` (checkered). Driving the kart through it
+   spawns `opponents` (3) NPC karts just ahead (`NpcDriver`, caution 0,
+   `speed_factor` 0.92 − 0.04·i, fox/panda/leopard seated through
+   `CharacterRoster.for_npc`) and starts a one-lap race: progress along
+   the ring is measured from the line; a lap counts only after the far
+   side (40–70 %) was reached and the progress wraps from > 70 % to
+   < 30 % (no U-turn cheating). HUD `Race` label under the hearts
+   (`RACE_HUD`: place, time, lap %). Finishing pays 5/3/1 stars once per
+   place (`race_<name>_<place>` collected ids), notice `RACE_RESULT` +
+   `RACE_REWARD`, rivals freed. Villagers hint (`NPC_V_12`). Island
+   suite 178 checks (`_test_race`: drive through, rivals exist, HUD,
+   faked lap, podium stars).
+
 ## Next step (Phase 8 — polish, continued)
 
 Decided with the human (2026-09-10): real models from **Kenney** (done for

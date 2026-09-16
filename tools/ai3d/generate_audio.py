@@ -2,9 +2,10 @@
 
 Musica: MusicGen small (Meta, transformers) -> assets/audio/music/<nome>.wav
   python tools/ai3d/generate_audio.py music --name hub --seconds 30 --seed 3
-Effetti: Stable Audio Open 1.0 (Stability, diffusers; modello "gated":
-accetta la licenza su huggingface.co/stabilityai/stable-audio-open-1.0 e fai
-`huggingface-cli login` una volta) -> assets/audio/sfx/<nome>.wav
+Effetti: AudioLDM 2 (cvssp/audioldm2, diffusers, non gated, ~2 GB) ->
+assets/audio/sfx/<nome>.wav. `--backend stable` usa Stable Audio Open 1.0
+(gated: licenza su huggingface.co/stabilityai/stable-audio-open-1.0 +
+`huggingface-cli login`).
   python tools/ai3d/generate_audio.py sfx --name horn
   python tools/ai3d/generate_audio.py sfx --all
 
@@ -93,19 +94,42 @@ def music(args):
 
 def sfx(args):
     import torch
-    from diffusers import StableAudioPipeline
     device = _device()
-    pipe = StableAudioPipeline.from_pretrained("stabilityai/stable-audio-open-1.0", torch_dtype=torch.float16)
-    pipe = pipe.to(device)
     names = list(SFX.keys()) if args.all else [args.name]
+    if args.backend == "stable":
+        from diffusers import StableAudioPipeline
+        pipe = StableAudioPipeline.from_pretrained("stabilityai/stable-audio-open-1.0", torch_dtype=torch.float16).to(device)
+        for name in names:
+            prompt = SFX.get(name, args.prompt or name)
+            seconds = 4.0 if name == "engine" else 1.6
+            gen = torch.Generator(device).manual_seed(args.seed)
+            audio = pipe(prompt, negative_prompt="low quality, noise, music, speech",
+                         num_inference_steps=60, audio_end_in_s=seconds, num_waveforms_per_prompt=1,
+                         generator=gen).audios[0]
+            _save_wav(SFX_DIR / f"{name}.wav", audio.float().cpu().numpy(), pipe.vae.sampling_rate)
+        return
+    # AudioLDM 2 (cvssp/audioldm2, not gated, ~2 GB): 16 kHz mono clips.
+    from diffusers import AudioLDM2Pipeline
+    pipe = AudioLDM2Pipeline.from_pretrained("cvssp/audioldm2", torch_dtype=torch.float16).to(device)
     for name in names:
         prompt = SFX.get(name, args.prompt or name)
-        seconds = 4.0 if name == "engine" else 1.6
+        seconds = 4.0 if name == "engine" else 2.0
         gen = torch.Generator(device).manual_seed(args.seed)
-        audio = pipe(prompt, negative_prompt="low quality, noise, music, speech",
-                     num_inference_steps=60, audio_end_in_s=seconds, num_waveforms_per_prompt=1,
-                     generator=gen).audios[0]
-        _save_wav(SFX_DIR / f"{name}.wav", audio.float().cpu().numpy(), pipe.vae.sampling_rate)
+        audio = pipe(prompt, negative_prompt="low quality, music, speech, noise",
+                     num_inference_steps=100, audio_length_in_s=seconds, num_waveforms_per_prompt=1,
+                     guidance_scale=3.5, generator=gen).audios[0]
+        audio = _trim(np.asarray(audio, dtype=np.float32))
+        _save_wav(SFX_DIR / f"{name}.wav", audio, 16000)
+
+
+def _trim(audio: np.ndarray, threshold: float = 0.02, tail: int = 1600) -> np.ndarray:
+    """Cut leading/trailing silence so short effects fire without delay."""
+    loud = np.where(np.abs(audio) > threshold * max(float(np.max(np.abs(audio))), 1e-6))[0]
+    if loud.size == 0:
+        return audio
+    start = max(int(loud[0]) - 200, 0)
+    end = min(int(loud[-1]) + tail, audio.shape[0])
+    return audio[start:end]
 
 
 def main():
@@ -122,6 +146,7 @@ def main():
     s.add_argument("--prompt", default="")
     s.add_argument("--all", action="store_true")
     s.add_argument("--seed", type=int, default=1)
+    s.add_argument("--backend", default="audioldm2", choices=["audioldm2", "stable"])
     args = ap.parse_args()
     if args.cmd == "music":
         music(args)

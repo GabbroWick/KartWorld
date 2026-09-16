@@ -374,6 +374,34 @@ func road_pose(road: int, distance: float) -> Transform3D:
 	return Transform3D.IDENTITY
 
 
+## Metres along a road at the point nearest to `at` (0 at the first point).
+func road_progress(road: int, at: Vector3) -> float:
+	var entry := _road_entry(road)
+	if entry.is_empty():
+		return 0.0
+	var pts: PackedVector2Array = entry[0]
+	var closed: bool = entry[1]
+	var n := pts.size()
+	var q := Vector2(at.x, at.z)
+	var best := INF
+	var best_distance := 0.0
+	var walked := 0.0
+	for i in (n if closed else n - 1):
+		var a := pts[i]
+		var b := pts[(i + 1) % n]
+		var seg := b - a
+		var seg_len := seg.length()
+		var t := 0.0
+		if seg_len > 0.001:
+			t = clampf((q - a).dot(seg) / (seg_len * seg_len), 0.0, 1.0)
+		var d := q.distance_squared_to(a + seg * t)
+		if d < best:
+			best = d
+			best_distance = walked + seg_len * t
+		walked += seg_len
+	return best_distance
+
+
 func _road_entry(road: int) -> Array:
 	if road < 0:
 		return [road_points, true] if road_points.size() >= 2 else []
