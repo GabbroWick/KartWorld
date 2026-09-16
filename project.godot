@@ -23,6 +23,7 @@ config/icon="res://icon.png"
 GameManager="*res://scripts/core/game_manager.gd"
 ProgressionManager="*res://scripts/core/progression_manager.gd"
 Sfx="*res://scripts/audio/sfx.gd"
+Settings="*res://scripts/core/settings.gd"
 
 [display]
 

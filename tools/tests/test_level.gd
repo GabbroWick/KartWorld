@@ -28,6 +28,7 @@ func _ready() -> void:
 
 func _run() -> void:
 	ProgressionManager.save_path = "user://test_level_save.json"
+	Settings.path = "user://test_settings.json"
 	ProgressionManager.reset()
 	await get_tree().process_frame
 	_scene = (load(MAIN_SCENE) as PackedScene).instantiate() as Node3D
@@ -58,6 +59,25 @@ func _test_pause() -> void:
 	_check(GameManager.is_paused and get_tree().paused, "Esc pauses the game")
 	_check(menu.root.visible, "pause menu is visible while paused")
 	_check(menu.resume_button.text == tr(&"PAUSE_RESUME"), "pause menu is in Italian (%s)" % menu.resume_button.text)
+	# Settings page: quality drives the sun's shadows, toggles are saved.
+	menu.settings_button.pressed.emit()
+	await _steps(2)
+	_check(menu.settings_panel.visible and not menu.panel.visible, "Impostazioni opens the settings page")
+	var sun := get_tree().get_first_node_in_group(&"sun") as DirectionalLight3D
+	Settings.set_quality(&"low")
+	_check(sun != null and not sun.shadow_enabled, "low quality turns the sun's shadows off")
+	Settings.set_quality(&"high")
+	_check(sun != null and sun.shadow_enabled and sun.directional_shadow_max_distance >= 100.0, "high quality: shadows on, long shadow distance")
+	Settings.set_invert_fly_y(true)
+	_check(FileAccess.get_file_as_string(Settings.path).contains("\"invert_fly_y\": true"), "settings are saved to disk")
+	Settings.set_invert_fly_y(false)
+	Settings.set_look_sensitivity(1.5)
+	_check(is_equal_approx(_camera_rig.sensitivity_scale, 1.5), "camera speed reaches the camera rig")
+	Settings.set_look_sensitivity(1.0)
+	Settings.set_quality(&"medium")
+	menu.settings_panel.back_button.pressed.emit()
+	await _steps(2)
+	_check(menu.panel.visible and not menu.settings_panel.visible, "Back returns to the pause menu")
 	_check(not menu.hub_button.visible, "no 'back to the island' button while already in the hub")
 	Input.action_press(&"move_forward")
 	await _steps(20)

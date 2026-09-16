@@ -9,6 +9,8 @@ extends CanvasLayer
 @onready var resume_button: Button = $Root/Panel/Margin/Rows/Resume
 @onready var hub_button: Button = $Root/Panel/Margin/Rows/Hub
 @onready var character_button: Button = $Root/Panel/Margin/Rows/Character
+@onready var settings_button: Button = $Root/Panel/Margin/Rows/Settings
+@onready var settings_panel: SettingsMenu = $Root/SettingsPanel
 @onready var panel: Control = $Root/Panel
 @onready var picker: Control = $Root/Picker
 @onready var picker_title: Label = $Root/Picker/Margin/Rows/Title
@@ -29,6 +31,13 @@ func _ready() -> void:
 	resume_button.pressed.connect(func() -> void: GameManager.set_paused(false))
 	hub_button.pressed.connect(_on_hub_pressed)
 	character_button.pressed.connect(_on_character_pressed)
+	settings_button.text = tr(&"SET_TITLE")
+	settings_button.pressed.connect(func() -> void:
+		panel.visible = false
+		settings_panel.open())
+	settings_panel.closed.connect(func() -> void:
+		panel.visible = true
+		settings_button.grab_focus())
 	back_button.text = tr(&"PICK_BACK")
 	back_button.pressed.connect(_show_picker.bind(false))
 	picker_title.text = tr(&"PICK_TITLE")
@@ -42,6 +51,7 @@ func _ready() -> void:
 func _on_pause_changed(paused: bool) -> void:
 	root.visible = paused
 	picker.visible = false
+	settings_panel.visible = false
 	panel.visible = true
 	if paused:
 		var manager := get_tree().get_first_node_in_group(LevelManager.GROUP) as LevelManager

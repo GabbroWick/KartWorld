@@ -19,6 +19,8 @@ extends Node3D
 ## Radians per second for keyboard / right stick camera actions.
 @export_range(0.5, 8.0, 0.1) var stick_sensitivity := 2.8
 @export var invert_y := false
+## Settings menu multiplier on every look input.
+var sensitivity_scale := 1.0
 @export var min_pitch_degrees := -65.0
 @export var max_pitch_degrees := 30.0
 
@@ -99,6 +101,7 @@ func _update_rotation(delta: float) -> void:
 		InputActions.CAMERA_LEFT, InputActions.CAMERA_RIGHT,
 		InputActions.CAMERA_UP, InputActions.CAMERA_DOWN
 	) * stick_sensitivity * delta
+	look *= sensitivity_scale
 
 	if look.length_squared() > 0.0:
 		_last_look_time = _now()

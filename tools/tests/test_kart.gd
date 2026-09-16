@@ -291,11 +291,14 @@ func _test_wings() -> void:
 	# Hands off: a plane glides, it does not drop like a stone, and it
 	# keeps flying forward on its own.
 	Input.action_release(InputActions.ACCELERATE)
+	await _steps(2)
+	last_pitch = _kart.motor.fly_pitch
 	var y_before := _kart.global_position.y
 	var pos_before := _kart.global_position
 	await _steps(25)
-	_check(y_before - _kart.global_position.y < 1.0, "released, the kart glides (lost %.1f m in 0.4 s)" % (y_before - _kart.global_position.y))
-	_check((_kart.global_position - pos_before).dot(-_kart.global_basis.z) > 5.0 and _kart.get_speed() > 6.0, "it keeps cruising forward by itself (%.1f m/s)" % _kart.get_speed())
+	_check(y_before - _kart.global_position.y < 1.0, "released, the kart keeps its nose angle and does not drop (lost %.1f m in 0.4 s)" % (y_before - _kart.global_position.y))
+	_check(absf(_kart.motor.fly_pitch - last_pitch) < 0.05, "hands off, the pitch stays where it was (%.2f vs %.2f)" % [_kart.motor.fly_pitch, last_pitch])
+	_check((_kart.global_position - pos_before).dot(-_kart.global_basis.z) > 2.5 and _kart.get_speed() > 6.0, "it keeps cruising forward by itself (%.1f m/s)" % _kart.get_speed())
 	Input.action_press(InputActions.BRAKE)
 	await _steps(10)
 	_check(_kart.get_speed() > 6.0, "the brake pedal dives, it never reverses in the air (%.1f m/s)" % _kart.get_speed())

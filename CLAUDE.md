@@ -550,6 +550,17 @@ them, one commit + suite + screenshot each:
    ground speed = speed·cos(pitch) (`fly_planar`), so holding the gas
    loops the loop. `_tilt_to_ground` pitches the model with the nose and
    banks with the steering. Kart suite 87 checks.
+   Hands off keeps the nose angle (no auto-level; human's request).
+14. **Settings — DONE 2026-09-16**: autoload `Settings`
+   (`scripts/core/settings.gd`, `user://settings.json`, tests set
+   `Settings.path` to a scratch file): quality low/medium/high (sun
+   shadows + distance, `IslandTerrain.far_distance`, `scaling_3d_scale`;
+   phones default to low), invert flight Y (VehicleMotor), invert camera
+   Y + look speed (`ThirdPersonCamera.sensitivity_scale`), sound / music
+   volume (`Sfx.set_music_volume`). Pause menu → "Impostazioni"
+   (`SettingsMenu`), with a "Comandi" page (keyboard or touch text).
+   Every DirectionalLight3D is put in group `sun` on entering the tree.
+   Level suite 65 checks.
 13. **Loader on character change**: `GameHUD.show_loading()` (black
    Fade + "Caricamento..."); `Main.set_character` shows it two frames
    before the hub rebuild and hides it after.

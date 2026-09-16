@@ -59,7 +59,6 @@ var throttle_input := 0.0
 var _air_time := 0.0
 const FLY_MIN_SPEED := 6.0
 const FLY_PITCH_RATE := 1.7   # rad/s nose up/down
-const FLY_LEVEL_RATE := 1.2
 const FLY_GLIDE := -0.6
 const FLY_CRUISE_FACTOR := 0.9
 const FLY_TAKEOFF_AIR := 0.1
@@ -173,20 +172,19 @@ func _apply_flight(delta: float, throttle: float, was_on_floor: bool) -> void:
 	# Pitch is free: gas pulls the nose up, brake pushes it down, hands off
 	# eases it level. Keep pulling and the kart loops the loop; the height
 	# follows the nose (speed * sin), the ground speed shrinks (speed * cos).
-	if throttle > 0.2:
+	# Hands off keeps the nose where it is (human: "deve rimanere con
+	# l'inclinazione che gli ho dato"); only the pedals move it.
+	var stick := -throttle if Settings.invert_fly_y else throttle
+	if stick > 0.2:
 		fly_pitch += FLY_PITCH_RATE * delta
-	elif throttle < -0.2:
+	elif stick < -0.2:
 		fly_pitch -= FLY_PITCH_RATE * delta
-	else:
-		fly_pitch = move_toward(fly_pitch, 0.0 if absf(fly_pitch) < PI * 0.5 else signf(fly_pitch) * PI, FLY_LEVEL_RATE * delta)
-		if absf(absf(fly_pitch) - PI) < 0.001:
-			fly_pitch = 0.0   # over the top: back to level, nose forward
 	fly_pitch = wrapf(fly_pitch, -PI, PI)
 	var too_high := ground_height_hint != null and body.global_position.y - float(ground_height_hint) > FLY_CEILING
 	if too_high and sin(fly_pitch) > 0.0:
 		fly_pitch = move_toward(fly_pitch, 0.0, FLY_PITCH_RATE * 2.0 * delta)
 	var vertical := absf(speed) * sin(fly_pitch)
-	if absf(fly_pitch) < 0.15:
+	if absf(fly_pitch) < 0.05:
 		vertical += FLY_GLIDE
 	body.velocity.y = move_toward(body.velocity.y, vertical, 40.0 * delta)
 	fly_planar = cos(fly_pitch)

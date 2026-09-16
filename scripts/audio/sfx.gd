@@ -17,6 +17,8 @@ var _streams: Dictionary = {}
 var _players: Array[AudioStreamPlayer] = []
 var _next := 0
 var _music: AudioStreamPlayer
+var _music_base_db := -8.0
+var _music_volume := 0.8
 var _music_track: StringName = &""
 ## Names played since the last `clear_log()` (tests read this).
 var played: Array[StringName] = []
@@ -30,7 +32,7 @@ func _ready() -> void:
 		add_child(player)
 		_players.append(player)
 	_music = AudioStreamPlayer.new()
-	_music.volume_db = -8.0
+	_music.volume_db = _music_base_db + linear_to_db(_music_volume)
 	add_child(_music)
 
 
@@ -96,3 +98,10 @@ func _load_file(directory: String, name: StringName) -> AudioStream:
 		if ResourceLoader.exists(path):
 			return load(path) as AudioStream
 	return null
+
+
+## Settings menu: 0..1 on top of the track's base level.
+func set_music_volume(value: float) -> void:
+	_music_volume = clampf(value, 0.0, 1.0)
+	if _music:
+		_music.volume_db = _music_base_db + linear_to_db(maxf(_music_volume, 0.0001))

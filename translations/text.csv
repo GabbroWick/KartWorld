@@ -118,3 +118,26 @@ INV_FOOD,Food: %s,Cibo: %s
 INV_NOTHING,nothing,niente
 TOUCH_BAG,Bag,Zaino
 HUD_LOADING,Loading...,Caricamento...
+SET_TITLE,Settings,Impostazioni
+SET_QUALITY,Quality,Qualità
+SET_QUALITY_LOW,Low,Bassa
+SET_QUALITY_MEDIUM,Medium,Media
+SET_QUALITY_HIGH,High,Alta
+SET_INVERT_FLY,Invert flight up/down (gas = dive),Inverti su/giù in volo (gas = picchiata)
+SET_INVERT_LOOK,Invert camera up/down,Inverti su/giù della camera
+SET_SENSITIVITY,Camera speed,Velocità camera
+SET_SFX,Sounds,Suoni
+SET_MUSIC,Music,Musica
+SET_CONTROLS,Controls,Comandi
+SET_CONTROLS_TEXT,"On foot: WASD move · Shift run · Space jump (twice = double jump) · J attack · E use/talk · K call the kart · H dance · I backpack · M map · Esc pause
+Kart: W/S gas and brake · A/D steer · Shift (hold) turbo · Space jump · H horn · E get out
+Wings (shop): jump and press jump again in the air · gas nose up · brake nose down · hold the gas to loop
+At sea the kart floats as a submarine; jump at speed to take off","A piedi: WASD muovi · Shift corri · Spazio salta (due volte = doppio salto) · J attacca · E usa/parla · K chiama il kart · H balla · I zaino · M mappa · Esc pausa
+Kart: W/S gas e freno · A/D sterza · Shift (tieni) turbo · Spazio salta · H clacson · E scendi
+Ali (negozio): salta e premi di nuovo salto in aria · gas alza il muso · freno lo abbassa · tieni il gas per il giro della morte
+In mare il kart galleggia come sottomarino; salta a tutta velocità per decollare"
+SET_CONTROLS_TOUCH,"Left half of the screen: stick to walk or drive (push to the edge to run) · right half: drag to look around
+Buttons: Jump (twice in the air = wings) · Attack/Turbo · Use · Kart · Dance/Horn · Bag · Map · Pause
+Wings: gas (stick up) raises the nose, brake (stick down) lowers it","Metà sinistra dello schermo: stick per camminare o guidare (spingi fino al bordo per correre) · metà destra: trascina per guardarti intorno
+Pulsanti: Salta (due volte in aria = ali) · Attacca/Turbo · Usa · Kart · Balla/Clacson · Zaino · Mappa · Pausa
+Ali: gas (stick in su) alza il muso, freno (stick in giù) lo abbassa"
