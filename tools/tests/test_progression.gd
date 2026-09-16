@@ -40,6 +40,7 @@ func _run() -> void:
 	await _test_triple_jump()
 	await _test_best_stars()
 	await _test_save_roundtrip()
+	await _test_profiles()
 	ProgressionManager.reset()
 	_finish()
 
@@ -153,6 +154,59 @@ func _check(condition: bool, description: String) -> void:
 	print("  %s  %s" % ["PASS" if condition else "FAIL", description])
 	if not condition:
 		_failures.append(description)
+
+
+func _test_profiles() -> void:
+	# Three save slots in a scratch folder: slot 1 keeps the progress made so
+	# far, slot 2 starts fresh, switching back restores everything, the
+	# pause menu lists the slots and switches through Main (island reload).
+	var root := "user://test_profiles/"
+	DirAccess.make_dir_recursive_absolute(root)
+	for slot in [1, 2, 3]:
+		var path := root + ("save.json" if slot == 1 else "save_%d.json" % slot)
+		if FileAccess.file_exists(path):
+			DirAccess.remove_absolute(path)
+	ProgressionManager.profiles_root = root
+	ProgressionManager.profile = 1
+	ProgressionManager.save_path = ProgressionManager.save_path_for(1)
+	ProgressionManager.set_character(&"panda")
+	ProgressionManager.record_level_completion(load(LEVEL), 2)
+	var stars_1 := ProgressionManager.get_total_stars()
+	_check(stars_1 == 2 and ProgressionManager.character == &"panda", "slot 1 holds the panda with 2 stars")
+	ProgressionManager.switch_profile(2)
+	_check(ProgressionManager.profile == 2 and ProgressionManager.get_total_stars() == 0 and ProgressionManager.character == &"leopard"
+		and not ProgressionManager.has_ability(&"enhanced_jump"), "slot 2 is a fresh game (stars %d, %s)" % [ProgressionManager.get_total_stars(), ProgressionManager.character])
+	var summary := ProgressionManager.profile_summary(1)
+	_check(summary["exists"] and summary["stars"] == 2 and summary["character"] == &"panda", "slot 1 summary read without loading it (%s)" % summary)
+	_check(not ProgressionManager.profile_summary(3)["exists"], "slot 3 is empty")
+	ProgressionManager.record_level_completion(load(LEVEL), 1)
+	ProgressionManager.switch_profile(1)
+	_check(ProgressionManager.get_total_stars() == 2 and ProgressionManager.character == &"panda", "switching back restores slot 1")
+	_check(ProgressionManager.profile_summary(2)["stars"] == 1, "slot 2 kept its own star")
+	var remembered := ProgressionManager._read_active_profile()
+	_check(remembered == 1, "the active slot is remembered on disk (%d)" % remembered)
+	# Pause menu: the profile panel and a switch through Main.
+	var pause := _scene.get_node("PauseMenu") as PauseMenu
+	GameManager.set_paused(true)
+	await _steps(2)
+	pause._show_profiles(true)
+	await _steps(2)
+	_check(pause.profiles.visible and pause.profile_cards.get_child_count() == 3, "profile panel shows three slots")
+	var card2 := pause.profile_cards.get_child(1) as Control
+	(card2.find_child("Use", true, false) as Button).pressed.emit()
+	await _steps(30)
+	_check(ProgressionManager.profile == 2 and _manager.is_in_hub() and not GameManager.is_paused, "choosing slot 2 switches profile and reloads the island")
+	# Slot 2 finished the Forest Trail above, so it owns enhanced_jump.
+	_check(_player.definition.id == &"leopard" and _player.motor.get_max_air_jumps() == 2, "hero and abilities follow the slot (%s, %d air jumps)" % [_player.definition.id, _player.motor.get_max_air_jumps()])
+	ProgressionManager.delete_profile(3)
+	ProgressionManager.delete_profile(2)
+	_check(not ProgressionManager.profile_summary(2)["exists"] and ProgressionManager.get_total_stars() == 0, "deleting the active slot restarts it")
+	ProgressionManager.switch_profile(1)
+	ProgressionManager.delete_profile(1)
+	if FileAccess.file_exists(root + "profiles.json"):
+		DirAccess.remove_absolute(root + "profiles.json")
+	ProgressionManager.profiles_root = "user://"
+	ProgressionManager.save_path = SCRATCH_SAVE
 
 
 func _finish() -> void:

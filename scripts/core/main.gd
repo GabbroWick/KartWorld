@@ -84,6 +84,25 @@ func _spawn_player() -> void:
 
 ## Character select: the hero becomes `id`; NPCs are re-cast on the next
 ## world build, so the hub reloads right away (nobody is a duplicate).
+## Switch save slot: black screen, load the slot, become its hero, reload
+## the island (or come back to it from a level).
+func set_profile(slot: int) -> void:
+	if game_hud and game_hud.has_method(&"show_loading"):
+		game_hud.call(&"show_loading", true)
+		await get_tree().process_frame
+		await get_tree().process_frame
+	ProgressionManager.switch_profile(slot)
+	if player.driver.is_driving:
+		player.driver.exit_vehicle()
+	player.set_definition(CharacterRoster.player_definition())   # re-applies the starter abilities
+	ProgressionManager.apply_to(player.abilities)
+	level_manager.return_to_hub()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if game_hud and game_hud.has_method(&"show_loading"):
+		game_hud.call(&"show_loading", false)
+
+
 func set_character(id: StringName) -> void:
 	# Black "Caricamento..." screen first: the world rebuild freezes a
 	# moment, and without it the change looked like a hang.

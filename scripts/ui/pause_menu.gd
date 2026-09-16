@@ -16,6 +16,11 @@ extends CanvasLayer
 @onready var picker_title: Label = $Root/Picker/Margin/Rows/Title
 @onready var cards: HBoxContainer = $Root/Picker/Margin/Rows/Cards
 @onready var back_button: Button = $Root/Picker/Margin/Rows/Back
+@onready var profile_button: Button = $Root/Panel/Margin/Rows/Profile
+@onready var profiles: Control = $Root/Profiles
+@onready var profiles_title: Label = $Root/Profiles/Margin/Rows/Title
+@onready var profile_cards: HBoxContainer = $Root/Profiles/Margin/Rows/Cards
+@onready var profiles_back: Button = $Root/Profiles/Margin/Rows/Back
 
 const PORTRAIT_PATH := "res://assets/ui/portraits/%s.png"
 @onready var quit_button: Button = $Root/Panel/Margin/Rows/Quit
@@ -42,6 +47,10 @@ func _ready() -> void:
 	back_button.pressed.connect(_show_picker.bind(false))
 	picker_title.text = tr(&"PICK_TITLE")
 	_build_cards()
+	profile_button.pressed.connect(_show_profiles.bind(true))
+	profiles_title.text = tr(&"PROFILE_TITLE")
+	profiles_back.text = tr(&"PICK_BACK")
+	profiles_back.pressed.connect(_show_profiles.bind(false))
 	ProgressionManager.changed.connect(_refresh_character_label)
 	_refresh_character_label()
 	quit_button.pressed.connect(func() -> void: get_tree().quit())
@@ -62,6 +71,100 @@ func _on_pause_changed(paused: bool) -> void:
 func _refresh_character_label() -> void:
 	var definition := CharacterRoster.player_definition()
 	character_button.text = tr(&"PAUSE_CHARACTER") % tr(definition.display_name)
+	profile_button.text = tr(&"PAUSE_PROFILE") % ProgressionManager.profile
+
+
+# --- save profiles ------------------------------------------------------------
+
+func _show_profiles(show: bool) -> void:
+	profiles.visible = show
+	panel.visible = not show
+	if show:
+		_build_profile_cards()
+	else:
+		profile_button.grab_focus()
+
+
+## One card per slot: hero portrait, "Profilo N", stars, a Use/Play
+## button and a two-press Delete (first press asks "Sicuro?").
+func _build_profile_cards() -> void:
+	for child in profile_cards.get_children():
+		child.queue_free()
+	for slot in range(1, ProgressionManager.PROFILES + 1):
+		var summary := ProgressionManager.profile_summary(slot)
+		var active := slot == ProgressionManager.profile
+		var card := PanelContainer.new()
+		card.custom_minimum_size = Vector2(190.0, 250.0)
+		card.set_meta(&"slot", slot)
+		var rows := VBoxContainer.new()
+		rows.alignment = BoxContainer.ALIGNMENT_CENTER
+		rows.add_theme_constant_override(&"separation", 6)
+		card.add_child(rows)
+		var title := Label.new()
+		title.text = tr(&"PROFILE_NAME") % slot
+		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		title.add_theme_font_size_override(&"font_size", 22)
+		if active:
+			title.add_theme_color_override(&"font_color", Color(1, 0.92, 0.4))
+		rows.add_child(title)
+		var portrait := TextureRect.new()
+		var id: StringName = summary["character"]
+		portrait.texture = load(PORTRAIT_PATH % id) if summary["exists"] and ResourceLoader.exists(PORTRAIT_PATH % id) else null
+		portrait.custom_minimum_size = Vector2(120.0, 120.0)
+		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		portrait.modulate = Color(1, 1, 1, 1) if summary["exists"] else Color(1, 1, 1, 0.2)
+		rows.add_child(portrait)
+		var info := Label.new()
+		info.text = (tr(&"PROFILE_STARS") % int(summary["stars"])) if summary["exists"] else tr(&"PROFILE_EMPTY")
+		info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		info.add_theme_font_size_override(&"font_size", 18)
+		rows.add_child(info)
+		var use := Button.new()
+		use.name = "Use"
+		use.text = tr(&"PROFILE_IN_USE") if active else tr(&"PROFILE_USE")
+		use.disabled = active
+		use.add_theme_font_size_override(&"font_size", 18)
+		use.pressed.connect(_on_profile_pressed.bind(slot))
+		rows.add_child(use)
+		var wipe := Button.new()
+		wipe.name = "Delete"
+		wipe.text = tr(&"PROFILE_DELETE")
+		wipe.visible = summary["exists"]
+		wipe.add_theme_font_size_override(&"font_size", 16)
+		wipe.modulate = Color(1, 0.7, 0.7)
+		wipe.pressed.connect(_on_profile_delete_pressed.bind(slot, wipe))
+		rows.add_child(wipe)
+		profile_cards.add_child(card)
+		if active:
+			use.grab_focus()
+
+
+func _on_profile_pressed(slot: int) -> void:
+	var main := get_tree().get_first_node_in_group(&"main")
+	if main and main.has_method(&"set_profile"):
+		main.call(&"set_profile", slot)
+	else:
+		ProgressionManager.switch_profile(slot)
+	_refresh_character_label()
+	_show_profiles(false)
+	GameManager.set_paused(false)
+
+
+func _on_profile_delete_pressed(slot: int, button: Button) -> void:
+	if button.get_meta(&"armed", false):
+		ProgressionManager.delete_profile(slot)
+		if slot == ProgressionManager.profile:
+			var main := get_tree().get_first_node_in_group(&"main")
+			if main and main.has_method(&"set_profile"):
+				# Reload the island as a fresh hero.
+				var other := 1 if slot != 1 else 2
+				ProgressionManager.switch_profile(other)
+				main.call(&"set_profile", slot)
+		_build_profile_cards()
+	else:
+		button.set_meta(&"armed", true)
+		button.text = tr(&"PROFILE_SURE")
 
 
 ## "Personaggio" opens the picker: one card per character, portrait + name.

@@ -643,6 +643,20 @@ them, one commit + suite + screenshot each:
    `SHOP_BOUGHT` notice points to the backpack; `SHOP_USE` reads
    "Comprato · Usa".
 
+5. **Save profiles — DONE**: `ProgressionManager.profile` 1..`PROFILES`
+   (3); slot files `save_path_for(n)` under `profiles_root` (`user://`;
+   slot 1 = the historical `save.json`, so the human's progress is slot
+   1), the active slot in `profiles.json`. `switch_profile(n)` loads the
+   slot (fresh game when the file is missing; `load_from_disk` now resets
+   `character` too), `delete_profile(n)`, `profile_summary(n)` reads a
+   slot's hero + stars without loading it. `Main.set_profile(n)`: loading
+   screen, switch, hero re-applied (`set_definition` resets abilities,
+   then `apply_to`), island reloaded. Pause menu "Profilo: N" opens the
+   Profiles panel: one card per slot (portrait, stars or "Nuova
+   partita", Gioca / In uso, Cancella with a second-press "Sicuro?").
+   Tests point `profiles_root` at `user://test_profiles/`. Progression
+   suite 40 checks; `capture_screenshot` `profiles` arg.
+
 ## Next step (Phase 8 — polish, continued)
 
 Decided with the human (2026-09-10): real models from **Kenney** (done for

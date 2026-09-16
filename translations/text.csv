@@ -161,3 +161,12 @@ RACE_READY,"Ready? One lap, through every checkpoint, to the finish line!","Pron
 RACE_FINISH,FINISH,TRAGUARDO
 RACE_OFFROAD,Off the road! Back to the last checkpoint.,Fuori strada! Torni all'ultimo checkpoint.
 RACE_GAVE_UP,Race abandoned.,Gara abbandonata.
+PAUSE_PROFILE,Profile: %d,Profilo: %d
+PROFILE_TITLE,Save profiles,Profili di salvataggio
+PROFILE_NAME,Profile %d,Profilo %d
+PROFILE_STARS,%d stars,%d stelle
+PROFILE_EMPTY,New game,Nuova partita
+PROFILE_USE,Play,Gioca
+PROFILE_IN_USE,In use,In uso
+PROFILE_DELETE,Delete,Cancella
+PROFILE_SURE,Sure? Press again,Sicuro? Premi ancora

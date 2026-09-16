@@ -15,6 +15,13 @@ const SAVE_VERSION := 1
 
 ## Where progress is stored. Tests point this at a scratch file.
 var save_path := "user://save.json"
+## Save profiles (slots): `profile` 1..PROFILES, each with its own save
+## file under `profiles_root` (profile 1 keeps the historical `save.json`);
+## the active slot is remembered in `profiles_root + "profiles.json"`.
+## Tests point `profiles_root` at a scratch folder.
+const PROFILES := 3
+var profiles_root := "user://"
+var profile := 1
 
 ## level id -> best stars collected in a single run.
 var best_stars: Dictionary = {}
@@ -38,7 +45,78 @@ var collected: Dictionary = {}
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	profile = _read_active_profile()
+	save_path = save_path_for(profile)
 	load_from_disk()
+
+
+# --- profiles ---------------------------------------------------------------
+
+func save_path_for(slot: int) -> String:
+	return profiles_root + ("save.json" if slot == 1 else "save_%d.json" % slot)
+
+
+func _read_active_profile() -> int:
+	var path := profiles_root + "profiles.json"
+	if not FileAccess.file_exists(path):
+		return 1
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if parsed is Dictionary:
+		return clampi(int((parsed as Dictionary).get("active", 1)), 1, PROFILES)
+	return 1
+
+
+func _write_active_profile() -> void:
+	var file := FileAccess.open(profiles_root + "profiles.json", FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify({"active": profile}))
+		file.close()
+
+
+## Switches to another slot: the current progress is already on disk, the
+## slot's file is loaded (a fresh game when it does not exist yet).
+func switch_profile(slot: int) -> void:
+	slot = clampi(slot, 1, PROFILES)
+	if slot == profile:
+		return
+	profile = slot
+	save_path = save_path_for(slot)
+	_write_active_profile()
+	load_from_disk()
+	changed.emit()
+
+
+## Wipes a slot's file (the active one restarts from zero).
+func delete_profile(slot: int) -> void:
+	var path := save_path_for(slot)
+	if FileAccess.file_exists(path):
+		DirAccess.remove_absolute(path)
+	if slot == profile:
+		load_from_disk()
+		changed.emit()
+
+
+## What a slot holds, without loading it: {"exists", "character", "stars"}.
+func profile_summary(slot: int) -> Dictionary:
+	var path := save_path_for(slot)
+	var out := {"exists": false, "character": &"leopard", "stars": 0}
+	if not FileAccess.file_exists(path):
+		return out
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if not parsed is Dictionary:
+		return out
+	var data: Dictionary = parsed
+	out["exists"] = true
+	out["character"] = StringName(String(data.get("character", "leopard")))
+	var stars := 0
+	for key in data.get("best_stars", {}):
+		stars += int(data["best_stars"][key])
+	for id in data.get("collected", {}):
+		var entry: Dictionary = data["collected"][id]
+		if String(entry.get("kind", "")) == "star":
+			stars += int(entry.get("amount", 1))
+	out["stars"] = stars
+	return out
 
 
 ## Best stars over all levels plus every persistent star found in the world.
@@ -228,6 +306,7 @@ func save_to_disk() -> void:
 func load_from_disk() -> void:
 	best_stars.clear()
 	unlocked_abilities.clear()
+	character = &"leopard"
 	collected.clear()
 	inventory.clear()
 	stars_spent = 0
