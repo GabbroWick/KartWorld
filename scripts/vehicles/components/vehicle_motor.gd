@@ -55,11 +55,11 @@ var is_flying := false
 var throttle_input := 0.0
 var _air_time := 0.0
 const FLY_MIN_SPEED := 6.0
-const FLY_CLIMB := 6.0
-const FLY_DIVE := -7.0
+const FLY_CLIMB := 11.0
+const FLY_DIVE := -12.0
 const FLY_GLIDE := -0.6
 const FLY_CRUISE_FACTOR := 0.9
-const FLY_TAKEOFF_AIR := 0.2
+const FLY_TAKEOFF_AIR := 0.1
 const FLY_CEILING := 90.0   # metres above the ground
 
 const SHOVE_DECAY := 12.0   # m/s^2 fade of a knock
@@ -94,12 +94,16 @@ func drive(delta: float, throttle: float, steer: float, jump_requested: bool,
 	elif is_flying:
 		_apply_flight(delta, throttle, was_on_floor)
 	else:
-		_apply_vertical(delta, was_on_floor, jump_requested)
-		_air_time = 0.0 if was_on_floor else _air_time + delta
-		if has_wings and not was_on_floor and _air_time >= FLY_TAKEOFF_AIR and absf(speed) > FLY_MIN_SPEED:
+		# Wings open only on purpose: a second press of jump while already
+		# in the air (a ramp or a hop alone never starts a flight).
+		if has_wings and jump_requested and not was_on_floor and _air_time >= FLY_TAKEOFF_AIR and absf(speed) > FLY_MIN_SPEED:
 			is_flying = true
 			body.floor_snap_length = 0.0
+			body.velocity.y = maxf(body.velocity.y, 2.0)
+			jump_requested = false
 			took_off.emit()
+		_apply_vertical(delta, was_on_floor, jump_requested)
+		_air_time = 0.0 if was_on_floor else _air_time + delta
 
 	var forward := -body.global_basis.z
 	body.velocity.x = forward.x * speed + _shove.x
@@ -163,7 +167,7 @@ func _apply_flight(delta: float, throttle: float, was_on_floor: bool) -> void:
 
 	if ground_height_hint != null and body.global_position.y - float(ground_height_hint) > FLY_CEILING and target > 0.0:
 		target = 0.0
-	body.velocity.y = move_toward(body.velocity.y, target, 10.0 * delta)
+	body.velocity.y = move_toward(body.velocity.y, target, 22.0 * delta)
 
 
 ## Set by the controller each tick (terrain height under the kart) so the

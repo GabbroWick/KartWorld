@@ -260,13 +260,16 @@ func _test_wings() -> void:
 	Input.action_press(InputActions.ACCELERATE)
 	await _steps(40)
 	await _press(InputActions.JUMP)
+	await _steps(12)
+	_check(not _kart.is_flying(), "one jump with wings is still just a hop")
+	await _press(InputActions.JUMP)   # second press in the air opens the wings
 	var flew := false
 	var top := 0.0
 	for i in 45:
 		await _steps(1)
 		flew = flew or _kart.is_flying()
 		top = maxf(top, _kart.global_position.y)
-	_check(flew and _kart.is_flying(), "with wings a jump at speed takes off")
+	_check(flew and _kart.is_flying(), "jump again in the air and the wings open")
 	_check(top > 3.0, "holding the gas climbs (%.1f m)" % top)
 	var visual := _kart.visual_root.get_children().filter(func(c: Node) -> bool: return c is AiVehicleVisual)
 	if visual.size() == 1:

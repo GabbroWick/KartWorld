@@ -511,7 +511,10 @@ them, one commit + suite + screenshot each:
    (bank with the steering). No getting out in the air. Human's phone
    feedback: it must fly like a plane — now the kart cruises forward on
    its own (`FLY_CRUISE_FACTOR` 0.9 of max speed, never backwards),
-   gas = climb, brake = dive, hands off = slow glide. Kart suite 83
+   gas = climb, brake = dive, hands off = slow glide. Second feedback
+   (2026-09-16): ramps opened the wings by themselves — now the wings
+   open only on a **second jump press while airborne** (0.1 s in the
+   air, speed > 6); climb/dive are steeper (11 / -12 m/s). Kart suite 84
    checks; `capture_screenshot` `fly` arg.
    Bug found on the phone: the streamer skipped every tile beyond the
    main shore, so Porto's village floated over the sea and the kart fell
