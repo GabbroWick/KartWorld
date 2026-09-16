@@ -37,7 +37,10 @@ func _ready() -> void:
 		game_hud.bind_player(player)
 		game_hud.bind_level_manager(level_manager)
 	level_manager.level_loading.connect(func(_d: LevelDefinition) -> void: Sfx.play(&"portal"))
-	level_manager.level_loaded.connect(func(_d: LevelDefinition) -> void: Sfx.play_music(&"level"))
+	# A level's world (forest, mountain, volcano...) gets its own track when
+	# a file exists, else the generic level music.
+	level_manager.level_loaded.connect(func(d: LevelDefinition) -> void:
+		Sfx.play_music(d.world if Sfx.has_music(d.world) else &"level"))
 	level_manager.hub_loaded.connect(func() -> void: Sfx.play_music(&"hub"))
 	Sfx.play_music(&"hub")
 

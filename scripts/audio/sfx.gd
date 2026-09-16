@@ -80,8 +80,19 @@ func play_music(track: StringName) -> void:
 		return
 	if stream is AudioStreamOggVorbis or stream is AudioStreamMP3:
 		stream.set(&"loop", true)
+	elif stream is AudioStreamWAV:
+		# AI-generated tracks are WAV: loop the whole file.
+		var wav := stream as AudioStreamWAV
+		wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		wav.loop_begin = 0
+		wav.loop_end = int(wav.get_length() * wav.mix_rate)
 	_music.stream = stream
 	_music.play()
+
+
+## True when a music file exists for `track`.
+func has_music(track: StringName) -> bool:
+	return _load_file(MUSIC_DIR, track) != null
 
 
 func current_music() -> StringName:

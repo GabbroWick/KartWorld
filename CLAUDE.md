@@ -565,6 +565,19 @@ them, one commit + suite + screenshot each:
    Fade + "Caricamento..."); `Main.set_character` shows it two frames
    before the hub rebuild and hides it after.
 
+## Phase 11 — "ok per tutto" (2026-09-16): audio AI, third island, races, boss, profiles, perf
+
+1. **AI audio — music DONE**: `tools/ai3d/generate_audio.py music` runs
+   MusicGen small (transformers, ~1.5 GB in `tools/ai3d/models/hf`) and
+   wrote `assets/audio/music/{hub,level,volcano}.wav` (30 s loops, WAV
+   looped by `Sfx.play_music`; a level plays its `world` track when the
+   file exists, else `level`). SFX: `generate_audio.py sfx --all` uses
+   Stable Audio Open 1.0 through diffusers — a gated model: the human must
+   accept the licence on Hugging Face and `huggingface-cli login` in the
+   venv first (not done yet; synth SFX stay meanwhile). torchaudio is
+   NOT installed (no wheel for torch 2.12+rocm7.14.1), so audiocraft /
+   AudioGen are out; transformers MusicGen and diffusers need none.
+
 ## Next step (Phase 8 — polish, continued)
 
 Decided with the human (2026-09-10): real models from **Kenney** (done for
