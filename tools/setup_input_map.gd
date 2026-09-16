@@ -38,6 +38,7 @@ func _initialize() -> void:
 
 		"pause": [_key(KEY_ESCAPE), _button(JOY_BUTTON_START)],
 		"map": [_key(KEY_M), _button(JOY_BUTTON_BACK)],
+		"inventory": [_key(KEY_I), _button(JOY_BUTTON_DPAD_DOWN)],
 		"toggle_mouse_capture": [_key(KEY_F1)],
 		"debug_toggle_hud": [_key(KEY_F3)],
 	}

@@ -17,7 +17,7 @@ var _travelled := 0.0
 var _returning := false
 var _hit: Array[Node] = []
 var _time := 0.0
-var _visual: MeshInstance3D
+var _visual: Node3D
 
 
 func _ready() -> void:
@@ -25,10 +25,13 @@ func _ready() -> void:
 	collision_mask = 4 | 2   # enemies (layer 3) and players (layer 2, filtered)
 	monitoring = true
 	body_entered.connect(_on_body_entered)
-	_visual = MeshInstance3D.new()
-	_visual.mesh = Weapons.make_mesh(&"boomerang")
-	_visual.scale = Vector3.ONE * 1.6
-	add_child(_visual)
+	_visual = Weapons.make_visual(&"boomerang")
+	_visual.scale = Vector3.ONE * 1.5
+	_visual.rotation_degrees = Vector3(90.0, 0.0, 0.0)   # flat, spinning about Y
+	var spinner := Node3D.new()
+	spinner.add_child(_visual)
+	add_child(spinner)
+	_visual = spinner
 	var shape := CollisionShape3D.new()
 	var sphere := SphereShape3D.new()
 	sphere.radius = 0.45

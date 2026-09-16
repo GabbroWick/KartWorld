@@ -526,6 +526,14 @@ them, one commit + suite + screenshot each:
 10. **Mobile HUD**: prompts drop the key letter on touch ("sali sul
    kart"), Pause and Map buttons live bottom-left (they overlapped the
    stars and the minimap). Touch suite 25 checks.
+11. **Backpack + weapon moves — DONE 2026-09-16**: `InventoryMenu`
+   (HUD panel, key `I` / touch "Zaino") lists paws + owned weapons with
+   Use, and the food. Weapons are assembled models (`Weapons.make_visual`:
+   studded club, striped V boomerang, gold-hilted sword) in the RightHand
+   BoneAttachment3D and on the thrown Boomerang. With a weapon the attack
+   is `SwingPose` (late-process bone pose like SeatedPose: overhead chop
+   for club/sword, whip for the boomerang) instead of the Mixamo kick
+   clip; paws still kick. No Mixamo needed. Combat suite 61 checks.
 
 ## Next step (Phase 8 — polish, continued)
 

@@ -18,6 +18,7 @@ extends CanvasLayer
 @onready var full_map_title: Label = $Root/FullMap/Rows/Title
 @onready var full_map_close: Button = $Root/FullMap/Rows/Close
 @onready var shop_menu: ShopMenu = $Root/ShopMenu
+@onready var inventory_menu: InventoryMenu = $Root/InventoryMenu
 @onready var star_row: HBoxContainer = $Root/TopRight/StarRow
 @onready var stars_label: Label = $Root/TopRight/StarRow/Stars
 @onready var objective_label: Label = $Root/TopCenter/Objective
@@ -105,8 +106,15 @@ func fade(seconds: float) -> void:
 	fade_rect.visible = false
 
 
+func toggle_inventory() -> void:
+	inventory_menu.toggle()
+
+
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed(InputActions.MAP) and minimap.visible:
+	if event.is_action_pressed(InputActions.INVENTORY) and not inventory_menu.visible and not shop_menu.visible and not GameManager.is_paused:
+		inventory_menu.open()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(InputActions.MAP) and minimap.visible:
 		set_full_map(not full_map.visible)
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed(InputActions.PAUSE) and full_map.visible:

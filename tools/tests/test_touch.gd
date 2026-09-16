@@ -43,7 +43,7 @@ func _run() -> void:
 	_check(not mouse_bound, "mouse bindings are stripped while touch controls are active")
 	var lowest := 0.0
 	for b in _touch.buttons.get_children():
-		if b is Control and b.name != "Pause" and b.name != "Map":
+		if b is Control and b.name != "Pause" and b.name != "Map" and b.name != "Bag":
 			lowest = maxf(lowest, (b as Control).get_global_rect().end.y)
 	_check(lowest <= _viewport_size().y - 80.0, "buttons keep a margin from the bottom edge (%.0f of %.0f)" % [lowest, _viewport_size().y])
 	await _steps(2)

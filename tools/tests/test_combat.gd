@@ -237,11 +237,41 @@ func _test_shop_weapons() -> void:
 	await _steps(120)
 	_check(hits[0] >= 1 and enemy.health.current_health <= 1.0, "the boomerang hits the slime (%d hits, %.0f hp)" % [hits[0], enemy.health.current_health])
 	_check(get_tree().root.find_children("*", "Boomerang", true, false).is_empty(), "the boomerang came back and vanished")
+	# Backpack: I lists paws + owned weapons; Use swaps the weapon; the
+	# swing is the weapon's move, not the kick clip.
+	_press_action_once(InputActions.INVENTORY)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_check(hud.inventory_menu.visible and get_tree().paused, "I opens the backpack")
+	_check(hud.inventory_menu._buttons.size() == 3 and hud.inventory_menu._buttons.has(&"club") and hud.inventory_menu._buttons.has(&"boomerang"),
+		"backpack lists paws, club and boomerang (%d rows)" % hud.inventory_menu._buttons.size())
+	(hud.inventory_menu._buttons[&"club"] as Button).pressed.emit()
+	_check(ProgressionManager.equipped_weapon == &"club", "Use in the backpack equips the club")
+	hud.inventory_menu.close()
+	await get_tree().process_frame
+	_check(not get_tree().paused, "closing the backpack thaws the world")
+	var rigged := _player.get_visual() as RiggedCharacterVisual
+	if rigged:
+		_check(rigged._weapon_mount != null and rigged._weapon_mount.get_child_count() == 1, "the club model hangs from the hand bone")
+		var swung := rigged.play_action(&"attack", 1.4)
+		_check(swung and rigged._swing_pose.active and rigged.player.current_animation != "attack", "with a weapon the attack is the procedural swing, not the kick clip")
+		await _steps(30)
 	# Back to paws (and a chasing slime) for the remaining tests.
 	enemy.definition = original_definition
 	enemy.health.restore_full()
 	ProgressionManager.equip_weapon(&"")
 	_check(_player.combat.weapon_damage == 1.0 and not _player.combat.weapon_ranged, "paws again")
+
+
+func _press_action_once(action: StringName) -> void:
+	var press := InputEventAction.new()
+	press.action = action
+	press.pressed = true
+	Input.parse_input_event(press)
+	var release := InputEventAction.new()
+	release.action = action
+	release.pressed = false
+	Input.parse_input_event(release)
 
 
 func _steps(count: int) -> void:

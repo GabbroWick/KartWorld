@@ -1,7 +1,7 @@
 extends Node
 ## Loads the main scene, lets it settle, saves a PNG and quits.
 ##
-## Run:  godot --path <project> res://tools/capture_screenshot.tscn -- <out.png> [frames] [drive] [turbo] [fly] [talk] [picker] [map] [face=deg] [level=<.tres>] [at=x,y,z] [yaw=deg] [zoom=m]
+## Run:  godot --path <project> res://tools/capture_screenshot.tscn -- <out.png> [frames] [drive] [turbo] [fly] [talk] [picker] [map] [weapon=id] [attack] [face=deg] [level=<.tres>] [at=x,y,z] [yaw=deg] [zoom=m]
 ##
 ## With the optional "drive" word the player summons the kart, gets in and
 ## holds the accelerator for the given frames, so the shot shows driving.
@@ -72,6 +72,17 @@ func _run() -> void:
 			(cam as ThirdPersonCamera).set_target(player, true)
 		await _wait(5)
 
+	for arg in user_args:
+		if arg.begins_with("weapon="):
+			# Own and equip a shop weapon (scratch save only).
+			var id := StringName(arg.trim_prefix("weapon="))
+			if not ProgressionManager.owns_weapon(id):
+				ProgressionManager.owned_weapons.append(id)
+			ProgressionManager.equip_weapon(id)
+			await _wait(3)
+	if user_args.has("attack"):
+		await _press(InputActions.ATTACK)
+		await _wait(int(user_args[1]) if user_args.size() > 1 else 8)
 	if user_args.has("map"):
 		(scene.get_node("GameHUD") as CanvasLayer).call(&"set_full_map", true)
 		await _wait(2)

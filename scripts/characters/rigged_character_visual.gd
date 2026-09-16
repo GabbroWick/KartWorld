@@ -39,6 +39,8 @@ var _current := &""
 var _was_airborne := false
 var _seated_pose: SeatedPose
 var _weapon_mount: BoneAttachment3D
+var _weapon_id: StringName = &""
+var _swing_pose: SwingPose
 var _action := &""
 
 
@@ -78,6 +80,9 @@ func _ready() -> void:
 		_seated_pose.name = "SeatedPose"
 		_seated_pose.active = false
 		skeleton.add_child(_seated_pose)
+		_swing_pose = SwingPose.new()
+		_swing_pose.name = "SwingPose"
+		skeleton.add_child(_swing_pose)
 	_play(&"idle", 1.0)
 
 
@@ -100,15 +105,15 @@ func set_weapon_visual(id: StringName) -> void:
 		skeleton.add_child(_weapon_mount)
 	for child in _weapon_mount.get_children():
 		child.queue_free()
-	var mesh := Weapons.make_mesh(id)
-	if mesh == null:
+	_weapon_id = id
+	var model := Weapons.make_visual(id)
+	if model == null:
 		return
-	var holder := MeshInstance3D.new()
-	holder.mesh = mesh
-	# Along the hand's bone (+X for Mixamo hands), a little forward.
-	holder.rotation_degrees = Vector3(0.0, 0.0, -90.0)
-	holder.position = Vector3(0.12, 0.0, 0.02)
-	_weapon_mount.add_child(holder)
+	# The model's +Y is the weapon's length: along the hand bone (+X for
+	# Mixamo hands), grip in the palm.
+	model.rotation_degrees = Vector3(0.0, 0.0, -90.0)
+	model.position = Vector3(0.08, -0.02, 0.02)
+	_weapon_mount.add_child(model)
 
 
 func set_seated(seated: bool) -> void:
@@ -118,6 +123,12 @@ func set_seated(seated: bool) -> void:
 
 
 func play_action(action: StringName, speed_scale: float = 1.0) -> bool:
+	# With a weapon in the hand the attack is the weapon's move (procedural
+	# swing or throw over the idle/walk clip), not the bare-paws kick clip.
+	if action == &"attack" and _weapon_id != &"" and _swing_pose:
+		var ranged := bool(Weapons.stats(_weapon_id)["ranged"])
+		_swing_pose.start(0.35 / maxf(speed_scale, 0.1), &"throw" if ranged else &"swing")
+		return true
 	if player == null or not player.has_animation(action):
 		return false
 	_action = action

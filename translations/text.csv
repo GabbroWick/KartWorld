@@ -2,7 +2,7 @@ keys,en,it
 HUD_HUB_HINT,Explore the island. Find a portal!,Esplora l'isola. Trova un portale!
 HUD_LEVEL_COMPLETE,Level complete!,Livello completato!
 HUD_NEW_ABILITY,New ability: %s!,Nuova abilità: %s!
-HUD_CONTROLS_FOOT,WASD move · Shift run · Space jump · J attack · E use · K kart · right-click dance · Esc pause,WASD muovi · Shift corri · Spazio salta · J attacca · E usa · K kart · M mappa · tasto dx balla · Esc pausa
+HUD_CONTROLS_FOOT,WASD move · Shift run · Space jump · J attack · E use · K kart · right-click dance · Esc pause,WASD muovi · Shift corri · Spazio salta · J attacca · E usa · K kart · M mappa · I zaino · tasto dx balla · Esc pausa
 HUD_CONTROLS_KART,W/S gas/brake · A/D steer · Shift (hold) turbo · Space jump · H horn · E leave · Esc pause,W/S gas/freno · A/D sterza · Shift (tieni) turbo · Spazio salta · H clacson · E scendi · Esc pausa
 PROMPT_LEAVE_KART,E  leave kart,E  scendi dal kart
 PROMPT_ENTER_KART,E  enter kart,E  sali sul kart
@@ -113,3 +113,7 @@ UPGRADE_WINGS,Kart wings,Ali per il kart
 UPGRADE_WINGS_DESC,"Jump, then jump again in the air: you fly like a plane. Gas climbs, brake dives.","Salta e poi salta di nuovo in aria: voli come un aereo. Gas per salire, freno per scendere."
 SHOP_OWNED,Owned,Comprato
 HUD_FLYING,Wings out! Gas = up; brake = down.,Ali aperte! Gas = sali; freno = scendi.
+INV_TITLE,Backpack,Zaino
+INV_FOOD,Food: %s,Cibo: %s
+INV_NOTHING,nothing,niente
+TOUCH_BAG,Bag,Zaino
