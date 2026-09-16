@@ -28,6 +28,7 @@ signal activated(by: CharacterController)
 var open_amount := 0.0
 
 var _used := false
+var _label_refresh_left := 0.0
 
 
 func _ready() -> void:
@@ -52,14 +53,35 @@ func get_missing_abilities(traveller: CharacterController = null) -> PackedStrin
 
 
 func is_locked() -> bool:
-	return not get_missing_abilities().is_empty()
+	return not get_missing_abilities().is_empty() or _blocking_objective() != null
+
+
+## The finish door stays shut while a required objective (other than
+## reaching it) is open: "kill the boss first". Null when free.
+func _blocking_objective() -> Objective:
+	if not completes_level:
+		return null
+	var controller := get_tree().get_first_node_in_group(LevelController.GROUP) as LevelController
+	if controller == null:
+		return null
+	for objective in controller.objectives:
+		if not objective.optional and not objective.is_complete and not objective is ReachDestinationObjective:
+			return objective
+	return null
 
 
 func _refresh_label() -> void:
 	if label == null:
 		return
 	if completes_level:
-		label.text = tr(&"PORTAL_GOAL")
+		var blocking := _blocking_objective()
+		if blocking:
+			label.text = "%s
+%s" % [tr(&"PORTAL_GOAL"), tr(&"PORTAL_FIRST") % blocking.get_status_text()]
+			label.modulate = Color(1.0, 0.6, 0.5)
+		else:
+			label.text = tr(&"PORTAL_GOAL")
+			label.modulate = Color.WHITE
 		return
 	if returns_to_hub:
 		label.text = tr(&"PORTAL_HOME")
@@ -77,6 +99,12 @@ func _refresh_label() -> void:
 
 
 func _process(delta: float) -> void:
+	if completes_level:
+		# The blocking objective changes as enemies die: keep the sign fresh.
+		_label_refresh_left -= delta
+		if _label_refresh_left <= 0.0:
+			_label_refresh_left = 0.5
+			_refresh_label()
 	var player := GameManager.get_player(0) as Node3D
 	var want_open := false
 	if player and not is_locked():
@@ -114,7 +142,7 @@ func _on_body_entered(body: Node3D) -> void:
 	var manager := get_tree().get_first_node_in_group(LevelManager.GROUP) as LevelManager
 	if manager == null or not manager.portals_armed():
 		return
-	if not get_missing_abilities(traveller).is_empty():
+	if not get_missing_abilities(traveller).is_empty() or _blocking_objective() != null:
 		_refresh_label()
 		return
 	_used = true

@@ -64,6 +64,7 @@ completion_delay = 3.5
 script = ExtResource("11_defeat")
 description = "OBJ_DEFEAT_SLIMES"
 required = 3
+optional = true
 
 [node name="DefeatBoss" type="Node" parent="LevelController"]
 script = ExtResource("11_defeat")

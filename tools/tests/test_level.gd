@@ -232,6 +232,8 @@ func _test_goal() -> void:
 	_check(_manager.is_in_hub(), "party is back in the hub after the delay")
 	_check(not get_tree().paused and not GameManager.is_frozen, "the world thaws back in the hub")
 	_check(not _hud.card.visible, "card is dismissed back in the hub")
+	await _steps(5)
+	_check(not _hud.loading_label.visible and not _hud.fade_rect.visible, "the loading screen is gone once the island is back")
 	_check(result[0] != null and result[0].id == &"forest_trail" and result[1] == 1,
 		"LevelManager reported forest_trail completed with 1 star")
 	_check(_hud.objective_label.text == tr(&"HUD_HUB_HINT"), "HUD shows the hub hint again")

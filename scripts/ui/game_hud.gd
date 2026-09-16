@@ -131,6 +131,13 @@ func _refresh_inventory() -> void:
 
 ## Black screen with "Caricamento..." while a world is rebuilt (character
 ## change). Call with false when done.
+## After a world swap: let it draw a couple of frames, then lift the black.
+func _hide_loading_soon() -> void:
+	await get_tree().process_frame
+	await get_tree().process_frame
+	show_loading(false)
+
+
 func show_loading(on: bool) -> void:
 	fade_rect.visible = on
 	fade_rect.color.a = 1.0 if on else 0.0
@@ -210,6 +217,8 @@ func _on_hub_loaded() -> void:
 	minimap.visible = terrain != null
 	_level = null
 	card.dismiss()
+	if fade_rect.visible and loading_label.visible:
+		_hide_loading_soon()
 	objective_label.text = tr(&"HUD_HUB_HINT")
 	_refresh_hub_stars()
 

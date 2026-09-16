@@ -120,10 +120,8 @@ func _return_home() -> void:
 		await tree.process_frame
 	GameManager.set_frozen(false)
 	var manager := tree.get_first_node_in_group(LevelManager.GROUP) as LevelManager
+	# `complete_level` frees this node and this coroutine with it: the HUD
+	# hides the loading screen itself on `hub_loaded`.
 	var stars := stars_collected
 	if manager:
 		manager.complete_level(stars)
-	if hud and hud.has_method(&"show_loading"):
-		await tree.process_frame
-		await tree.process_frame
-		hud.call(&"show_loading", false)

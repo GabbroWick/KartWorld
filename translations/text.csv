@@ -16,6 +16,7 @@ ABILITY_VEHICLE_JUMP,Kart jump,Salto del kart
 PORTAL_HOME,Home,Casa
 PORTAL_GOAL,Finish,Traguardo
 PORTAL_NEEDS,Needs: %s,Serve: %s
+PORTAL_FIRST,First: %s,Prima: %s
 CHAR_LEOPARD,Leopard,Leopardo
 CHAR_FOX,Fox,Volpe
 CHAR_PANDA,Panda,Panda

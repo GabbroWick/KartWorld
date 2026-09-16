@@ -702,7 +702,17 @@ them, one commit + suite + screenshot each:
    The party comes back **in front of the door it went through**
    (`LevelManager._door_exit`: hub Portal whose `level.id` matches,
    4 m on its front side, tiles built there), not at the house spawn.
-   Portal suite 36 checks.
+   Portal suite 36 checks. Phone feedback: the black screen never went
+   away — `complete_level` frees the LevelController and its coroutine
+   with it, so the hide never ran; the HUD now hides it itself two
+   frames after `hub_loaded` (`_hide_loading_soon`; level suite checks).
+   Also "killed the boss, cannot leave": the crater's three slimes were a
+   required objective and the king's babies look the same, so the kid
+   never knew which to kill — `DefeatSlimes` is optional now, and a
+   `completes_level` door is **locked** (shut, red label
+   `PORTAL_FIRST` "Prima: <objective>") while any required non-Reach
+   objective is open (`Portal._blocking_objective`, label refreshed every
+   0.5 s). Volcano suite 44 checks.
 8. **Faster flight**: `FLY_CRUISE_FACTOR` 1.5 (24 m/s vs 16 on dirt).
    A speed-scaled pitch rate was tried and felt like stopping mid-air
    (forward speed is speed·cos(pitch), so a fast nose-up kills it):

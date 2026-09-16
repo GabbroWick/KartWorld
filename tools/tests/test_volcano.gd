@@ -66,7 +66,10 @@ func _test_load() -> void:
 	var slimes := get_tree().get_nodes_in_group(&"enemy").filter(func(e: Node) -> bool: return _level.owns(e))
 	_check(slimes.size() == 4, "three slimes and the Slime King in the crater (%d)" % slimes.size())
 	_check(_world.get_node("SlimeKing") is BossSlime, "the crater has a BossSlime")
-	_check(_hud.objective_label.text.begins_with(tr(&"OBJ_DEFEAT_SLIMES")), "HUD shows the slime objective (%s)" % _hud.objective_label.text)
+	_check(_hud.objective_label.text.begins_with(tr(&"OBJ_DEFEAT_BOSS")), "HUD shows the boss objective first (%s)" % _hud.objective_label.text)
+	var goal := _world.get_node("GoalPortal") as Portal
+	_check(goal.is_locked() and goal.label.text.contains(tr(&"OBJ_DEFEAT_BOSS")), "the finish door is locked until the king is dead (%s)" % goal.label.text.replace("
+", " / "))
 	var kart := _player.driver.vehicle
 	_check(kart.global_position.distance_to(_player.global_position) < 8.0, "kart parked next to the spawn (%.1f m)" % kart.global_position.distance_to(_player.global_position))
 	_check(_player.is_on_floor(), "player stands on the start pad")
