@@ -117,7 +117,7 @@ func _refresh_race() -> void:
 			break
 	race_label.visible = line != null
 	if line:
-		race_label.text = tr(&"RACE_HUD") % [line.place, line.opponents + 1, line.elapsed, int(line.lap_progress * 100.0)]
+		race_label.text = tr(&"RACE_HUD") % [line.place, line.opponents + 1, line.elapsed, line.next_gate, line.gate_count]
 
 
 func _refresh_inventory() -> void:
@@ -263,7 +263,10 @@ func _prompt_text_keys() -> String:
 		return ""
 	var driver := _player.driver
 	if driver.is_driving:
-		return "" if (driver.vehicle and (driver.vehicle.is_submarine or driver.vehicle.is_flying())) else tr(&"PROMPT_LEAVE_KART")
+		if driver.vehicle and (driver.vehicle.is_submarine or driver.vehicle.is_flying()):
+			return ""
+		var at_wheel := _player.interaction.get_prompt(true)
+		return at_wheel if at_wheel != "" else tr(&"PROMPT_LEAVE_KART")
 	var interaction := _player.interaction.get_prompt()
 	if interaction != "":
 		return interaction

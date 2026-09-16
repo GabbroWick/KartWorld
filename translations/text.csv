@@ -147,12 +147,17 @@ OBJ_CROSS_JUNGLE,Reach the door across the jungle,Raggiungi la porta oltre la gi
 PLACE_GIUNGLA,Jungle,Giungla
 NPC_V_11,Far to the south-west there is a jungle island. Fly there!,Lontano a sud-ovest c'è un'isola con la giungla. Volaci!
 RACE_BANNER,RACE,GARA
-RACE_GO,Race! One lap of the road. Go!,Gara! Un giro della strada. Via!
-RACE_HUD,"Place %d/%d · %.1f s · lap %d%%","Posizione %d/%d · %.1f s · giro %d%%"
+RACE_GO,GO!,VIA!
+RACE_HUD,"Place %d/%d · %.1f s · checkpoint %d/%d","Posizione %d/%d · %.1f s · checkpoint %d/%d"
 RACE_RESULT,"Finished %d° in %.1f s","Arrivato %d° in %.1f s"
 RACE_REWARD,+%d stars!,+%d stelle!
-NPC_V_12,Drive through the GARA arch by the house to race the others!,Passa con il kart sotto l'arco GARA vicino a casa per sfidare gli altri!
+NPC_V_12,"Stop your kart under the GARA arch by the house and press Use to race!","Fermati col kart sotto l'arco GARA vicino a casa e premi Usa per gareggiare!"
 ENEMY_BOSS_SLIME,Slime King,Re Slime
 OBJ_DEFEAT_BOSS,Defeat the Slime King,Sconfiggi il Re Slime
 SHOP_NEED,You need %d more stars!,Ti mancano %d stelle!
 SHOP_BOUGHT,Bought: %s! It is in your backpack.,Comprato: %s! Lo trovi nello zaino.
+PROMPT_RACE,E  start the race!,E  inizia la gara!
+RACE_READY,"Ready? One lap, through every checkpoint, to the finish line!","Pronti? Un giro, passa da tutti i checkpoint, fino al traguardo!"
+RACE_FINISH,FINISH,TRAGUARDO
+RACE_OFFROAD,Off the road! Back to the last checkpoint.,Fuori strada! Torni all'ultimo checkpoint.
+RACE_GAVE_UP,Race abandoned.,Gara abbandonata.

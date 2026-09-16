@@ -17,6 +17,8 @@ signal flying_changed(on: bool)
 @export var definition: VehicleDefinition
 ## Below this height the vehicle is considered fallen out of the world.
 @export var fall_limit := -25.0
+## A race forbids flying (RaceLine sets it).
+var wings_locked := false
 
 @onready var input: VehicleInput = $InputSource
 @onready var motor: VehicleMotor = $Motor
@@ -72,7 +74,7 @@ func _physics_process(delta: float) -> void:
 	var acceleration_multiplier := 1.0
 	if input.horn_pressed:
 		honk()
-	motor.has_wings = driver != null and driver is CharacterController and ProgressionManager.owns_upgrade(&"wings")
+	motor.has_wings = driver != null and driver is CharacterController and not wings_locked and ProgressionManager.owns_upgrade(&"wings")
 	if motor.is_flying != _was_flying:
 		_was_flying = motor.is_flying
 		if _visual_instance and _visual_instance.has_method(&"set_flying"):

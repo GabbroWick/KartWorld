@@ -594,23 +594,35 @@ them, one commit + suite + screenshot each:
    3 stars, 3 slimes (optional), goal door; palms as ModelProps. Music
    `jungle.wav`. Suite `test_jungle_runner.tscn` 17 checks.
 
-3. **Island race — DONE**: `RaceLine` (`scenes/gameplay/race_line.tscn`,
-   Area3D arch "GARA" with poles, banner and Label3D turned to the camera)
-   snaps itself onto road ring `road_index` (`IslandTerrain.road_progress`
-   + `road_pose`); hub instance `Race` at (88, 4, 92) on ring 1, map
-   marker group `map_race` (checkered). Driving the kart through it
-   spawns `opponents` (3) NPC karts just ahead (`NpcDriver`, caution 0,
-   `speed_factor` 0.92 − 0.04·i, fox/panda/leopard seated through
-   `CharacterRoster.for_npc`) and starts a one-lap race: progress along
-   the ring is measured from the line; a lap counts only after the far
-   side (40–70 %) was reached and the progress wraps from > 70 % to
-   < 30 % (no U-turn cheating). HUD `Race` label under the hearts
-   (`RACE_HUD`: place, time, lap %). Finishing pays 5/3/1 stars once per
-   place (`race_<name>_<place>` collected ids), notice `RACE_RESULT` +
-   `RACE_REWARD`, rivals freed. Villagers hint (`NPC_V_12`). Island
-   suite 178 checks (`_test_race`: drive through, rivals exist, HUD,
-   faked lap, podium stars).
-
+3. **Island race — DONE, reworked on the human's feedback**: `RaceLine`
+   (`scenes/gameplay/race_line.tscn`, Area3D arch "GARA" with poles,
+   banner and Label3D turned to the camera) snaps itself onto road ring
+   `road_index` (`IslandTerrain.road_progress` + `road_pose`); hub
+   instance `Race` at (88, 4, 92) on ring 1, map marker group `map_race`
+   (checkered). It builds its course in the parent: a separate checkered
+   **finish arch** "TRAGUARDO" `finish_offset` (90) m down the road and
+   `gate_count` (6) checkpoint gates (pole pairs with flags) evenly along
+   the ring, visible only during a race (next one yellow, passed grey).
+   Flow: stop the kart under the arch → prompt `PROMPT_RACE` (the arch is
+   an interactable usable **from the kart**: `can_use_from_kart()`,
+   `InteractionComponent.get_target(from_kart)`, DriverComponent tries
+   those before leaving the kart, HUD prompt too) → `_start`: 3-2-1
+   countdown with the world frozen (RaceLine is PROCESS_MODE_ALWAYS),
+   `opponents` (3) rival karts on a two-column grid ahead
+   (`NpcDriver.lane_offset`), every other `npc_kart` hidden + disabled,
+   `VehicleController.wings_locked` (no flying) → `_go`. Rivals:
+   `NpcDriver.use_turbo` (turbo on straights), `bend_speed`, speed
+   factor 1.0 − 0.03·i with a ±8 % rubber band on the gap. Lap: gates in
+   order (`next_gate`), the wrap from > 75 % to < 25 % counts only with
+   every gate taken, and nothing counts while > 10 m off the road; > 18 m
+   off the road for `offroad_time` (3 s) = back to the last checkpoint
+   (`RACE_OFFROAD`); out of the kart 3 s = `RACE_GAVE_UP`. Finish = one
+   lap + the finish arch. HUD `Race` label (`RACE_HUD`: place, time,
+   checkpoint n/N). Places pay 5/3/1 stars once (`race_<name>_<place>`),
+   notice `RACE_RESULT` + `RACE_REWARD`. Villagers hint (`NPC_V_12`).
+   `IslandTerrain.set_focus` now drops the queued tiles on a jump > 2
+   tiles (stale queue starved the far island in the suite). Island suite
+   195 checks (`_test_race`).
 4. **Slime King boss — DONE**: `BossSlime` (`scripts/enemies/
    boss_slime.gd` extends Enemy, scene `scenes/enemies/boss_slime.tscn`,
    definition `boss_slime.tres`: scale 3, 14 hp, chase 28 m, golden

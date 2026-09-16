@@ -597,18 +597,20 @@ func _test_submarine() -> void:
 
 
 func _test_race() -> void:
-	# The GARA arch sits on road ring 1 near the house; driving through it
-	# starts a one-lap race against NPC karts, the HUD shows place and
-	# time, and finishing pays stars once per place.
+	# The GARA arch sits on road ring 1 near the house. Stop the kart under
+	# it and press Use: countdown, rivals on the grid, wings locked, other
+	# NPC karts gone, checkpoints in order, separate finish arch, stars.
 	var line := _scene.get("world").get_node_or_null("Race") as RaceLine
 	_check(line != null, "hub has a race line")
 	if line == null:
 		return
 	await _steps(5)
 	_check(_terrain.is_on_road(line.global_position.x, line.global_position.z), "the arch snapped onto the road (%s)" % line.global_position)
+	_check(line._finish != null and line._finish.global_position.distance_to(line.global_position) > 40.0, "finish arch is a separate arch down the road (%.0f m)" % (line._finish.global_position.distance_to(line.global_position) if line._finish else 0.0))
+	_check(line._gates.size() == line.gate_count and not line._gates[0].visible, "checkpoint gates built, hidden outside a race (%d)" % line._gates.size())
 	var kart := _player.driver.vehicle
 	var pose := line.global_transform
-	var start := pose.origin + pose.basis.z * 8.0 + Vector3.UP * 0.3   # 8 m before the line, facing it
+	var start := pose.origin + Vector3.UP * 0.3   # under the arch, facing along the road
 	_ensure_ground(start)
 	kart.place(Transform3D(Basis.looking_at(-pose.basis.z, Vector3.UP), start))
 	_player.global_position = start + pose.basis.x * 2.0 + Vector3.UP * 0.3
@@ -616,41 +618,77 @@ func _test_race() -> void:
 	await _steps(10)
 	await _hold(InputActions.INTERACT, 3)
 	await _steps(3)
-	_check(_player.driver.is_driving, "in the kart before the arch")
-	Input.action_press(InputActions.ACCELERATE)
-	var started := false
-	for i in 90:
-		await _steps(1)
-		if line.is_racing:
-			started = true
-			break
-	_check(started, "driving through the arch starts the race")
-	_check(line._racers.size() == 3 and get_tree().get_nodes_in_group(&"npc_kart").size() >= 3, "three rival karts spawn (%d)" % line._racers.size())
-	await _steps(30)
+	_check(_player.driver.is_driving, "in the kart under the arch")
+	_check(not line.is_racing and not line.is_counting, "just sitting under the arch starts nothing")
 	var hud: GameHUD = _scene.get_node("GameHUD")
+	_check(hud.prompt_label.text == tr(&"PROMPT_RACE"), "prompt offers the race at the wheel (%s)" % hud.prompt_label.text)
+	var npc_karts_before := get_tree().get_nodes_in_group(&"npc_kart").filter(func(k: Node) -> bool: return not line.is_ancestor_of(k))
+	await _hold(InputActions.INTERACT, 3)
+	await _steps(2)
+	_check(line.is_counting and get_tree().paused, "Use starts the countdown with the world frozen")
+	_check(_player.driver.is_driving, "pressing Use for the race does not leave the kart")
+	_check(line._racers.size() == 3, "three rival karts on the grid (%d)" % line._racers.size())
+	_check(npc_karts_before.size() > 0 and npc_karts_before.all(func(k: Node) -> bool: return not k.visible), "the other NPC karts leave the road (%d hidden)" % npc_karts_before.size())
+	_check(line._gates[0].visible, "checkpoint gates appear")
+	_check(kart.wings_locked and not kart.motor.has_wings, "wings locked during the race")
+	line.countdown_left = 0.05
+	await _steps(6)
+	_check(line.is_racing and not get_tree().paused, "countdown over: racing, world running")
+	Input.action_press(InputActions.ACCELERATE)
+	await _steps(40)
+	Input.action_release(InputActions.ACCELERATE)
 	_check(hud.race_label.visible and hud.race_label.text.begins_with(tr(&"RACE_HUD").substr(0, 5)), "HUD shows the race (%s)" % hud.race_label.text)
 	_check(line.elapsed > 0.4 and line.place >= 1 and line.place <= 4, "timer runs, place is 1-4 (%d, %.1f s)" % [line.place, line.elapsed])
-	Input.action_release(InputActions.ACCELERATE)
-	# Fake the lap: pretend the player was near the end of the ring, then
-	# put the kart just past the line.
+	var rivals_moving := line._racers.all(func(r: Dictionary) -> bool: return (r["kart"] as VehicleController).get_speed() > 2.0)
+	_check(rivals_moving, "rivals drive off at the start")
+	var rival_driver := (line._racers[0]["kart"] as Node).get_node("NpcDriver") as NpcDriver
+	_check(rival_driver.use_turbo and rival_driver.speed_factor >= 0.9, "rivals race at full speed with turbo allowed (%.2f)" % rival_driver.speed_factor)
+	# Skipping a checkpoint: the lap does not count.
 	var stars_before := ProgressionManager.get_total_stars()
 	line._player_last = line._length * 0.9
-	line._player_mid = true
+	line.next_gate = line.gate_count - 1
+	kart.place(Transform3D(Basis.looking_at(-pose.basis.z, Vector3.UP), pose.origin - pose.basis.z * 3.0 + Vector3.UP * 0.3))
+	await _steps(3)
+	_check(line.is_racing and line._player_laps == 0, "crossing the start with a checkpoint missing counts no lap")
+	# Off the road for too long: back to the last checkpoint.
+	var off := pose.origin + pose.basis.x * 40.0
+	_ensure_ground(off)
+	off.y = _terrain.sample_height(off.x, off.z) + 0.5
+	kart.place(Transform3D(Basis.looking_at(-pose.basis.z, Vector3.UP), off))
+	line._offroad_left = 0.1
+	await _steps(8)
+	_check(_terrain.road_distance(kart.global_position.x, kart.global_position.z) < 6.0, "off-road kart returns to the road (%.1f m)" % _terrain.road_distance(kart.global_position.x, kart.global_position.z))
+	_check(line._player_laps == 0 and line.next_gate == line.gate_count - 1, "nothing counted while off the road (laps %d gate %d)" % [line._player_laps, line.next_gate])
+	# Full lap through every checkpoint, then the finish arch.
+	line._player_last = line._length * 0.9
+	line.next_gate = line.gate_count
 	for racer in line._racers:
 		racer["finished"] = true
 	var finished := [-1]
 	line.race_finished.connect(func(place: int, _t: float) -> void: finished[0] = place)
 	kart.place(Transform3D(Basis.looking_at(-pose.basis.z, Vector3.UP), pose.origin - pose.basis.z * 3.0 + Vector3.UP * 0.3))
+	await _steps(3)
+	_check(line.is_racing and line._player_laps == 1, "lap counted at the start arch, race goes on to the finish")
+	var finish_pose := line._finish.global_transform
+	_ensure_ground(finish_pose.origin)
+	kart.place(Transform3D(Basis.looking_at(-finish_pose.basis.z, Vector3.UP), finish_pose.origin - finish_pose.basis.z * 3.0 + Vector3.UP * 0.3))
 	await _steps(5)
-	_check(finished[0] == 4 and not line.is_racing, "crossing the line after a lap finishes the race (place %d)" % finished[0])
+	_check(finished[0] == 4 and not line.is_racing, "crossing the finish arch ends the race (place %d)" % finished[0])
 	_check(get_tree().get_nodes_in_group(&"npc_kart").filter(func(k: Node) -> bool: return line.is_ancestor_of(k)).is_empty(), "rival karts are cleared")
+	_check(npc_karts_before.all(func(k: Node) -> bool: return k.visible), "the other NPC karts are back")
+	_check(not kart.wings_locked and not line._gates[0].visible, "wings free and gates hidden after the race")
 	_check(ProgressionManager.get_total_stars() == stars_before, "4th place pays nothing")
 	# A podium finish pays once.
+	kart.place(Transform3D(Basis.looking_at(-pose.basis.z, Vector3.UP), start))
+	await _steps(3)
 	line._start(kart)
-	await _steps(2)
+	line.countdown_left = 0.05
+	await _steps(6)
 	line._player_last = line._length * 0.9
-	line._player_mid = true
+	line.next_gate = line.gate_count
 	kart.place(Transform3D(Basis.looking_at(-pose.basis.z, Vector3.UP), pose.origin - pose.basis.z * 3.0 + Vector3.UP * 0.3))
+	await _steps(3)
+	kart.place(Transform3D(Basis.looking_at(-finish_pose.basis.z, Vector3.UP), finish_pose.origin - finish_pose.basis.z * 3.0 + Vector3.UP * 0.3))
 	await _steps(5)
 	_check(ProgressionManager.get_total_stars() == stars_before + 5, "first place pays 5 stars (%d)" % (ProgressionManager.get_total_stars() - stars_before))
 	await _hold(InputActions.INTERACT, 3)

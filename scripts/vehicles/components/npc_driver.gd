@@ -21,6 +21,12 @@ extends Node
 @export_range(4.0, 40.0, 1.0) var look_ahead := 12.0
 ## Brake when the player (on foot or in a kart) is closer than this ahead.
 @export_range(0.0, 30.0, 0.5) var caution_radius := 9.0
+## Metres to the right of the road centre to drive on (racers share the road).
+@export_range(-4.0, 4.0, 0.1) var lane_offset := 0.0
+## Speed kept in the tightest bends (racers brake less).
+@export_range(0.2, 1.0, 0.05) var bend_speed := 0.45
+## Fire the turbo on straights (racers).
+@export var use_turbo := false
 
 var vehicle: VehicleController
 var terrain: IslandTerrain
@@ -150,6 +156,10 @@ func _physics_process(delta: float) -> void:
 		walked += Vector2(a.x, a.z).distance_to(Vector2(b.x, b.z))
 		target_index = ni
 	var target := _samples[target_index]
+	if lane_offset != 0.0:
+		var after := _samples[(target_index + 1) % n]
+		var dir := Vector2(after.x - target.x, after.z - target.z).normalized()
+		target += Vector3(-dir.y, 0.0, dir.x) * lane_offset   # right-hand side of the road
 	var to_target := Vector2(target.x - pos.x, target.z - pos.z)
 	var forward := -vehicle.global_basis.z
 	var fwd2 := Vector2(forward.x, forward.z).normalized()
@@ -158,7 +168,7 @@ func _physics_process(delta: float) -> void:
 
 	# Speed: cruise, less in bends, brake for a nearby player ahead.
 	var wanted := speed_factor * vehicle.definition.max_speed
-	wanted *= lerpf(1.0, 0.45, clampf(absf(angle) / deg_to_rad(60.0), 0.0, 1.0))
+	wanted *= lerpf(1.0, bend_speed, clampf(absf(angle) / deg_to_rad(60.0), 0.0, 1.0))
 	var player := GameManager.get_player(0) as Node3D
 	if player and caution_radius > 0.0:
 		var focus := player
@@ -174,6 +184,8 @@ func _physics_process(delta: float) -> void:
 		throttle = 0.0
 	vehicle.input.throttle = throttle
 	vehicle.input.steer = steer
+	if use_turbo and vehicle.turbo and absf(angle) < deg_to_rad(10.0) 			and speed > 0.6 * vehicle.definition.max_speed and wanted > speed - 1.0:
+		vehicle.turbo.try_activate()
 
 	# Fell off / stuck for a while: back on the road.
 	if pos.distance_to(_last_position) > 0.5:

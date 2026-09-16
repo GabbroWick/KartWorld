@@ -34,7 +34,11 @@ func _physics_process(_delta: float) -> void:
 	if is_driving:
 		_character.global_position = vehicle.global_position
 		if vehicle.input.interact_pressed and not vehicle.is_submarine and not vehicle.is_flying():
-			exit_vehicle()
+			var target := _character.interaction.get_target(true)
+			if target:
+				target.call(&"interact", _character)   # e.g. start a race
+			else:
+				exit_vehicle()
 	else:
 		if _character.input.summon_pressed:
 			summon()

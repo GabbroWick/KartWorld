@@ -221,6 +221,10 @@ func _wait_in_flight() -> void:
 
 ## Where detail should be (the player). Main calls this every frame.
 func set_focus(position: Vector3) -> void:
+	# A big jump (teleport, race respawn) makes the queued tiles stale:
+	# requeue around the new focus instead of building the old list first.
+	if streaming and Vector2(position.x, position.z).distance_to(Vector2(_focus.x, _focus.z)) > chunk_size * 2.0:
+		_pending.clear()
 	_focus = position
 
 

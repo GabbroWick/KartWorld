@@ -31,12 +31,15 @@ func _physics_process(_delta: float) -> void:
 	_character.input.interact_pressed = false
 
 
-## Nearest usable interactable within reach, or null.
-func get_target() -> Node:
+## Nearest usable interactable within reach, or null. `from_kart` keeps
+## only the ones usable at the wheel (`can_use_from_kart()`), e.g. a race.
+func get_target(from_kart := false) -> Node:
 	var best: Node = null
 	var best_distance := reach
 	for node in get_tree().get_nodes_in_group(GROUP):
 		if not node.has_method(&"interact") or not node.has_method(&"get_prompt"):
+			continue
+		if from_kart and not (node.has_method(&"can_use_from_kart") and node.call(&"can_use_from_kart")):
 			continue
 		if node.has_method(&"can_interact") and not node.call(&"can_interact", _character):
 			continue
@@ -48,6 +51,6 @@ func get_target() -> Node:
 	return best
 
 
-func get_prompt() -> String:
-	var target := get_target()
+func get_prompt(from_kart := false) -> String:
+	var target := get_target(from_kart)
 	return target.call(&"get_prompt") if target else ""
