@@ -268,7 +268,7 @@ func _drive_rival(racer: Dictionary, rp: float) -> void:
 	if driver == null:
 		return
 	var gap := _course_position(racer["laps"], racer["gate"], rp) - _course_position(_player_laps, next_gate, _player_last)
-	driver.speed_factor = clampf(opponent_speed - float(racer["handicap"]) + clampf(-gap / 400.0, -0.08, 0.08), 0.6, 1.1)
+	driver.speed_factor = clampf(opponent_speed - float(racer["handicap"]) + clampf(-gap / 400.0, -0.05, 0.05), 0.8, 1.1)
 	driver.use_turbo = gap < 60.0
 
 
@@ -344,6 +344,9 @@ func _start(kart: VehicleController) -> void:
 		driver.speed_factor = 0.0
 		driver.caution_radius = 0.0
 		driver.lane_offset = 2.6 * (1.0 if i % 2 == 0 else -1.0)
+		driver.racing = true
+		driver.bend_speed = 0.8
+		driver.look_ahead = 14.0
 		rival.add_child(driver)
 		add_child(rival)
 		rival.wings_locked = true
@@ -355,7 +358,7 @@ func _start(kart: VehicleController) -> void:
 				rival.seat_visual(visual)
 				if visual.has_method(&"set_seated"):
 					visual.call(&"set_seated", true)
-		_racers.append({"kart": rival, "last": 0.0, "gate": 0, "laps": 0, "finished": false, "handicap": 0.03 * i})
+		_racers.append({"kart": rival, "last": 0.0, "gate": 0, "laps": 0, "finished": false, "handicap": 0.01 * i})
 	kart.wings_locked = true
 	kart.motor.is_flying = false
 	GameManager.set_frozen(true)

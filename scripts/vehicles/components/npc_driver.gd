@@ -27,6 +27,9 @@ extends Node
 @export_range(0.2, 1.0, 0.05) var bend_speed := 0.45
 ## Fire the turbo on straights (racers).
 @export var use_turbo := false
+## Racer: floor the throttle whenever below the wanted speed (a cruiser
+## eases off near it and never reaches the player's top speed).
+@export var racing := false
 
 var vehicle: VehicleController
 var terrain: IslandTerrain
@@ -195,12 +198,12 @@ func _physics_process(delta: float) -> void:
 		if rel.length() < caution_radius and forward.dot(rel.normalized()) > 0.3:
 			wanted = 0.0
 	var speed := vehicle.get_speed()
-	var throttle := clampf((wanted - speed) / 4.0, -1.0, 1.0)
+	var throttle := clampf((wanted - speed) / (0.5 if racing else 4.0), -1.0, 1.0)
 	if wanted <= 0.01 and speed < 0.5:
 		throttle = 0.0
 	vehicle.input.throttle = throttle
 	vehicle.input.steer = steer
-	if use_turbo and vehicle.turbo and absf(angle) < deg_to_rad(10.0) 			and speed > 0.6 * vehicle.definition.max_speed and wanted > speed - 1.0:
+	if use_turbo and vehicle.turbo and absf(angle) < deg_to_rad(16.0) 			and speed > 0.5 * vehicle.definition.max_speed and wanted > speed - 1.0:
 		vehicle.turbo.try_activate()
 
 	# Fell off / stuck for a while: back on the road.

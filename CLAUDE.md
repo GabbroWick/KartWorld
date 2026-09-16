@@ -612,8 +612,11 @@ them, one commit + suite + screenshot each:
    `opponents` (3) rival karts on a two-column grid ahead
    (`NpcDriver.lane_offset`), every other `npc_kart` hidden + disabled,
    `VehicleController.wings_locked` (no flying) → `_go`. Rivals:
-   `NpcDriver.use_turbo` (turbo on straights), `bend_speed`, speed
-   factor 1.0 − 0.03·i with a ±8 % rubber band on the gap. Lap: gates in
+   `NpcDriver.use_turbo` (turbo on straights), `bend_speed` 0.8,
+   `racing` (throttle floored below the wanted speed — a cruiser eased
+   off near it and topped out ~12 m/s; the human beat them without
+   turbo), speed factor 1.0 − 0.01·i with a ±5 % rubber band on the gap.
+   Suite checks every rival runs > 12 m/s (top speed 16). Lap: gates in
    order (`next_gate`), the wrap from > 75 % to < 25 % counts only with
    every gate taken, and nothing counts while > 10 m off the road; > 18 m
    off the road for `offroad_time` (3 s) = back to the last checkpoint

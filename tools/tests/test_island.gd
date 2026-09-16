@@ -639,8 +639,12 @@ func _test_race() -> void:
 	Input.action_release(InputActions.ACCELERATE)
 	_check(hud.race_label.visible and hud.race_label.text.begins_with(tr(&"RACE_HUD").substr(0, 5)), "HUD shows the race (%s)" % hud.race_label.text)
 	_check(line.elapsed > 0.4 and line.place >= 1 and line.place <= 4, "timer runs, place is 1-4 (%d, %.1f s)" % [line.place, line.elapsed])
-	var rivals_moving := line._racers.all(func(r: Dictionary) -> bool: return (r["kart"] as VehicleController).get_speed() > 2.0)
-	_check(rivals_moving, "rivals drive off at the start")
+	_check((line._racers[0]["kart"] as VehicleController).get_speed() > 7.0, "the pole rival floors it at the start (%.1f m/s)" % (line._racers[0]["kart"] as VehicleController).get_speed())
+	await _steps(120)
+	var slowest := INF
+	for r in line._racers:
+		slowest = minf(slowest, (r["kart"] as VehicleController).get_speed())
+	_check(slowest > 12.0, "every rival runs near the kart's top speed on the road (slowest %.1f m/s)" % slowest)
 	var rival_driver := (line._racers[0]["kart"] as Node).get_node("NpcDriver") as NpcDriver
 	_check(rival_driver.use_turbo and rival_driver.speed_factor >= 0.9, "rivals race at full speed with turbo allowed (%.2f)" % rival_driver.speed_factor)
 	# Skipping a checkpoint: the lap does not count.
