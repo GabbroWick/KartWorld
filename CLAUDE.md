@@ -601,7 +601,9 @@ them, one commit + suite + screenshot each:
    `road_index` (`IslandTerrain.road_progress` + `road_pose`); hub
    instance `Race` at (88, 4, 92) on ring 1, map marker group `map_race`
    (checkered). It builds its course in the parent: a separate checkered
-   **finish arch** "TRAGUARDO" `finish_offset` (90) m down the road and
+   **finish arch** "TRAGUARDO" `finish_offset` m along the ring (−110:
+   before the start, so the race ends before the village — human's
+   request; a positive offset needs a full lap first, `_at_finish`) and
    `gate_count` (6) checkpoint gates (pole pairs with flags) evenly along
    the ring, visible only during a race (next one yellow, passed grey).
    Flow: stop the kart under the arch → prompt `PROMPT_RACE` (the arch is
@@ -620,8 +622,8 @@ them, one commit + suite + screenshot each:
    order (`next_gate`), the wrap from > 75 % to < 25 % counts only with
    every gate taken, and nothing counts while > 10 m off the road; > 18 m
    off the road for `offroad_time` (3 s) = back to the last checkpoint
-   (`RACE_OFFROAD`); out of the kart 3 s = `RACE_GAVE_UP`. Finish = one
-   lap + the finish arch. HUD `Race` label (`RACE_HUD`: place, time,
+   (`RACE_OFFROAD`); out of the kart 3 s = `RACE_GAVE_UP`. Finish = every
+   gate + the finish arch (both arches are `map_race` markers). HUD `Race` label (`RACE_HUD`: place, time,
    checkpoint n/N). Places pay 5/3/1 stars once (`race_<name>_<place>`),
    notice `RACE_RESULT` + `RACE_REWARD`. Villagers hint (`NPC_V_12`).
    `IslandTerrain.set_focus` now drops the queued tiles on a jump > 2

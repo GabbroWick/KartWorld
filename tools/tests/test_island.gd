@@ -606,7 +606,8 @@ func _test_race() -> void:
 		return
 	await _steps(5)
 	_check(_terrain.is_on_road(line.global_position.x, line.global_position.z), "the arch snapped onto the road (%s)" % line.global_position)
-	_check(line._finish != null and line._finish.global_position.distance_to(line.global_position) > 40.0, "finish arch is a separate arch down the road (%.0f m)" % (line._finish.global_position.distance_to(line.global_position) if line._finish else 0.0))
+	_check(line._finish != null and line._finish.global_position.distance_to(line.global_position) > 40.0, "finish arch is a separate arch (%.0f m away)" % (line._finish.global_position.distance_to(line.global_position) if line._finish else 0.0))
+	_check(line.finish_offset < 0.0 and line._finish_progress > line._gate_distances[line.gate_count - 1], "finish arch sits before the start, after the last gate (%.0f of %.0f m)" % [line._finish_progress, line._length])
 	_check(line._gates.size() == line.gate_count and not line._gates[0].visible, "checkpoint gates built, hidden outside a race (%d)" % line._gates.size())
 	var kart := _player.driver.vehicle
 	var pose := line.global_transform
@@ -663,16 +664,12 @@ func _test_race() -> void:
 	await _steps(8)
 	_check(_terrain.road_distance(kart.global_position.x, kart.global_position.z) < 6.0, "off-road kart returns to the road (%.1f m)" % _terrain.road_distance(kart.global_position.x, kart.global_position.z))
 	_check(line._player_laps == 0 and line.next_gate == line.gate_count - 1, "nothing counted while off the road (laps %d gate %d)" % [line._player_laps, line.next_gate])
-	# Full lap through every checkpoint, then the finish arch.
-	line._player_last = line._length * 0.9
+	# Every checkpoint taken, then the finish arch (before the start).
 	line.next_gate = line.gate_count
 	for racer in line._racers:
 		racer["finished"] = true
 	var finished := [-1]
 	line.race_finished.connect(func(place: int, _t: float) -> void: finished[0] = place)
-	kart.place(Transform3D(Basis.looking_at(-pose.basis.z, Vector3.UP), pose.origin - pose.basis.z * 3.0 + Vector3.UP * 0.3))
-	await _steps(3)
-	_check(line.is_racing and line._player_laps == 1, "lap counted at the start arch, race goes on to the finish")
 	var finish_pose := line._finish.global_transform
 	_ensure_ground(finish_pose.origin)
 	kart.place(Transform3D(Basis.looking_at(-finish_pose.basis.z, Vector3.UP), finish_pose.origin - finish_pose.basis.z * 3.0 + Vector3.UP * 0.3))
@@ -688,10 +685,7 @@ func _test_race() -> void:
 	line._start(kart)
 	line.countdown_left = 0.05
 	await _steps(6)
-	line._player_last = line._length * 0.9
 	line.next_gate = line.gate_count
-	kart.place(Transform3D(Basis.looking_at(-pose.basis.z, Vector3.UP), pose.origin - pose.basis.z * 3.0 + Vector3.UP * 0.3))
-	await _steps(3)
 	kart.place(Transform3D(Basis.looking_at(-finish_pose.basis.z, Vector3.UP), finish_pose.origin - finish_pose.basis.z * 3.0 + Vector3.UP * 0.3))
 	await _steps(5)
 	_check(ProgressionManager.get_total_stars() == stars_before + 5, "first place pays 5 stars (%d)" % (ProgressionManager.get_total_stars() - stars_before))

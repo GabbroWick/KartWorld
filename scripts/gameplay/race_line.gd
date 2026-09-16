@@ -4,7 +4,8 @@ extends Area3D
 ## `interact` to race: a 3-2-1 countdown, `opponents` NPC karts on the
 ## grid ahead, one lap of the ring through `gate_count` checkpoints in
 ## order, then the separate finish arch ("TRAGUARDO") `finish_offset`
-## metres past the start. While racing: wings are locked, the other NPC
+## metres from the start (negative = before it: the race ends before the
+## village comes back). While racing: wings are locked, the other NPC
 ## karts leave the island, leaving the road for more than `offroad_time`
 ## seconds puts the kart back at the last checkpoint, getting out of the
 ## kart gives up. Rivals drive at full speed and use their turbo on
@@ -33,8 +34,9 @@ const ON_ROAD_DISTANCE := 10.0
 @export_range(0.5, 1.1, 0.05) var opponent_speed := 1.0
 @export var race_name: StringName = &"island"
 @export_range(2, 12, 1) var gate_count := 6
-## Metres from the start arch to the finish arch along the ring.
-@export_range(20.0, 400.0, 5.0) var finish_offset := 90.0
+## Metres from the start arch to the finish arch along the ring; negative
+## = before the start (the race ends before reaching the village again).
+@export_range(-600.0, 600.0, 5.0) var finish_offset := -110.0
 @export_range(1.0, 10.0, 0.5) var offroad_time := 3.0
 
 var is_racing := false
@@ -48,6 +50,7 @@ var _terrain: IslandTerrain
 var _length := 0.0
 var _start_distance := 0.0
 var _gate_distances: PackedFloat32Array = PackedFloat32Array()   # relative to the start
+var _finish_progress := 0.0   # finish arch, metres from the start along the ring
 var _racers: Array[Dictionary] = []   # {kart, last, gate, laps, finished, handicap}
 var _player_kart: VehicleController
 var _player_last := 0.0
@@ -96,9 +99,12 @@ func _build_course() -> void:
 	_finish = Node3D.new()
 	_finish.name = "RaceFinish"
 	parent.add_child(_finish)
-	_finish.global_transform = _terrain.road_pose(road_index, _start_distance + finish_offset)
+	_finish_progress = fposmod(finish_offset, _length)
+	_finish.global_transform = _terrain.road_pose(road_index, _start_distance + _finish_progress)
 	_finish.global_position.y += 0.05
 	_add_arch(_finish, tr(&"RACE_FINISH"), true)
+	_finish.set_meta(&"map_label", &"RACE_FINISH")
+	_finish.add_to_group(&"map_race")
 	_gate_distances.clear()
 	for k in gate_count:
 		var d := (k + 1) * _length / (gate_count + 1)
@@ -236,7 +242,7 @@ func _physics_process(delta: float) -> void:
 		racer["last"] = rp
 		if racer["gate"] < gate_count and rp > _gate_distances[racer["gate"]]:
 			racer["gate"] += 1
-		if racer["laps"] >= 1 and rp >= finish_offset:
+		if _at_finish(racer["laps"], racer["gate"], rp):
 			racer["finished"] = true
 		_drive_rival(racer, rp)
 	# Place: 1 + racers ahead (finished, or further along the course).
@@ -246,8 +252,16 @@ func _physics_process(delta: float) -> void:
 		if racer["finished"] or _course_position(racer["laps"], racer["gate"], racer["last"]) > mine:
 			ahead += 1
 	place = 1 + ahead
-	if on_road and _player_laps >= 1 and p >= finish_offset:
+	if on_road and _at_finish(_player_laps, next_gate, p):
 		_finish_race()
+
+
+## Past the finish arch with the course done: after the start arch it
+## takes a counted lap, before it every gate.
+func _at_finish(laps: int, gate: int, progress: float) -> bool:
+	if finish_offset >= 0.0:
+		return laps >= 1 and progress >= _finish_progress
+	return (laps >= 1 or gate >= gate_count) and progress >= _finish_progress
 
 
 ## A lap ends when the progress wraps from the last stretch to the first,
