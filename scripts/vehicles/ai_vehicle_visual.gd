@@ -30,6 +30,7 @@ var _speed := 0.0
 ## Wings: two panels that swing out of the sides when flying.
 var _wings: Array[Node3D] = []
 var _exhausts: Array[CPUParticles3D] = []
+var _pylons: Array[MeshInstance3D] = []
 var _fin: Node3D
 var _fly_amount := 0.0
 var _flying := false
@@ -139,11 +140,17 @@ func _build_submarine_parts() -> void:
 	var accent := Color(0.95, 0.35, 0.28)
 	var dark := Color(0.28, 0.3, 0.36)
 	for side in [-1.0, 1.0]:
+		# A pylon fixed to the body side carries the folding wing.
+		var pylon := _jet_box(Vector3(0.14, 0.12, 0.7), dark)
+		pylon.position = Vector3(side * 0.47, 0.4, 0.15)
+		pylon.visible = false
+		_instance.add_child(pylon)
+		_pylons.append(pylon)
 		var pivot := Node3D.new()
-		pivot.position = Vector3(side * 0.4, 0.5, 0.15)
+		pivot.position = Vector3(side * 0.5, 0.42, 0.15)
 		# Swept wing: a wide root panel and a narrower, further-back tip panel.
 		var root_panel := _jet_box(Vector3(0.55, 0.035, 0.55), body_color)
-		root_panel.position = Vector3(side * 0.28, 0.0, 0.05)
+		root_panel.position = Vector3(side * 0.24, 0.0, 0.05)
 		root_panel.rotation.y = side * deg_to_rad(-18.0)
 		pivot.add_child(root_panel)
 		var tip_panel := _jet_box(Vector3(0.6, 0.03, 0.34), body_color)
@@ -271,8 +278,12 @@ func set_flying(on: bool) -> void:
 	_flying = on
 	for wing in _wings:
 		wing.visible = true
+	for pylon in _pylons:
+		pylon.visible = true
 	if _fin:
 		_fin.visible = true
+	# The cockpit closes in the air like it does at sea.
+	_canopy.visible = true
 
 
 func is_flying() -> bool:
@@ -296,15 +307,16 @@ func _process(delta: float) -> void:
 		return
 	var before := _sub_amount
 	_sub_amount = move_toward(_sub_amount, 1.0 if _submarine else 0.0, delta * 2.0)
+	var canopy_amount := maxf(_sub_amount, _fly_amount)
+	_canopy.scale = Vector3.ONE * maxf(smoothstep(0.0, 1.0, canopy_amount), 0.001)
+	_canopy.visible = canopy_amount > 0.0
 	if _sub_amount != before or _submarine:
 		var t := smoothstep(0.0, 1.0, _sub_amount)
-		_canopy.scale = Vector3.ONE * maxf(t, 0.001)
 		for pivot in _props:
 			pivot.position.z = lerpf(0.75, 1.15, t)
 			var blades := pivot.get_node("Blades") as Node3D
 			blades.rotate_z((absf(_speed) * 2.0 + (3.0 if _submarine else 0.0)) * delta)
 		if _sub_amount <= 0.0:
-			_canopy.visible = false
 			for pivot in _props:
 				pivot.visible = false
 	if _bubbles:
@@ -327,6 +339,8 @@ func _process(delta: float) -> void:
 		if _fly_amount <= 0.0:
 			for wing in _wings:
 				wing.visible = false
+			for pylon in _pylons:
+				pylon.visible = false
 			if _fin:
 				_fin.visible = false
 

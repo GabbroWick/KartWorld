@@ -538,7 +538,12 @@ them, one commit + suite + screenshot each:
    `_build_submarine_parts` tail): swept delta wings with red winglets,
    a tail fin, two turbines under the wings (intake ring, glowing nozzle,
    fire exhaust particles while flying); stowed panels fold up along the
-   body. `capture_screenshot` `fly` presses jump twice.
+   body. Human: wings must be attached — pylons on the body sides carry
+   the pivots, and the glass canopy closes in the air like at sea.
+   `capture_screenshot` `fly` presses jump twice.
+13. **Loader on character change**: `GameHUD.show_loading()` (black
+   Fade + "Caricamento..."); `Main.set_character` shows it two frames
+   before the hub rebuild and hides it after.
 
 ## Next step (Phase 8 — polish, continued)
 

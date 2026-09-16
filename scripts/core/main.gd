@@ -82,6 +82,12 @@ func _spawn_player() -> void:
 ## Character select: the hero becomes `id`; NPCs are re-cast on the next
 ## world build, so the hub reloads right away (nobody is a duplicate).
 func set_character(id: StringName) -> void:
+	# Black "Caricamento..." screen first: the world rebuild freezes a
+	# moment, and without it the change looked like a hang.
+	if game_hud and game_hud.has_method(&"show_loading"):
+		game_hud.call(&"show_loading", true)
+		await get_tree().process_frame
+		await get_tree().process_frame
 	ProgressionManager.set_character(id)
 	if player.driver.is_driving:
 		player.driver.exit_vehicle()
@@ -89,6 +95,10 @@ func set_character(id: StringName) -> void:
 	ProgressionManager.apply_to(player.abilities)
 	if level_manager.is_in_hub():
 		level_manager.return_to_hub()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if game_hud and game_hud.has_method(&"show_loading"):
+		game_hud.call(&"show_loading", false)
 
 
 ## Progression grants abilities on top of the definitions' starters, now and

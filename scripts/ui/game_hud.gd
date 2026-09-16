@@ -19,6 +19,7 @@ extends CanvasLayer
 @onready var full_map_close: Button = $Root/FullMap/Rows/Close
 @onready var shop_menu: ShopMenu = $Root/ShopMenu
 @onready var inventory_menu: InventoryMenu = $Root/InventoryMenu
+@onready var loading_label: Label = $Root/Fade/Loading
 @onready var star_row: HBoxContainer = $Root/TopRight/StarRow
 @onready var stars_label: Label = $Root/TopRight/StarRow/Stars
 @onready var objective_label: Label = $Root/TopCenter/Objective
@@ -93,6 +94,15 @@ func _refresh_inventory() -> void:
 		if n > 0:
 			parts.append("%s %d" % [tr(&"ITEM_" + String(item).to_upper()), n])
 	inventory_label.text = " · ".join(parts)
+
+
+## Black screen with "Caricamento..." while a world is rebuilt (character
+## change). Call with false when done.
+func show_loading(on: bool) -> void:
+	fade_rect.visible = on
+	fade_rect.color.a = 1.0 if on else 0.0
+	loading_label.visible = on
+	loading_label.text = tr(&"HUD_LOADING")
 
 
 ## Fade to black and back (sleeping). Awaitable.

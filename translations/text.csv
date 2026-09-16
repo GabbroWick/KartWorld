@@ -117,3 +117,4 @@ INV_TITLE,Backpack,Zaino
 INV_FOOD,Food: %s,Cibo: %s
 INV_NOTHING,nothing,niente
 TOUCH_BAG,Bag,Zaino
+HUD_LOADING,Loading...,Caricamento...
