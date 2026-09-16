@@ -14,6 +14,8 @@ var _vehicle: VehicleController
 func _ready() -> void:
 	_vehicle = get_parent() as VehicleController
 	stream = Sfx.get_stream(&"engine")
+	if stream:
+		Sfx.make_looping(stream)
 	unit_size = 6.0
 	max_db = 0.0
 	volume_db = idle_db

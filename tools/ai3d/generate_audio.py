@@ -2,7 +2,7 @@
 
 Musica: MusicGen small (Meta, transformers) -> assets/audio/music/<nome>.wav
   python tools/ai3d/generate_audio.py music --name hub --seconds 30 --seed 3
-Effetti: AudioLDM 2 (cvssp/audioldm2, diffusers, non gated, ~2 GB) ->
+Effetti: AudioLDM (cvssp/audioldm-s-full-v2, diffusers, non gated, ~1.3 GB) ->
 assets/audio/sfx/<nome>.wav. `--backend stable` usa Stable Audio Open 1.0
 (gated: licenza su huggingface.co/stabilityai/stable-audio-open-1.0 +
 `huggingface-cli login`).
@@ -54,6 +54,11 @@ SFX = {
     "horn": "cute go-kart horn beep beep, cartoon",
     "engine": "small go-kart engine idle loop, cartoon, steady hum",
 }
+
+# Longest useful length per effect (s); the model always renders ~2 s.
+SFX_MAX = {"jump": 0.7, "double_jump": 0.5, "land": 0.5, "attack": 0.6, "hit": 0.6,
+           "hurt": 0.8, "enemy_die": 0.9, "star": 1.0, "checkpoint": 1.2, "unlock": 1.5,
+           "fanfare": 2.0, "portal": 1.5, "turbo": 1.5, "ui": 0.3, "horn": 1.4}
 
 
 def _device():
@@ -108,9 +113,12 @@ def sfx(args):
                          generator=gen).audios[0]
             _save_wav(SFX_DIR / f"{name}.wav", audio.float().cpu().numpy(), pipe.vae.sampling_rate)
         return
-    # AudioLDM 2 (cvssp/audioldm2, not gated, ~2 GB): 16 kHz mono clips.
-    from diffusers import AudioLDM2Pipeline
-    pipe = AudioLDM2Pipeline.from_pretrained("cvssp/audioldm2", torch_dtype=torch.float16).to(device)
+    # AudioLDM (cvssp/audioldm-s-full-v2, not gated, ~1.3 GB): 16 kHz mono
+    # clips. AudioLDM 2 in diffusers 0.35 breaks against transformers 4.57
+    # (`GPT2Model has no attribute _get_initial_cache_position`); v1 has no
+    # GPT2 stage and works.
+    from diffusers import AudioLDMPipeline
+    pipe = AudioLDMPipeline.from_pretrained("cvssp/audioldm-s-full-v2", torch_dtype=torch.float16).to(device)
     for name in names:
         prompt = SFX.get(name, args.prompt or name)
         seconds = 4.0 if name == "engine" else 2.0
@@ -118,8 +126,43 @@ def sfx(args):
         audio = pipe(prompt, negative_prompt="low quality, music, speech, noise",
                      num_inference_steps=100, audio_length_in_s=seconds, num_waveforms_per_prompt=1,
                      guidance_scale=3.5, generator=gen).audios[0]
-        audio = _trim(np.asarray(audio, dtype=np.float32))
+        audio = np.asarray(audio, dtype=np.float32)
+        audio = _loopify(audio, 16000) if name == "engine" else _cap(_trim(audio), 16000, SFX_MAX.get(name, 2.0))
         _save_wav(SFX_DIR / f"{name}.wav", audio, 16000)
+
+
+def _loopify(audio: np.ndarray, rate: int, fade: float = 0.4) -> np.ndarray:
+    """Seamless loop: cross-fade the tail into the head and drop the tail."""
+    n = int(fade * rate)
+    if audio.shape[0] < 3 * n:
+        return audio
+    ramp = np.linspace(0.0, 1.0, n, dtype=np.float32)
+    body = audio[:-n].copy()
+    body[:n] = body[:n] * ramp + audio[-n:] * (1.0 - ramp)
+    return body
+
+
+def _cap(audio: np.ndarray, rate: int, seconds: float, fade: float = 0.06) -> np.ndarray:
+    """Cut to `seconds` with a short fade-out (a click must not last 2 s)."""
+    n = int(seconds * rate)
+    if audio.shape[0] > n:
+        audio = audio[:n].copy()
+    f = min(int(fade * rate), audio.shape[0])
+    if f > 0:
+        audio[-f:] *= np.linspace(1.0, 0.0, f, dtype=np.float32)
+    return audio
+
+
+def trim(args):
+    """Re-cap the existing sfx WAVs (no model needed)."""
+    from scipy.io import wavfile
+    for name, seconds in SFX_MAX.items():
+        path = SFX_DIR / f"{name}.wav"
+        if not path.exists():
+            continue
+        rate, data = wavfile.read(str(path))
+        audio = data.astype(np.float32) / 32767.0
+        _save_wav(path, _cap(audio, rate, seconds), rate)
 
 
 def _trim(audio: np.ndarray, threshold: float = 0.02, tail: int = 1600) -> np.ndarray:
@@ -146,10 +189,13 @@ def main():
     s.add_argument("--prompt", default="")
     s.add_argument("--all", action="store_true")
     s.add_argument("--seed", type=int, default=1)
-    s.add_argument("--backend", default="audioldm2", choices=["audioldm2", "stable"])
+    s.add_argument("--backend", default="audioldm", choices=["audioldm", "stable"])
+    sub.add_parser("trim")
     args = ap.parse_args()
     if args.cmd == "music":
         music(args)
+    elif args.cmd == "trim":
+        trim(args)
     else:
         sfx(args)
 

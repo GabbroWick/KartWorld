@@ -23,7 +23,10 @@ extends CanvasLayer
 @onready var loading_label: Label = $Root/Fade/Loading
 @onready var star_row: HBoxContainer = $Root/TopRight/StarRow
 @onready var stars_label: Label = $Root/TopRight/StarRow/Stars
-@onready var objective_label: Label = $Root/TopCenter/Objective
+@onready var objective_label: Label = $Root/TopCenter/TopCenterRows/Objective
+@onready var boss_box: Control = $Root/TopCenter/TopCenterRows/Boss
+@onready var boss_name: Label = $Root/TopCenter/TopCenterRows/Boss/Name
+@onready var boss_bar: ProgressBar = $Root/TopCenter/TopCenterRows/Boss/Bar
 @onready var prompt_label: Label = $Root/Bottom/Prompt
 @onready var notice_label: Label = $Root/Notice/Text
 @onready var controls_label: Label = $Root/BottomRight/Controls
@@ -72,6 +75,7 @@ func bind_level_manager(manager: LevelManager) -> void:
 func _process(delta: float) -> void:
 	prompt_label.text = _prompt_text()
 	_refresh_race()
+	_refresh_boss()
 	if is_instance_valid(_player):
 		var driving := _player.driver.is_driving
 		var turbo: TurboAbility = _player.driver.vehicle.turbo if driving and _player.driver.vehicle else null
@@ -87,6 +91,21 @@ func _process(delta: float) -> void:
 		_notice_left -= delta
 		if _notice_left <= 0.0:
 			notice_label.text = ""
+
+
+## Boss health bar while a living boss is chasing / near the player.
+func _refresh_boss() -> void:
+	var boss: Enemy = null
+	if is_instance_valid(_player):
+		for node in get_tree().get_nodes_in_group(BossSlime.BOSS_GROUP):
+			var enemy := node as Enemy
+			if enemy and not enemy.health.is_dead and enemy.global_position.distance_to(_player.global_position) < 40.0:
+				boss = enemy
+				break
+	boss_box.visible = boss != null
+	if boss:
+		boss_name.text = tr(boss.definition.display_name)
+		boss_bar.value = boss.health.current_health / maxf(boss.health.max_health, 1.0)
 
 
 ## Race in progress: time, place and lap percentage.
@@ -170,8 +189,9 @@ func _on_ability_unlocked(id: StringName) -> void:
 func _refresh_hub_stars() -> void:
 	if _manager == null or not _manager.is_in_hub():
 		return
-	var total := ProgressionManager.get_total_stars()
-	_set_stars_text(str(total) if total > 0 else "")
+	# The wallet (earned minus spent): what the shop will accept.
+	var total := ProgressionManager.get_available_stars()
+	_set_stars_text(str(total) if total > 0 or ProgressionManager.stars_spent > 0 else "")
 
 
 func _on_health_changed(current: float, maximum: float) -> void:

@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/game_hud.gd" id="1_hud"]
 [ext_resource type="Script" path="res://scripts/ui/heart_bar.gd" id="2_hearts"]
@@ -9,6 +9,25 @@
 [ext_resource type="Script" path="res://scripts/ui/map_view.gd" id="21_mapview"]
 [ext_resource type="Script" path="res://scripts/ui/shop_menu.gd" id="22_shop"]
 [ext_resource type="Script" path="res://scripts/ui/inventory_menu.gd" id="23_inventory"]
+
+[sub_resource type="StyleBoxFlat" id="boss_bg"]
+bg_color = Color(0.1, 0.08, 0.1, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.9, 0.6, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="boss_fill"]
+bg_color = Color(0.9, 0.2, 0.25, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
 [sub_resource type="StyleBoxFlat" id="card_style"]
 bg_color = Color(0.12, 0.14, 0.24, 0.92)
@@ -282,12 +301,37 @@ offset_bottom = 60.0
 grow_horizontal = 2
 theme_override_constants/margin_top = 16
 
-[node name="Objective" type="Label" parent="Root/TopCenter"]
+[node name="TopCenterRows" type="VBoxContainer" parent="Root/TopCenter"]
+theme_override_constants/separation = 6
+
+[node name="Objective" type="Label" parent="Root/TopCenter/TopCenterRows"]
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
 theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 22
 horizontal_alignment = 1
 text = ""
+
+[node name="Boss" type="VBoxContainer" parent="Root/TopCenter/TopCenterRows"]
+visible = false
+theme_override_constants/separation = 2
+
+[node name="Name" type="Label" parent="Root/TopCenter/TopCenterRows/Boss"]
+theme_override_colors/font_color = Color(1, 0.55, 0.55, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+text = ""
+
+[node name="Bar" type="ProgressBar" parent="Root/TopCenter/TopCenterRows/Boss"]
+custom_minimum_size = Vector2(320, 18)
+size_flags_horizontal = 4
+theme_override_styles/background = SubResource("boss_bg")
+theme_override_styles/fill = SubResource("boss_fill")
+max_value = 1.0
+step = 0.001
+value = 1.0
+show_percentage = false
 
 [node name="Notice" type="MarginContainer" parent="Root"]
 anchors_preset = 8

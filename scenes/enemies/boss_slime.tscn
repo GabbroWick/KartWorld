@@ -1,0 +1,44 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/boss_slime.gd" id="1_enemy"]
+[ext_resource type="Script" path="res://scripts/characters/components/health_component.gd" id="2_health"]
+[ext_resource type="Script" path="res://scripts/vfx/hit_flash.gd" id="3_flash"]
+[ext_resource type="Resource" path="res://resources/enemies/boss_slime.tres" id="4_boss"]
+[ext_resource type="Resource" path="res://resources/enemies/slime.tres" id="5_slime"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/enemy.tscn" id="6_enemy"]
+
+[sub_resource type="CapsuleShape3D" id="shape_body"]
+radius = 0.5
+height = 1.0
+
+[sub_resource type="SphereShape3D" id="shape_contact"]
+radius = 0.75
+
+[node name="BossSlime" type="CharacterBody3D" groups=["enemy", "boss"]]
+collision_layer = 4
+collision_mask = 3
+floor_snap_length = 0.5
+script = ExtResource("1_enemy")
+definition = ExtResource("4_boss")
+minion_scene = ExtResource("6_enemy")
+minion_definition = ExtResource("5_slime")
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("shape_body")
+
+[node name="VisualRoot" type="Node3D" parent="."]
+
+[node name="Health" type="Node" parent="."]
+script = ExtResource("2_health")
+
+[node name="HitFlash" type="Node" parent="."]
+script = ExtResource("3_flash")
+
+[node name="ContactArea" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="Shape" type="CollisionShape3D" parent="ContactArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("shape_contact")

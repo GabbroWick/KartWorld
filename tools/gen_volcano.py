@@ -29,7 +29,7 @@ color = Color(%g, %g, %g, 1)
 
 ROCK = (0.42, 0.36, 0.36)
 ROCK2 = (0.48, 0.42, 0.4)
-scene = '''[gd_scene load_steps=18 format=3]
+scene = '''[gd_scene load_steps=19 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/props/placeholder_block.tscn" id="1_block"]
 [ext_resource type="PackedScene" path="res://scenes/world/props/placeholder_cone.tscn" id="2_cone"]
@@ -42,6 +42,7 @@ scene = '''[gd_scene load_steps=18 format=3]
 [ext_resource type="PackedScene" path="res://scenes/enemies/enemy.tscn" id="9_enemy"]
 [ext_resource type="Resource" path="res://resources/enemies/slime.tres" id="10_slime"]
 [ext_resource type="Script" path="res://scripts/levels/defeat_enemies_objective.gd" id="11_defeat"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/boss_slime.tscn" id="16_boss"]
 [ext_resource type="PackedScene" path="res://scenes/world/props/track_ribbon.tscn" id="12_ribbon"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/hazard.tscn" id="13_hazard"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/moving_platform.tscn" id="14_platform"]
@@ -94,6 +95,12 @@ completion_delay = 3.5
 script = ExtResource("11_defeat")
 description = "OBJ_DEFEAT_SLIMES"
 required = 3
+
+[node name="DefeatBoss" type="Node" parent="LevelController"]
+script = ExtResource("11_defeat")
+description = "OBJ_DEFEAT_BOSS"
+required = 1
+boss_only = true
 
 [node name="ReachCrater" type="Node" parent="LevelController"]
 script = ExtResource("7_reach")
@@ -212,6 +219,9 @@ definition = ExtResource("10_slime")
 [node name="Slime3" parent="." instance=ExtResource("9_enemy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -50, 33.3, -162)
 definition = ExtResource("10_slime")
+
+[node name="SlimeKing" parent="." instance=ExtResource("16_boss")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -46, 33.3, -136)
 
 [node name="GoalPlinth" parent="." instance=ExtResource("1_block")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60, 33.05, -150)

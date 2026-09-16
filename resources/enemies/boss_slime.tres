@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="EnemyDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/enemy_definition.gd" id="1_definition"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/visuals/slime_ai.tscn" id="2_visual"]
+
+[resource]
+script = ExtResource("1_definition")
+id = &"boss_slime"
+display_name = "ENEMY_BOSS_SLIME"
+visual_scene = ExtResource("2_visual")
+visual_scale = 3.0
+body_radius = 1.6
+body_height = 3.2
+max_health = 14.0
+move_speed = 3.2
+patrol_radius = 0.0
+chase_radius = 28.0
+lose_radius = 80.0
+contact_damage = 1.0
+knockback = 12.0

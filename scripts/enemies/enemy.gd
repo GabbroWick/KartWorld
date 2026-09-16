@@ -55,7 +55,7 @@ func _physics_process(delta: float) -> void:
 	var speed := definition.move_speed * (1.35 if state == State.CHASE else 1.0)
 	velocity.x = move_toward(velocity.x, wish.x * speed, 20.0 * delta)
 	velocity.z = move_toward(velocity.z, wish.z * speed, 20.0 * delta)
-	if is_on_floor():
+	if is_on_floor() and velocity.y <= 0.0:   # an upward push (hop, boss leap) survives
 		velocity.y = -1.0
 	else:
 		velocity.y -= _gravity * delta

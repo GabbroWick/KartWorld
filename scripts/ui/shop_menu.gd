@@ -97,7 +97,7 @@ func _refresh() -> void:
 				button.disabled = true
 			else:
 				button.text = tr(&"SHOP_BUY")
-				button.disabled = ProgressionManager.get_available_stars() < int(Weapons.UPGRADES[id]["price"])
+				button.disabled = false
 		elif ProgressionManager.equipped_weapon == id:
 			button.text = tr(&"SHOP_IN_USE")
 			button.disabled = true
@@ -106,15 +106,28 @@ func _refresh() -> void:
 			button.disabled = false
 		else:
 			button.text = tr(&"SHOP_BUY")
-			button.disabled = ProgressionManager.get_available_stars() < Weapons.price(id)
+			button.disabled = false
 
 
 func _on_upgrade_pressed(id: StringName) -> void:
 	if ProgressionManager.buy_upgrade(id):
 		Sfx.play(&"unlock")
+		_notice(tr(&"SHOP_BOUGHT") % tr(Weapons.UPGRADES[id]["name"]))
 	else:
-		Sfx.play(&"hurt", -10.0)
+		_too_poor(int(Weapons.UPGRADES[id]["price"]))
 	_refresh()
+
+
+## Not enough stars: say how many are missing instead of a dead button.
+func _too_poor(price: int) -> void:
+	Sfx.play(&"hurt", -10.0)
+	_notice(tr(&"SHOP_NEED") % maxi(price - ProgressionManager.get_available_stars(), 1))
+
+
+func _notice(text: String) -> void:
+	var hud := get_tree().get_first_node_in_group(&"hud")
+	if hud and hud.has_method(&"show_notice"):
+		hud.call(&"show_notice", text)
 
 
 func _on_item_pressed(id: StringName) -> void:
@@ -123,6 +136,7 @@ func _on_item_pressed(id: StringName) -> void:
 		Sfx.play(&"ui", -4.0)
 	elif ProgressionManager.buy_weapon(id):
 		Sfx.play(&"unlock")
+		_notice(tr(&"SHOP_BOUGHT") % tr(Weapons.stats(id)["name"]))
 	else:
-		Sfx.play(&"hurt", -10.0)
+		_too_poor(Weapons.price(id))
 	_refresh()

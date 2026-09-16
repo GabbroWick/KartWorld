@@ -4,6 +4,8 @@ extends Objective
 
 ## How many to defeat. 0 = every enemy present in the level at start.
 @export_range(0, 100, 1) var required := 0
+## Only count enemies in group `boss` (BossSlime.BOSS_GROUP).
+@export var boss_only := false
 
 var defeated := 0
 var target := 0
@@ -14,7 +16,9 @@ func _start() -> void:
 	var present := 0
 	for node in get_tree().get_nodes_in_group(Enemy.GROUP):
 		var enemy := node as Enemy
-		if enemy and level.owns(enemy):
+		if enemy is BossSlime and not boss_only:
+			continue   # the boss has its own objective
+		if enemy and level.owns(enemy) and (not boss_only or enemy.is_in_group(BossSlime.BOSS_GROUP)):
 			present += 1
 			enemy.died.connect(_on_enemy_died)
 	if target == 0:

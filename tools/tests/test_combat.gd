@@ -215,7 +215,8 @@ func _test_shop_weapons() -> void:
 	(hud.shop_menu._buttons[&"boomerang"] as Button).pressed.emit()
 	_check(ProgressionManager.owns_weapon(&"boomerang") and ProgressionManager.equipped_weapon == &"boomerang" and ProgressionManager.get_available_stars() == 3,
 		"pressing Buy on the boomerang buys and equips it (%d stars left)" % ProgressionManager.get_available_stars())
-	_check((hud.shop_menu._buttons[&"sword"] as Button).disabled, "the sword is too expensive now")
+	(hud.shop_menu._buttons[&"sword"] as Button).pressed.emit()
+	_check(not ProgressionManager.owns_weapon(&"sword") and hud.notice_label.text == tr(&"SHOP_NEED") % 7, "the sword is too expensive: notice says 7 stars missing (%s)" % hud.notice_label.text)
 	hud.shop_menu.close()
 	await get_tree().process_frame
 	_check(not get_tree().paused, "closing the shop thaws the world")

@@ -567,15 +567,20 @@ them, one commit + suite + screenshot each:
 
 ## Phase 11 — "ok per tutto" (2026-09-16): audio AI, third island, races, boss, profiles, perf
 
-1. **AI audio — music DONE**: `tools/ai3d/generate_audio.py music` runs
+1. **AI audio — DONE**: `tools/ai3d/generate_audio.py music` runs
    MusicGen small (transformers, ~1.5 GB in `tools/ai3d/models/hf`) and
-   wrote `assets/audio/music/{hub,level,volcano}.wav` (30 s loops, WAV
-   looped by `Sfx.play_music`; a level plays its `world` track when the
-   file exists, else `level`). SFX: `generate_audio.py sfx --all` uses
-   Stable Audio Open 1.0 through diffusers — a gated model: the human must
-   accept the licence on Hugging Face and `huggingface-cli login` in the
-   venv first (not done yet; synth SFX stay meanwhile). torchaudio is
-   NOT installed (no wheel for torch 2.12+rocm7.14.1), so audiocraft /
+   wrote `assets/audio/music/{hub,level,volcano,jungle}.wav` (30 s loops,
+   WAV looped by `Sfx.make_looping`; a level plays its `world` track when
+   the file exists, else `level`). SFX: `generate_audio.py sfx --all`
+   runs **AudioLDM v1** (`cvssp/audioldm-s-full-v2`, diffusers, 1.3 GB,
+   not gated) — AudioLDM 2 in diffusers 0.35 crashes against
+   transformers 4.57 (`GPT2Model has no attribute
+   _get_initial_cache_position`), Stable Audio Open is gated. Every
+   `SoundBank` name now has `assets/audio/sfx/<name>.wav` (16 kHz):
+   silence trimmed, capped per effect (`SFX_MAX`, `trim` subcommand
+   re-caps without the model), `engine.wav` cross-faded into a seamless
+   loop (`_loopify`; `EngineSound` marks it looping). torchaudio is NOT
+   installed (no wheel for torch 2.12+rocm7.14.1), so audiocraft /
    AudioGen are out; transformers MusicGen and diffusers need none.
 
 2. **Jungle island + Level 4 — DONE**: third island at (-1300, 900)
@@ -605,6 +610,26 @@ them, one commit + suite + screenshot each:
    `RACE_REWARD`, rivals freed. Villagers hint (`NPC_V_12`). Island
    suite 178 checks (`_test_race`: drive through, rivals exist, HUD,
    faked lap, podium stars).
+
+4. **Slime King boss — DONE**: `BossSlime` (`scripts/enemies/
+   boss_slime.gd` extends Enemy, scene `scenes/enemies/boss_slime.tscn`,
+   definition `boss_slime.tres`: scale 3, 14 hp, chase 28 m, golden
+   procedural crown) in the Vulcano crater at (-46, 33.3, -136). Every
+   `slam_period` (3.5 s, 2.2 when enraged under half health, +40 %
+   speed) it leaps at the player (`_leap`: planar speed chosen to land on
+   them; `Enemy` keeps an upward velocity set while on the floor now —
+   the old `velocity.y = -1` also ate the hurt hop); landing = shockwave
+   (1 heart within 4.5 m) + up to 2 baby slimes (max 4 alive, die with
+   the king). Objective `DefeatBoss` (`DefeatEnemiesObjective.boss_only`;
+   the slime objective skips bosses). HUD `TopCenterRows/Boss` red bar
+   with the name while a living boss is within 40 m. Volcano suite 43
+   checks (`_test_boss`).
+   Shop feedback from the human (2026-09-16): the HUD star counter shows
+   the **wallet** (`get_available_stars`) like the shop, buy buttons stay
+   enabled and a failed buy says `SHOP_NEED` "Ti mancano N stelle!"
+   (before: greyed buttons, the kid thought he had bought everything);
+   `SHOP_BOUGHT` notice points to the backpack; `SHOP_USE` reads
+   "Comprato · Usa".
 
 ## Next step (Phase 8 — polish, continued)
 

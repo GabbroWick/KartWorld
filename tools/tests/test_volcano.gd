@@ -48,6 +48,7 @@ func _run() -> void:
 	await _test_platform()
 	await _test_lava()
 	await _test_spikes()
+	await _test_boss()
 	await _test_finish()
 	_finish()
 
@@ -60,10 +61,11 @@ func _test_load() -> void:
 	_check(_level != null, "Vulcano has a LevelController")
 	if _level == null:
 		return
-	_check(_level.objectives.size() == 3, "three objectives (%d)" % _level.objectives.size())
+	_check(_level.objectives.size() == 4, "four objectives (%d)" % _level.objectives.size())
 	_check(_level.stars_total == 3, "level counts three stars (%d)" % _level.stars_total)
 	var slimes := get_tree().get_nodes_in_group(&"enemy").filter(func(e: Node) -> bool: return _level.owns(e))
-	_check(slimes.size() == 3, "three slimes in the crater (%d)" % slimes.size())
+	_check(slimes.size() == 4, "three slimes and the Slime King in the crater (%d)" % slimes.size())
+	_check(_world.get_node("SlimeKing") is BossSlime, "the crater has a BossSlime")
 	_check(_hud.objective_label.text.begins_with(tr(&"OBJ_DEFEAT_SLIMES")), "HUD shows the slime objective (%s)" % _hud.objective_label.text)
 	var kart := _player.driver.vehicle
 	_check(kart.global_position.distance_to(_player.global_position) < 8.0, "kart parked next to the spawn (%.1f m)" % kart.global_position.distance_to(_player.global_position))
@@ -196,6 +198,41 @@ func _test_spikes() -> void:
 	await _steps(20)
 
 
+func _test_boss() -> void:
+	var boss := _world.get_node("SlimeKing") as BossSlime
+	_check(boss.is_in_group(BossSlime.BOSS_GROUP) and boss.health.max_health == 14.0, "Slime King: group boss, 14 hp (%.0f)" % boss.health.max_health)
+	_player.health.heal(10.0)
+	var hearts := _player.health.current_health
+	_teleport(Vector3(-46.0, 33.3, -145.0))   # 9 m in front of the king
+	await _steps(5)
+	_check(_hud.boss_box.visible and _hud.boss_name.text == tr(&"ENEMY_BOSS_SLIME"), "HUD shows the boss bar (%s)" % _hud.boss_name.text)
+	_check(is_equal_approx(_hud.boss_bar.value, 1.0), "boss bar full (%.2f)" % _hud.boss_bar.value)
+	var enemies_before := get_tree().get_nodes_in_group(&"enemy").size()
+	var waited := 0
+	while boss.slams < 1 and waited < 400:
+		await _steps(5)
+		waited += 5
+	_check(boss.slams >= 1, "the king slams within %d ticks (chase %s)" % [waited, boss.state])
+	await _steps(3)
+	var enemies_after := get_tree().get_nodes_in_group(&"enemy").size()
+	_check(enemies_after > enemies_before, "a slam spawns baby slimes (%d -> %d)" % [enemies_before, enemies_after])
+	_check(_player.health.current_health < hearts, "the king hurts the player (%.0f -> %.0f)" % [hearts, _player.health.current_health])
+	_teleport(Vector3(-58.0, 33.3, -150.0))
+	boss.take_damage(8.0, _player)
+	await _steps(2)
+	_check(boss.enraged, "half health makes the king angry")
+	_check(_hud.boss_bar.value < 0.5, "boss bar drops (%.2f)" % _hud.boss_bar.value)
+	var died := [false]
+	boss.died.connect(func(_e: Enemy) -> void: died[0] = true)
+	boss.take_damage(100.0, _player)
+	await _steps(30)
+	_check(died[0] and not is_instance_valid(boss), "the king dies and is gone")
+	var babies := get_tree().get_nodes_in_group(&"enemy").filter(func(e: Node) -> bool: return is_instance_valid(e) and e.name.begins_with("Baby") and not (e as Enemy).health.is_dead)
+	_check(babies.is_empty(), "baby slimes die with the king (%d left)" % babies.size())
+	_check(not _hud.boss_box.visible, "boss bar hides after the fight")
+	_player.health.heal(10.0)
+
+
 func _test_finish() -> void:
 	var done := [-1]
 	_level.completed.connect(func(stars: int) -> void: done[0] = stars)
@@ -207,7 +244,7 @@ func _test_finish() -> void:
 	_teleport(Vector3(-56.0, 33.3, -150.0))
 	for e in get_tree().get_nodes_in_group(&"enemy"):
 		if _level.owns(e):
-			(e as Enemy).take_damage(10.0, _player)
+			(e as Enemy).take_damage(100.0, _player)
 	await _steps(10)
 	_check(done[0] == -1, "level not complete before reaching the crater portal")
 	_check(_hud.objective_label.text == tr(&"OBJ_REACH_CRATER"), "HUD moves on to the portal objective (%s)" % _hud.objective_label.text)

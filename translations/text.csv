@@ -30,7 +30,7 @@ OBJ_COLLECT_STARS,Collect stars,Raccogli le stelle
 OBJ_DEFEAT_SLIMES,Defeat the slimes,Sconfiggi gli slime
 OBJ_CLIMB_CLIFF,Climb to the top of the cliff,Arriva in cima alla rupe
 LEVEL_VOLCANO_NAME,Volcano,Vulcano
-LEVEL_VOLCANO_DESC,Race up the volcano by kart then climb to the crater on foot.,Sali sul vulcano in kart e poi arrampicati fino al cratere a piedi.
+LEVEL_VOLCANO_DESC,"Race up the volcano by kart, then face the Slime King in the crater.","Sali sul vulcano in kart, poi affronta il Re Slime nel cratere."
 OBJ_REACH_CRATER,Reach the crater portal,Raggiungi il portale del cratere
 NPC_FOX_1,Hi! The portal is over by the beach.,Ciao! Il portale è laggiù vicino alla spiaggia.
 NPC_FOX_2,Press K to call your kart. It goes anywhere!,Premi K per chiamare il kart. Va dappertutto!
@@ -98,7 +98,7 @@ PROMPT_SHOP,E  shop,E  negozio
 SHOP_TITLE,Star Shop,Negozio delle Stelle
 SHOP_BALANCE,Your stars: %d,Le tue stelle: %d
 SHOP_BUY,Buy,Compra
-SHOP_USE,Use,Usa
+SHOP_USE,Owned · Use,Comprato · Usa
 SHOP_IN_USE,In use,In uso
 SHOP_CLOSE,Close,Chiudi
 WEAPON_PAWS,Paws,Zampe
@@ -152,3 +152,7 @@ RACE_HUD,"Place %d/%d · %.1f s · lap %d%%","Posizione %d/%d · %.1f s · giro 
 RACE_RESULT,"Finished %d° in %.1f s","Arrivato %d° in %.1f s"
 RACE_REWARD,+%d stars!,+%d stelle!
 NPC_V_12,Drive through the GARA arch by the house to race the others!,Passa con il kart sotto l'arco GARA vicino a casa per sfidare gli altri!
+ENEMY_BOSS_SLIME,Slime King,Re Slime
+OBJ_DEFEAT_BOSS,Defeat the Slime King,Sconfiggi il Re Slime
+SHOP_NEED,You need %d more stars!,Ti mancano %d stelle!
+SHOP_BOUGHT,Bought: %s! It is in your backpack.,Comprato: %s! Lo trovi nello zaino.
