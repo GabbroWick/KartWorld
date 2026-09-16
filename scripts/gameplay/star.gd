@@ -18,6 +18,7 @@ func _ready() -> void:
 	add_to_group(&"star")
 	_base_y = visual.position.y
 	FlatMaterial.apply_fill(visual)
+	Lod.register_deferred(self)
 
 
 func _on_collected(_by: CharacterController) -> void:

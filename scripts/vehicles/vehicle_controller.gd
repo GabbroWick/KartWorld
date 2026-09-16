@@ -19,6 +19,8 @@ signal flying_changed(on: bool)
 @export var fall_limit := -25.0
 ## A race forbids flying (RaceLine sets it).
 var wings_locked := false
+## Far from the camera (NpcDriver decides): rig frozen, engine silent.
+var lod_far := false
 
 @onready var input: VehicleInput = $InputSource
 @onready var motor: VehicleMotor = $Motor
@@ -105,7 +107,7 @@ func _physics_process(delta: float) -> void:
 		_visual_instance.call(&"set_steer", input.steer)
 	# Seated driver leans into the steering and keeps its idle clip running.
 	seat.rotation.z = lerp_angle(seat.rotation.z, -input.steer * definition.seat_lean, 8.0 * delta)
-	if _seated and _seated.has_method(&"animate"):
+	if _seated and not lod_far and _seated.has_method(&"animate"):
 		_seated.call(&"animate", delta, 0.0, true)
 
 	if global_position.y < fall_limit:
@@ -261,6 +263,22 @@ func _tilt_to_ground(delta: float) -> void:
 	var weight := minf(definition.tilt_speed * delta, 1.0)
 	visual_root.basis = visual_root.basis.slerp(target_basis, weight)
 	visual_root.position.y = lerpf(visual_root.position.y, target_y, weight)
+
+
+## Phone LOD for NPC karts: the seated rig and the engine hum stop far
+## from the camera; the kart itself keeps driving.
+func set_lod_far(far: bool) -> void:
+	if far == lod_far:
+		return
+	lod_far = far
+	if _seated:
+		_seated.process_mode = Node.PROCESS_MODE_DISABLED if far else Node.PROCESS_MODE_INHERIT
+	var engine := get_node_or_null("EngineSound") as AudioStreamPlayer3D
+	if engine:
+		if far:
+			engine.stop()
+		elif engine.stream and not engine.playing and Sfx.enabled:
+			engine.play()
 
 
 func is_driven() -> bool:

@@ -76,6 +76,8 @@ func _rebuild() -> void:
 	FlatMaterial.apply_fill(_instance)
 	bounds = _measure(_instance, _instance.transform)
 	_build_collision()
+	if not Engine.is_editor_hint() and is_inside_tree():
+		Lod.register(self)
 
 
 ## Merged AABB of every mesh under `node`, in this body's local space.

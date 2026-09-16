@@ -30,6 +30,7 @@ var _bubble_left := 0.0
 var _stuck_time := 0.0
 var _terrain: IslandTerrain
 var _parked := false
+var _lod_ticks := 0
 
 
 func _ready() -> void:
@@ -54,6 +55,7 @@ func _late_setup() -> void:
 
 func _physics_process(delta: float) -> void:
 	_tick_bubble(delta)
+	_tick_lod()
 	# Streaming terrain: no ground under us right now → stand still on the
 	# analytic surface until the tile is back (else we would fall through).
 	if _terrain and _terrain.streaming:
@@ -154,6 +156,21 @@ func say(line: String) -> void:
 	_bubble.visible = true
 	_bubble_left = bubble_time
 	spoke.emit(line)
+
+
+## Far from the camera the rig stops animating (phones: 20+ skeletons).
+func _tick_lod() -> void:
+	_lod_ticks += 1
+	if _lod_ticks % 15 != 0:
+		return
+	var visual := _character.get_visual()
+	if visual == null:
+		return
+	var far := Lod.camera_distance(get_tree(), _character.global_position) > Lod.NPC_ANIMATE_RANGE
+	var mode := Node.PROCESS_MODE_DISABLED if far else Node.PROCESS_MODE_INHERIT
+	if visual.process_mode != mode:
+		visual.process_mode = mode
+	_character.set_meta(&"lod_far", far)
 
 
 func _tick_bubble(delta: float) -> void:

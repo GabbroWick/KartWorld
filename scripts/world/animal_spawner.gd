@@ -43,6 +43,7 @@ func _spawn_one() -> void:
 	animal.name = "%s%d" % [definition.id, spawned.size()]
 	animal.definition = definition
 	add_child(animal)
+	Lod.register_deferred(animal)
 	animal.global_position = spot
 	animal.died.connect(_on_animal_died)
 	spawned.append(animal)

@@ -80,6 +80,7 @@ func _spawn_walkers(rng: RandomNumberGenerator, terrain: IslandTerrain) -> void:
 		behaviour.dialogue_lines = lines
 		npc.add_child(behaviour)
 		add_child(npc)
+		Lod.register_deferred(npc)
 		npc.global_position = spot
 		npc.rotation.y = rng.randf_range(0.0, TAU)
 		spawned_walkers.append(npc)
@@ -104,6 +105,7 @@ func _spawn_karts(rng: RandomNumberGenerator, terrain: IslandTerrain) -> void:
 			driver.distance = length * (k + rng.randf_range(0.1, 0.9)) / karts_per_road
 			driver.reverse = rng.randf() < 0.5
 			driver.speed_factor = kart_speed_factor * rng.randf_range(0.85, 1.1)
+			driver.lane_offset = 2.0   # right-hand traffic: opposite karts never meet head-on
 			kart.add_child(driver)
 			add_child(kart)
 			# A passenger: the NPC's visual on the seat (no character body).
@@ -116,6 +118,7 @@ func _spawn_karts(rng: RandomNumberGenerator, terrain: IslandTerrain) -> void:
 					if visual.has_method(&"set_seated"):
 						visual.call(&"set_seated", true)
 			spawned_karts.append(kart)
+			Lod.register_deferred(kart)
 			index += 1
 
 

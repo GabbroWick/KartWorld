@@ -56,6 +56,7 @@ $G --path . res://tools/tests/test_lighting_runner.tscn            # lighting su
 $G --path . res://tools/capture_screenshot.tscn -- out.png 120     # render a frame to PNG
 $G --path . res://tools/capture_screenshot.tscn -- out.png 120 drive   # ...while driving the kart
 $G --path . res://tools/capture_screenshot.tscn -- out.png 90 level=res://resources/levels/level_01_forest_trail.tres at=20,0.3,-40   # ...inside a level
+$G --path . res://tools/perf_probe.tscn -- 12 low                   # frame times / draw calls while driving (windowed)
 $G --path . --quit-after 400                                       # run the game 400 frames
 $G --headless --path . --editor --quit                             # reimport / refresh class cache
 $G --headless --path . --script res://tools/setup_input_map.gd     # regenerate input map
@@ -656,6 +657,33 @@ them, one commit + suite + screenshot each:
    partita", Gioca / In uso, Cancella with a second-press "Sicuro?").
    Tests point `profiles_root` at `user://test_profiles/`. Progression
    suite 40 checks; `capture_screenshot` `profiles` arg.
+
+6. **Phone performance pass — DONE**: `tools/perf_probe.tscn` (windowed:
+   `godot --path . res://tools/perf_probe.tscn -- [seconds] [quality]`)
+   drives the kart along ring 1 through the village and prints frame
+   times, spike frames, draw calls, primitives, node counts and visible
+   meshes by owning script. Findings and fixes:
+   * A **hitch every 9 frames (45 ms)**: an NPC kart parked just outside
+     `near_distance` called `_teleport_to` → `ensure_built_at`, which
+     force-built a near tile the streamer freed again next frame.
+     `NpcDriver._teleport_to` now glides kinematically when its tile is
+     not built instead of building it. NPC karts also drive right-hand
+     traffic (`lane_offset` 2.0) so opposite drivers never deadlock
+     head-on. p95 57 ms → 17 ms on the PC.
+   * **Distance culling**: `scripts/world/lod.gd` (`Lod.register` /
+     `register_deferred` put a node in group `lod_prop` and set
+     `visibility_range_end` on its meshes to `Settings.prop_range()`:
+     low 130 m, medium 220 m, high unlimited; re-applied on a quality
+     change). Registered: every `ModelProp` (scatter props, village
+     buildings), NPC walkers and karts, stars, fruit trees, ramps,
+     animals. Draw calls at low: 448 → ~290.
+   * **Rig freezing**: NPC walkers (`NpcBehaviour._tick_lod`) and NPC
+     karts (`NpcDriver` → `VehicleController.set_lod_far`) beyond
+     `Lod.NPC_ANIMATE_RANGE` (60 m) set their visual's `process_mode`
+     DISABLED (AnimationPlayer/skeleton stop; `_animate_visual` skipped
+     via meta `lod_far`) and silence the engine hum.
+   Phone default stays quality `low` (0.7 render scale, no shadows, far
+   tiles to 400 m).
 
 ## Next step (Phase 8 — polish, continued)
 

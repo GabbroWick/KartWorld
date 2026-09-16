@@ -66,6 +66,7 @@ func build() -> void:
 			var ramp := ramp_scene.instantiate() as Node3D
 			ramp.name = "Ramp%d" % ramps.size()
 			add_child(ramp)
+			Lod.register_deferred(ramp)
 			ramp.global_transform = pose
 			ramps.append(ramp)
 			if star_scene and stars_per_ramp > 0:

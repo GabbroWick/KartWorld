@@ -37,6 +37,7 @@ var _last_progress_time := 0.0
 var _last_position := Vector3.ZERO
 var _gliding := false
 var _glide_offset := 0.0
+var _lod_ticks := 0
 
 
 func _ready() -> void:
@@ -112,16 +113,31 @@ func _teleport_to(index: int) -> void:
 	var heading := Vector3(next.x - here.x, 0.0, next.z - here.z)
 	if heading.length_squared() < 0.001:
 		heading = Vector3.FORWARD
-	# The terrain tile may not be built yet (streaming): ask for it.
-	terrain.ensure_built_at(here.x, here.z)
-	vehicle.place(Transform3D(Basis.looking_at(heading.normalized(), Vector3.UP),
-		Vector3(here.x, here.y + 0.3, here.z)))
+	var pose := Transform3D(Basis.looking_at(heading.normalized(), Vector3.UP), Vector3(here.x, here.y + 0.3, here.z))
+	# No collidable ground here (the streamer keeps this tile far): glide
+	# kinematically from the road instead of forcing a near tile build —
+	# that build cost ~40 ms and the streamer freed it again next frame
+	# (a stuck kart just outside `near_distance` hitched the game forever).
+	if terrain.streaming and not terrain.is_built_at(here.x, here.z):
+		vehicle.set_physics_process(false)
+		vehicle.velocity = Vector3.ZERO
+		vehicle.global_transform = pose
+		_gliding = true
+		_glide_offset = 0.0
+	else:
+		if _gliding:
+			_gliding = false
+			vehicle.set_physics_process(true)
+		vehicle.place(pose)
 	_last_position = vehicle.global_position
 	_last_progress_time = _now()
 
 
 func _physics_process(delta: float) -> void:
 	var pos := vehicle.global_position
+	_lod_ticks += 1
+	if _lod_ticks % 15 == 0:
+		vehicle.set_lod_far(Lod.camera_distance(get_tree(), pos) > Lod.NPC_ANIMATE_RANGE)
 	# Far from the player the terrain tile is not built: glide along the
 	# road samples kinematically instead of falling through the world.
 	if terrain.streaming and not terrain.is_built_at(pos.x, pos.z):

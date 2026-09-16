@@ -88,7 +88,14 @@ func apply() -> void:
 		_apply_terrain(terrain)
 	for camera in tree.get_nodes_in_group(&"camera_rig"):
 		_apply_camera(camera)
+	for prop in tree.get_nodes_in_group(Lod.GROUP):
+		Lod.apply_range(prop, prop_range())
 	changed.emit()
+
+
+## Metres beyond which scattered props and buildings stop drawing (0 = never).
+func prop_range() -> float:
+	return {&"low": 130.0, &"medium": 220.0, &"high": 0.0}[quality]
 
 
 func _apply_sun(sun: DirectionalLight3D) -> void:

@@ -37,6 +37,7 @@ func _ready() -> void:
 	_apply()
 	if not Engine.is_editor_hint():
 		add_to_group(GROUP)
+		Lod.register_deferred(self)
 
 
 func _apply() -> void:

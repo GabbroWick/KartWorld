@@ -150,6 +150,8 @@ func _on_landed_sound(impact_speed: float) -> void:
 func _animate_visual(delta: float) -> void:
 	if _visual_instance == null or not _visual_instance.has_method(&"animate"):
 		return
+	if get_meta(&"lod_far", false):
+		return   # NpcBehaviour froze the rig: far from the camera
 	var horizontal := Vector2(velocity.x, velocity.z).length()
 	var ratio := clampf(horizontal / maxf(definition.run_speed, 0.1), 0.0, 1.0)
 	_visual_instance.call(&"animate", delta, ratio, is_on_floor())
