@@ -141,3 +141,8 @@ Buttons: Jump (twice in the air = wings) · Attack/Turbo · Use · Kart · Dance
 Wings: gas (stick up) raises the nose, brake (stick down) lowers it","Metà sinistra dello schermo: stick per camminare o guidare (spingi fino al bordo per correre) · metà destra: trascina per guardarti intorno
 Pulsanti: Salta (due volte in aria = ali) · Attacca/Turbo · Usa · Kart · Balla/Clacson · Zaino · Mappa · Pausa
 Ali: gas (stick in su) alza il muso, freno (stick in giù) lo abbassa"
+LEVEL_JUNGLE_NAME,Jungle Bridges,Ponti della Giungla
+LEVEL_JUNGLE_DESC,"Cross the river on planks, logs and vines.","Attraversa il fiume su assi, tronchi e liane."
+OBJ_CROSS_JUNGLE,Reach the door across the jungle,Raggiungi la porta oltre la giungla
+PLACE_GIUNGLA,Jungle,Giungla
+NPC_V_11,Far to the south-west there is a jungle island. Fly there!,Lontano a sud-ovest c'è un'isola con la giungla. Volaci!

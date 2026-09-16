@@ -234,7 +234,7 @@ func _crest_launch() -> bool:
 
 
 ## Thrown upward by a Spring; snapping is released so the kart really flies.
-func launch(vertical_speed: float) -> void:
+func launch(vertical_speed: float, _horizontal := Vector3.ZERO) -> void:
 	body.velocity.y = vertical_speed
 	body.floor_snap_length = 0.0
 	jumped.emit()

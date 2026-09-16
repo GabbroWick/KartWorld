@@ -29,6 +29,8 @@ MUSIC = {
            "steel drums, light percussion, bright and playful, loopable, 120 bpm",
     "level": "upbeat adventure platformer music for kids, bouncy synth melody, brass stabs, "
              "driving drums, energetic and fun, loopable, 140 bpm",
+    "jungle": "jungle adventure music for a kids game, bongos, flute, marimba, birds, "
+              "cheerful and mysterious, loopable, 125 bpm",
     "volcano": "exciting volcano level music, tribal drums, low brass, urgent but fun, "
                "kids cartoon game, loopable, 130 bpm",
 }

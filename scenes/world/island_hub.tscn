@@ -1,4 +1,4 @@
-[gd_scene load_steps=66 format=3]
+[gd_scene load_steps=67 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/props/island_terrain.tscn" id="1_terrain"]
 [ext_resource type="PackedScene" path="res://scenes/world/props/house.tscn" id="2_house"]
@@ -64,6 +64,7 @@
 [ext_resource type="PackedScene" path="res://scenes/enemies/animal.tscn" id="43_animal"]
 [ext_resource type="Resource" path="res://resources/enemies/chicken.tres" id="44_chicken"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/shop.tscn" id="45_shop"]
+[ext_resource type="Resource" path="res://resources/levels/level_04_jungle.tres" id="46_level4"]
 
 [sub_resource type="FastNoiseLite" id="cloud_noise"]
 noise_type = 3
@@ -136,8 +137,8 @@ beach_height = 0.5
 plateau_height = 4.0
 sea_floor_height = -60.0
 drop_width = 30.0
-flat_zones = Array[Vector4]([Vector4(60, 80, 12, 4), Vector4(20, 130, 16, 4), Vector4(-80, 110, 14, 4), Vector4(130, 150, 14, 4)])
-extra_islands = Array[Vector4]([Vector4(1500, -350, 200, 260)])
+flat_zones = Array[Vector4]([Vector4(60, 80, 12, 4), Vector4(20, 130, 16, 4), Vector4(-80, 110, 14, 4), Vector4(130, 150, 14, 4), Vector4(-1300, 900, 14, 4)])
+extra_islands = Array[Vector4]([Vector4(1500, -350, 200, 260), Vector4(-1300, 900, 240, 300)])
 water_level = 0.3
 mountain_center = Vector2(-150, -120)
 mountain_radius = 170.0
@@ -238,6 +239,33 @@ spawn_seed = 12
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72, 4, 92)
 rotation_degrees = Vector3(0, -40, 0)
 
+[node name="JunglePalms" type="Node3D" parent="."]
+script = ExtResource("6_scatter")
+prop_scene = ExtResource("3_tree")
+models = Array[PackedScene]([ExtResource("21_p1"), ExtResource("21_p2"), ExtResource("21_p3"), ExtResource("21_p4")])
+terrain_path = NodePath("../IslandTerrain")
+scatter_seed = 31
+density = 22.0
+center = Vector2(-1300, 900)
+radius = 250.0
+exclusion_zones = Array[Vector3]([Vector3(-1300, 900, 30)])
+min_height = 2.0
+max_slope_degrees = 30.0
+min_spacing = 4.0
+
+[node name="PortalSite4" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1300, 4, 900)
+rotation_degrees = Vector3(0, 45, 0)
+
+[node name="Plinth" parent="PortalSite4" instance=ExtResource("5_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+size = Vector3(6, 0.2, 6)
+color = Color(0.6, 0.58, 0.62, 1)
+
+[node name="Portal" parent="PortalSite4" instance=ExtResource("10_portal")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+level = ExtResource("46_level4")
+
 [node name="RoadJumps" type="Node3D" parent="."]
 script = ExtResource("30_dressing")
 ramp_scene = ExtResource("31_ramp")
@@ -269,6 +297,10 @@ persistent_id = &"hub_star_road_east"
 [node name="StarPorto" parent="HubStars" instance=ExtResource("13_star")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1500, 5.5, -350)
 persistent_id = &"hub_star_porto"
+
+[node name="StarJungle" parent="HubStars" instance=ExtResource("13_star")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1280, 5.5, 880)
+persistent_id = &"hub_star_jungle"
 
 [node name="StarRoadWest" parent="HubStars" instance=ExtResource("13_star")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -215, 4.5, 0)
@@ -462,7 +494,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 4, 60)
 script = ExtResource("31_spawner")
 character_scene = ExtResource("7_character")
 definitions = Array[CharacterDefinition]([ExtResource("8_fox"), ExtResource("9_panda")])
-dialogue_pool = PackedStringArray("NPC_V_1", "NPC_V_2", "NPC_V_3", "NPC_V_4", "NPC_V_5", "NPC_V_6", "NPC_V_7", "NPC_V_8", "NPC_V_9", "NPC_V_10")
+dialogue_pool = PackedStringArray("NPC_V_1", "NPC_V_2", "NPC_V_3", "NPC_V_4", "NPC_V_5", "NPC_V_6", "NPC_V_7", "NPC_V_8", "NPC_V_9", "NPC_V_10", "NPC_V_11")
 walkers = 7
 walk_radius = 18.0
 village_path = NodePath("../Village")

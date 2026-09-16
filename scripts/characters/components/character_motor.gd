@@ -111,8 +111,12 @@ func _try_jump() -> void:
 ## Thrown upward by something in the world (a Spring): like a jump that
 ## the player did not ask for. Air jumps are refreshed so the bounce feels
 ## generous.
-func launch(vertical_speed: float) -> void:
+func launch(vertical_speed: float, horizontal := Vector3.ZERO) -> void:
 	body.velocity.y = vertical_speed
+	if horizontal.length_squared() > 0.0:
+		body.velocity.x = horizontal.x
+		body.velocity.z = horizontal.z
+		_carry_left = 1.2
 	_jump_buffer = 0.0
 	_coyote_timer = 0.0
 	air_jumps_used = 0
@@ -128,6 +132,7 @@ func _do_jump(scale: float, index: int) -> void:
 
 ## A good meal: faster for a while (kitchen stew).
 var _well_fed_left := 0.0
+var _carry_left := 0.0
 
 func set_well_fed(seconds: float) -> void:
 	_well_fed_left = seconds
@@ -150,5 +155,15 @@ func _apply_horizontal(delta: float, wish_dir: Vector3, want_run: bool) -> void:
 	else:
 		rate = definition.ground_friction if on_floor else definition.air_friction
 
+	# A vine/spring fling carries the character: while airborne and still
+	# faster than the wish, keep the momentum (only steer, never brake).
+	_carry_left = maxf(_carry_left - delta, 0.0)
+	if _carry_left > 0.0 and not on_floor:
+		var planar := Vector3(body.velocity.x, 0.0, body.velocity.z)
+		if planar.length() > target.length():
+			var steered := planar.move_toward(planar.normalized() * planar.length() + target * 0.0, 0.0)
+			body.velocity.x = steered.x
+			body.velocity.z = steered.z
+			return
 	body.velocity.x = move_toward(body.velocity.x, target.x, rate * delta)
 	body.velocity.z = move_toward(body.velocity.z, target.z, rate * delta)

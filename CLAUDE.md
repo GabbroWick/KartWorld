@@ -578,6 +578,17 @@ them, one commit + suite + screenshot each:
    NOT installed (no wheel for torch 2.12+rocm7.14.1), so audiocraft /
    AudioGen are out; transformers MusicGen and diffusers need none.
 
+2. **Jungle island + Level 4 — DONE**: third island at (-1300, 900)
+   r 240/300 with a streamed palm scatter, a door (PortalSite4) and a hub
+   star; villagers hint at it (`NPC_V_11`). Level 4 "Ponti della Giungla"
+   (`tools/gen_jungle.py` → `level_04_jungle.tscn`, on foot): plank
+   bridges over a lethal river (3.4 m planks, 1.4 m gaps: a walking jump
+   clears them), log `MovingPlatform` ferries, `Vine` (extends Spring:
+   `forward_boost` along -Z; `CharacterMotor.launch` takes a horizontal
+   velocity and keeps that momentum for 1.2 s in the air), tree platform,
+   3 stars, 3 slimes (optional), goal door; palms as ModelProps. Music
+   `jungle.wav`. Suite `test_jungle_runner.tscn` 17 checks.
+
 ## Next step (Phase 8 — polish, continued)
 
 Decided with the human (2026-09-10): real models from **Kenney** (done for

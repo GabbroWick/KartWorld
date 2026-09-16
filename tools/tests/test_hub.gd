@@ -113,8 +113,8 @@ func _test_map() -> void:
 	var kinds := {}
 	for m in _hud.world_map.markers():
 		kinds[m["kind"]] = kinds.get(m["kind"], 0) + 1
-	_check(kinds.get("door", 0) == 3 and kinds.get("home", 0) == 1 and kinds.get("village", 0) == 3,
-		"map markers: 3 doors, the house, 3 villages (%s)" % str(kinds))
+	_check(kinds.get("door", 0) == 4 and kinds.get("home", 0) == 1 and kinds.get("village", 0) == 3,
+		"map markers: 4 doors, the house, 3 villages (%s)" % str(kinds))
 	_press_action(InputActions.MAP)
 	await _steps(4)
 	_check(_hud.full_map.visible, "M opens the full map")
@@ -137,8 +137,8 @@ func _press_action(action: StringName) -> void:
 
 func _test_hub_setup() -> void:
 	_test_translations()
-	_check(_hub_stars().size() == 6, "island has six persistent stars (%d)" % _hub_stars().size())
-	_check(_portals().size() == 3, "island has three portals (%d)" % _portals().size())
+	_check(_hub_stars().size() == 7, "island has seven persistent stars (%d)" % _hub_stars().size())
+	_check(_portals().size() == 4, "island has four portals (%d)" % _portals().size())
 	var locked := _portals().filter(func(p: Portal) -> bool: return p.is_locked())
 	_check(locked.size() == 1, "exactly one portal is locked at the start")
 	if locked.size() == 1:
@@ -162,7 +162,7 @@ func _test_persistent_star() -> void:
 	await _steps(5)
 	_manager.return_to_hub()
 	await _steps(5)
-	_check(_hub_stars().size() == 5, "collected hub star does not respawn (%d left)" % _hub_stars().size())
+	_check(_hub_stars().size() == 6, "collected hub star does not respawn (%d left)" % _hub_stars().size())
 	_check(_hud.stars_label.text == "1", "HUD still shows 1 star back in the hub (%s)" % _hud.stars_label.text)
 
 
